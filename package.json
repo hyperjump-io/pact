@@ -1,22 +1,21 @@
 {
-  "name": "@hyperjump/promise",
+  "name": "@hyperjump/pact",
   "version": "0.1.0",
-  "description": "Higher order functions for promises",
-  "main": "index.js",
+  "description": "Higher order functions that work with promises",
+  "main": "lib/index.js",
   "scripts": {
     "clean": "xargs -a .gitignore rm -rf",
     "lint": "eslint .",
-    "test": "mocha './{,!(node_modules)}/*.spec.js'"
+    "test": "mocha 'lib/**/*.spec.js'"
   },
-  "repository": "github:jdesrosiers/hyperjump-promise",
+  "repository": "github:jdesrosiers/hyperjump-pact",
   "keywords": [
     "Hyperjump",
     "Promise",
     "map",
     "filter",
     "reduce",
-    "pipeline",
-    "higher order function"
+    "pipeline"
   ],
   "author": "Jason Desrosiers <jdesrosi@gmail.com>",
   "license": "MIT",
