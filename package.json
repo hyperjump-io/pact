@@ -19,6 +19,10 @@
   ],
   "author": "Jason Desrosiers <jdesrosi@gmail.com>",
   "license": "MIT",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/jdesrosiers"
+  },
   "devDependencies": {
     "chai": "^4.2.0",
     "eslint": "^4.19.1",
