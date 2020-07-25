@@ -33,9 +33,9 @@ The following is short demo using the [Hyperjump Browser][browser] whose use of
 promises is ideal for illustrating how these functions can be used. See the
 [API](#api) section below to see all of the things you can do.
 
-This example uses the API at https://swapi.hyperjump.io. It's a variation of the
-[Star Wars API (SWAPI)](https://www.swapi.co) implemented using the [JRef][jref]
-media type.
+This example uses the API at [https://swapi.hyperjump.io](https://explore.hyperjump.io#https://swapi.hyperjump.io/api/films/1).
+It's a variation of the [Star Wars API (SWAPI)](https://swapi.dev)
+implemented using the [JRef][jref] media type.
 
 ```javascript
 const Hyperjump = require("@hyperjump/browser");
@@ -110,6 +110,6 @@ previous function.
 `allValues` is like `all` except it resolves promise for each value in an object
 rather than each item in an array.
 
-[hyperjump]: https://github.com/jdesrosiers/hyperjump-browser
-[jref]: https://github.com/jdesrosiers/hyperjump-browser/blob/master/json-reference/README.md
+[hyperjump]: https://github.com/hyperjump-io/browser
+[jref]: https://github.com/hyperjump-io/browser/blob/master/lib/json-reference/README.md
 [rollup]: https://rollupjs.org
