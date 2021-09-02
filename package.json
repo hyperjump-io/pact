@@ -3,9 +3,13 @@
   "version": "0.1.2",
   "description": "Higher order functions that work with promises",
   "main": "lib/index.js",
+  "exports": {
+    "require": "./lib/index.js",
+    "import": "./lib/index.mjs"
+  },
   "scripts": {
     "clean": "xargs -a .gitignore rm -rf",
-    "lint": "eslint .",
+    "lint": "eslint lib",
     "test": "mocha 'lib/**/*.spec.js'",
     "build": "rollup --config rollup.config.js",
     "prepublishOnly": "npm run build"
