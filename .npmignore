@@ -1,3 +1,4 @@
 rollup.config.js
+tsconfig.json
 .eslintrc.json
-**/*.spec.js
+**/*.spec.ts

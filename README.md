@@ -6,6 +6,8 @@ promise-implementation agnostic library. All functions are curried and designed
 for pipelining.
 
 ## Installation
+Includes support for node.js JavaScript (CommonJS and ES Modules), TypeScript,
+and browsers.
 
 ```bash
 npm install @hyperjump/pact --save
@@ -78,38 +80,67 @@ higher-order functions and they work exactly like you would expect them to
 except that they work with promises.
 
 ### entries
-`(object<A>) => Promise<[string, A][]>`
+Similar to `Object.entries`.
 
 ### map
-`((A, number?) => any, A[]|Promise<A[]>, Options) => Promise<any>`
+Similar to `Array.map`.
+
+```javascript
+await map(async (n) => await n + 1, [Promise.resolve(1), Promise.resolve(2)])
+// => [Promise.resolve(2), Promise.resolve(3)]
+```
 
 ### filter
-`((A, number?) => boolean|Promise<boolean>, A[]|Promise<A[]>, Options) => Promise<A[]>`
+Similar to `Array.filter` except the return value of the test function can be a
+`Promise<boolean>` as well as a `boolean`.
+
+```javascript
+await filter(async (n) => await n > 1, [Promise.resolve(1), Promise.resolve(2)])
+// => [Promise.resolve(2)]
+```
 
 ### reduce
-`((B, A, number?) => B, A[]|Promise<A[]>, B, Options) => Promise<B>`
+Similar to `Array.reduce` except optimized for Promises.
+
+await reduce(async (sum, n) => sum + await n, 0, [Promise.resolve(1), Promise.resolve(2)])
+// => 3
 
 ### some
-`((A, number?) => boolean|Promise<boolean>, A[]|Promise<A[]>, Options) => Promise<boolean>`
+Similar to `Array.some`.
+
+```javascript
+await some(async (n) => n > 1, [Promise.resolve(1), Promise.resolve(2)])
+// => true
+```
 
 ### every
-`((A, number?) => boolean|Promise<boolean>, A|Promise<A>, Options) => Promise<boolean>`
+Similar to `Array.every`.
+
+```javascript
+await every(async (n) => n > 1, [Promise.resolve(1), Promise.resolve(2)])
+// => false
+```
 
 ### pipeline
-`(Function[], any) => Promise<any>`
-
 Compose an array of functions that call the next function with result of the
 previous function.
 
+```javascript
+await pipeline([
+  filter(async (n) => await n > 1),
+  map(async (n) => await n + 1),
+  reduce(async (sum, n) => sum + await n, 0)
+], [Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)])
+// => 7
+```
+
 ### all
-`(Promise<A>[]) => A[]`
+Same as the standard `Promise.all` except more convenient to use with
+`pipeline`.
 
 ### allValues
-`(object<Promise<A>>) => object<A>`
-
 `allValues` is like `all` except it resolves promise for each value in an object
 rather than each item in an array.
 
 [hyperjump]: https://github.com/hyperjump-io/browser
 [jref]: https://github.com/hyperjump-io/browser/blob/master/lib/json-reference/README.md
-[rollup]: https://rollupjs.org
