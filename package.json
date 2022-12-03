@@ -1,6 +1,6 @@
 {
   "name": "@hyperjump/pact",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Higher order functions that work with promises",
   "main": "lib/index.js",
   "exports": {
