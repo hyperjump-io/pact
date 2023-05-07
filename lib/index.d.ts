@@ -1,189 +1,78 @@
-export type ArraySubject<A> = Promise<A[]> | A[];
-export type ObjectSubject<A> = Promise<Record<string, A>> | Record<string, A>;
-
-export const all: <A>(doc: ArraySubject<Promise<A> | A>) => Promise<A[]>;
-export const allValues: <A>(doc: ObjectSubject<Promise<A> | A>) => Promise<Record<string, A>>;
-export const entries: <A>(doc: ObjectSubject<Promise<A> | A>) => Promise<[string, A][]>;
-
-export const every: (
-  <A>(fn: FilterFn<A>, doc: ArraySubject<A>) => Promise<boolean>
+export const map: (
+  <A, B>(fn: Mapper<A, B>, iterator: Iterable<A>) => Generator<B>
 ) & (
-  <A>(fn: FilterFn<A>) => Every<A>
+  <A, B>(fn: Mapper<A, B>) => (iterator: Iterable<A>) => Generator<B>
 );
-export type Every<A> = (doc: ArraySubject<A>) => Promise<boolean>;
+export type Mapper<A, B> = (item: A) => B;
+
+export const asyncMap: (
+  <A, B>(fn: AsyncMapper<A, B>, iterator: AsyncIterable<A>) => AsyncGenerator<B>
+) & (
+  <A, B>(fn: AsyncMapper<A, B>) => (iterator: AsyncIterable<A>) => AsyncGenerator<B>
+);
+export type AsyncMapper<A, B> = (item: A) => Promise<B> | B;
 
 export const filter: (
-  <A>(fn: FilterFn<A>, doc: ArraySubject<A>) => Promise<A[]>
+  <A>(fn: Predicate<A>, iterator: Iterable<A>) => Generator<A>
 ) & (
-  <A>(fn: FilterFn<A>) => Filter<A>
+  <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => Generator<A>
 );
-export type Filter<A> = (doc: ArraySubject<A>) => Promise<A[]>;
-export type FilterFn<A> = (item: A, index: number) => Promise<boolean> | boolean;
+export type Predicate<A> = (item: A) => boolean;
 
-export const map: (
-  <A, B>(fn: MapFn<A, B>, doc: ArraySubject<A>) => Promise<B[]>
+export const asyncFilter: (
+  <A>(fn: AsyncPredicate<A>, iterator: AsyncIterable<A>) => AsyncGenerator<A>
 ) & (
-  <A, B>(fn: MapFn<A, B>) => Mapper<A, B>
+  <A>(fn: AsyncPredicate<A>) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
 );
-export type Mapper<A, B> = (doc: ArraySubject<A>) => Promise<B[]>;
-export type MapFn<A, B> = (item: A, index: number) => B;
+export type AsyncPredicate<A> = (item: A) => Promise<boolean> | boolean;
 
 export const reduce: (
-  <A, B>(fn: ReduceFn<A, B>, initialValue: B, doc: ArraySubject<A>) => Promise<B>
+  <A, B>(fn: Reducer<A, B>, acc: B, iter: Iterable<A>) => B
 ) & (
-  <A, B>(fn: ReduceFn<A, B>, initialValue: B) => Reducer<A, B>
-) & (
-  <A, B>(fn: ReduceFn<A, B>) => (initialValue: B) => Reducer<A, B>
+  <A, B>(fn: Reducer<A, B>, acc: B) => (iter: Iterable<A>) => B
 );
-export type Reducer<A, B> = (doc: ArraySubject<A>) => Promise<B>;
-export type ReduceFn<A, B> = (acc: B, item: A, index: number) => Promise<B> | B;
+export type Reducer<A, B> = (acc: B, item: A) => B;
+
+export const asyncReduce: (
+  <A, B>(fn: AsyncReducer<A, B>, acc: B, iter: AsyncIterable<A>) => Promise<B>
+) & (
+  <A, B>(fn: AsyncReducer<A, B>, acc: B) => (iter: AsyncIterable<A>) => Promise<B>
+);
+export type AsyncReducer<A, B> = (acc: B, item: A) => Promise<B> | B;
+
+export const every: (
+  <A>(fn: Predicate<A>, iterator: Iterable<A>) => boolean
+) & (
+  <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => boolean
+);
+
+export const asyncEvery: (
+  <A>(fn: AsyncPredicate<A>, iterator: AsyncIterable<A>) => Promise<boolean>
+) & (
+  <A>(fn: AsyncPredicate<A>) => (iterator: AsyncIterable<A>) => Promise<boolean>
+);
 
 export const some: (
-  <A>(fn: FilterFn<A>, doc: ArraySubject<A>) => Promise<boolean>
+  <A>(fn: Predicate<A>, iterator: Iterable<A>) => boolean
 ) & (
-  <A>(fn: FilterFn<A>) => Some<A>
+  <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => boolean
 );
-export type Some<A> = (doc: ArraySubject<A>) => Promise<boolean>;
 
-export const pipeline: (
-  <A, B>(fns: [(a: A) => B], initialValue: A) => Promise<B>
+export const asyncSome: (
+  <A>(fn: AsyncPredicate<A>, iterator: AsyncIterable<A>) => Promise<boolean>
 ) & (
-  <A, B>(fns: [(a: A) => B]) => Pipeline<A, B>
-) & (
-  <A, B, C>(fns: [
-    (a: A) => B,
-    (b: B) => C
-  ], initialValue: A) => Promise<C>
-) & (
-  <A, B, C>(fns: [
-    (a: A) => B,
-    (b: B) => C
-  ]) => Pipeline<A, C>
-) & (
-  <A, B, C, D>(fns: [
-    (a: A) => B,
-    (b: B) => C,
-    (c: C) => D
-  ], initialValue: A) => Promise<D>
-) & (
-  <A, B, C, D>(fns: [
-    (a: A) => B,
-    (b: B) => C,
-    (c: C) => D
-  ]) => Pipeline<A, D>
-) & (
-  <A, B, C, D, E>(fns: [
-    (a: A) => B,
-    (b: B) => C,
-    (c: C) => D,
-    (d: D) => E
-  ], initialValue: A) => Promise<E>
-) & (
-  <A, B, C, D, E>(fns: [
-    (a: A) => B,
-    (b: B) => C,
-    (c: C) => D,
-    (d: D) => E
-  ]) => Pipeline<A, E>
-) & (
-  <A, B, C, D, E, F>(fns: [
-    (a: A) => B,
-    (b: B) => C,
-    (c: C) => D,
-    (d: D) => E,
-    (e: E) => F
-  ], initialValue: A) => Promise<F>
-) & (
-  <A, B, C, D, E, F>(fns: [
-    (a: A) => B,
-    (b: B) => C,
-    (c: C) => D,
-    (d: D) => E,
-    (e: E) => F
-  ]) => Pipeline<A, F>
-) & (
-  <A, B, C, D, E, F, G>(fns: [
-    (a: A) => B,
-    (b: B) => C,
-    (c: C) => D,
-    (d: D) => E,
-    (e: E) => F,
-    (f: F) => G
-  ], initialValue: A) => Promise<G>
-) & (
-  <A, B, C, D, E, F, G>(fns: [
-    (a: A) => B,
-    (b: B) => C,
-    (c: C) => D,
-    (d: D) => E,
-    (e: E) => F,
-    (f: F) => G
-  ]) => Pipeline<A, G>
-) & (
-  <A, B, C, D, E, F, G, H>(fns: [
-    (a: A) => B,
-    (b: B) => C,
-    (c: C) => D,
-    (d: D) => E,
-    (e: E) => F,
-    (f: F) => G,
-    (g: G) => H
-  ], initialValue: A) => Promise<H>
-) & (
-  <A, B, C, D, E, F, G, H>(fns: [
-    (a: A) => B,
-    (b: B) => C,
-    (c: C) => D,
-    (d: D) => E,
-    (e: E) => F,
-    (f: F) => G,
-    (g: G) => H
-  ]) => Pipeline<A, H>
-) & (
-  <A, B, C, D, E, F, G, H, I>(fns: [
-    (a: A) => B,
-    (b: B) => C,
-    (c: C) => D,
-    (d: D) => E,
-    (e: E) => F,
-    (f: F) => G,
-    (g: G) => H,
-    (h: H) => I
-  ], initialValue: A) => Promise<I>
-) & (
-  <A, B, C, D, E, F, G, H, I>(fns: [
-    (a: A) => B,
-    (b: B) => C,
-    (c: C) => D,
-    (d: D) => E,
-    (e: E) => F,
-    (f: F) => G,
-    (g: G) => H,
-    (h: H) => I
-  ]) => Pipeline<A, I>
-) & (
-  <A, B, C, D, E, F, G, H, I>(fns: [
-    (a: A) => B,
-    (b: B) => C,
-    (c: C) => D,
-    (d: D) => E,
-    (e: E) => F,
-    (f: F) => G,
-    (g: G) => H,
-    (h: H) => I,
-    ...Function[] // eslint-disable-line @typescript-eslint/ban-types
-  ], initialValue: A) => Promise<unknown>
-) & (
-  <A, B, C, D, E, F, G, H, I>(fns: [
-    (a: A) => B,
-    (b: B) => C,
-    (c: C) => D,
-    (d: D) => E,
-    (e: E) => F,
-    (f: F) => G,
-    (g: G) => H,
-    (h: H) => I,
-    ...Function[] // eslint-disable-line @typescript-eslint/ban-types
-  ]) => Pipeline<A, unknown>
+  <A>(fn: AsyncPredicate<A>) => (iterator: AsyncIterable<A>) => Promise<boolean>
 );
-export type Pipeline<A, B> = (initialValue: A) => Promise<B>;
+
+export const collectArray: <A>(fn: Iterable<A>) => A[];
+export const asyncCollectArray: <A>(fn: AsyncIterable<A>) => Promise<A[]>;
+
+export const collectSet: <A>(fn: Iterable<A>) => Set<A>;
+export const asyncCollectSet: <A>(fn: AsyncIterable<A>) => Promise<Set<A>>;
+
+export const collectMap: <A, B>(fn: Iterable<[A, B]>) => Map<A, B>;
+export const asyncCollectMap: <A, B>(fn: AsyncIterable<[A, B]>) => Promise<Map<A, B>>;
+
+export const pipeline: <A>(iterator: Iterable<any> | AsyncIterable<any>, ...fns: Function[]) => A;
+
+export const compose: (...fns: Function[]) => <A>(iterator: Iterable<any> | AsyncIterable<any>) => A;
