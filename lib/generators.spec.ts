@@ -1,7 +1,8 @@
 import { expect } from "chai";
 import {
   map, asyncMap,
-  filter, asyncFilter
+  filter, asyncFilter,
+  drop, asyncDrop
 } from "./index.js";
 
 
@@ -97,6 +98,52 @@ describe("asyncFilter", () => {
   it("curried", async () => {
     const greaterThanTwo = asyncFilter((n: number) => n > 2);
     const result = greaterThanTwo(subject);
+    expect((await result.next()).value).to.equal(3);
+  });
+});
+
+describe("drop", () => {
+  let subject: Iterable<number>;
+
+  beforeEach(() => {
+    subject = (function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+  });
+
+  it("uncurried", () => {
+    const result = drop(2, subject);
+    expect([...result]).to.eql([3]);
+  });
+
+  it("curried", () => {
+    const dropTwo = drop(2);
+    const result = dropTwo(subject);
+    expect([...result]).to.eql([3]);
+  });
+});
+
+describe("asyncDrop", () => {
+  let subject: AsyncGenerator<number>;
+
+  beforeEach(() => {
+    subject = (async function* () {
+      yield Promise.resolve(1);
+      yield Promise.resolve(2);
+      yield Promise.resolve(3);
+    }());
+  });
+
+  it("uncurried", async () => {
+    const result = asyncDrop(2, subject);
+    expect((await result.next()).value).to.equal(3);
+  });
+
+  it("curried", async () => {
+    const dropTwo = asyncDrop(2);
+    const result = dropTwo(subject);
     expect((await result.next()).value).to.equal(3);
   });
 });
