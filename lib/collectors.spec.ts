@@ -2,7 +2,8 @@ import { expect } from "chai";
 import {
   collectArray, asyncCollectArray,
   collectSet, asyncCollectSet,
-  collectMap, asyncCollectMap
+  collectMap, asyncCollectMap,
+  collectObject, asyncCollectObject
 } from "./index.js";
 
 
@@ -105,5 +106,39 @@ describe("asyncCollectMap", () => {
   it("collect", async () => {
     const result = await asyncCollectMap(subject);
     expect(result).to.eql(new Map([["foo", 1], ["bar", 2], ["baz", 3]]));
+  });
+});
+
+describe("collectObject", () => {
+  let subject: Iterable<[string, number]>;
+
+  beforeEach(() => {
+    subject = (function* () {
+      yield ["foo", 1];
+      yield ["bar", 2];
+      yield ["baz", 3];
+    }());
+  });
+
+  it("collect", () => {
+    const result = collectObject(subject);
+    expect(result).to.eql({ "foo": 1, "bar": 2, "baz": 3 });
+  });
+});
+
+describe("asyncCollectObject", () => {
+  let subject: AsyncGenerator<[string, number]>;
+
+  beforeEach(() => {
+    subject = (async function* () {
+      yield Promise.resolve(["foo", 1]);
+      yield Promise.resolve(["bar", 2]);
+      yield Promise.resolve(["baz", 3]);
+    }()) as AsyncGenerator<[string, number]>;
+  });
+
+  it("collect", async () => {
+    const result = await asyncCollectObject(subject);
+    expect(result).to.eql({ "foo": 1, "bar": 2, "baz": 3 });
   });
 });
