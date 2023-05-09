@@ -3,7 +3,8 @@ import {
   map, asyncMap,
   filter, asyncFilter,
   drop, asyncDrop,
-  take, asyncTake
+  take, asyncTake,
+  range
 } from "./index.js";
 
 
@@ -194,5 +195,17 @@ describe("asyncTake", () => {
     const result = takeTwo(subject);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
+  });
+});
+
+describe("range", () => {
+  it("closed", () => {
+    const result = range(0, 3);
+    expect([...result]).to.eql([0, 1, 2]);
+  });
+
+  it("infinite", () => {
+    const result = take(3, range(0));
+    expect([...result]).to.eql([0, 1, 2]);
   });
 });

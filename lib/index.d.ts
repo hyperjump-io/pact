@@ -50,6 +50,8 @@ export const asyncTake: (
   <A>(count: number) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
 );
 
+export const range: (from: number, to?: number) => Generator<number>;
+
 export const reduce: (
   <A, B>(fn: Reducer<A, B>, acc: B, iter: Iterable<A>) => B
 ) & (
