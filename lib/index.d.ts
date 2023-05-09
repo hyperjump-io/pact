@@ -38,6 +38,18 @@ export const asyncDrop: (
   <A>(count: number) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
 );
 
+export const take: (
+  <A>(count: number, iterator: Iterable<A>) => Generator<A>
+) & (
+  <A>(count: number) => (iterator: Iterable<A>) => Generator<A>
+);
+
+export const asyncTake: (
+  <A>(count: number, iterator: AsyncIterable<A>) => AsyncGenerator<A>
+) & (
+  <A>(count: number) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
+);
+
 export const reduce: (
   <A, B>(fn: Reducer<A, B>, acc: B, iter: Iterable<A>) => B
 ) & (
