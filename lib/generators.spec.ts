@@ -4,7 +4,8 @@ import {
   filter, asyncFilter,
   drop, asyncDrop,
   take, asyncTake,
-  range
+  range,
+  zip, asyncZip
 } from "./index.js";
 
 
@@ -207,5 +208,51 @@ describe("range", () => {
   it("infinite", () => {
     const result = take(3, range(0));
     expect([...result]).to.eql([0, 1, 2]);
+  });
+});
+
+describe("zip", () => {
+  it("same number of items", () => {
+    const iter1 = (function* () {
+      yield 1;
+      yield 2;
+    }());
+
+    const iter2 = (function* () {
+      yield "a";
+      yield "b";
+    }());
+    const result = zip(iter1, iter2);
+    expect([...result]).to.eql([[1, "a"], [2, "b"]]);
+  });
+
+  it("iter1 has more items", () => {
+    const iter1 = (function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+
+    const iter2 = (function* () {
+      yield "a";
+      yield "b";
+    }());
+    const result = zip(iter1, iter2);
+    expect([...result]).to.eql([[1, "a"], [2, "b"], [3, undefined]]);
+  });
+
+  it("iter2 has more items", () => {
+    const iter1 = (function* () {
+      yield 1;
+      yield 2;
+    }());
+
+    const iter2 = (function* () {
+      yield "a";
+      yield "b";
+      yield "c";
+    }());
+    const result = zip(iter1, iter2);
+    expect([...result]).to.eql([[1, "a"], [2, "b"]]);
   });
 });

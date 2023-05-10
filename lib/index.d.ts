@@ -52,6 +52,9 @@ export const asyncTake: (
 
 export const range: (from: number, to?: number) => Generator<number>;
 
+export const zip: <A, B>(iter1: Iterable<A>, iter2: Iterable<B>) => Generator<[A, B]>;
+export const asyncZip: <A, B>(iter1: AsyncIterable<A>, iter2: AsyncIterable<B>) => AsyncGenerator<[A, B]>;
+
 export const reduce: (
   <A, B>(fn: Reducer<A, B>, acc: B, iter: Iterable<A>) => B
 ) & (
