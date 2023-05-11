@@ -105,6 +105,4 @@ export const asyncCollectMap: <A, B>(fn: AsyncIterable<[A, B]>) => Promise<Map<A
 export const collectObject: <A>(fn: Iterable<[string, A]>) => Record<string, A>;
 export const asyncCollectObject: <A>(fn: AsyncIterable<[string, A]>) => Promise<Record<string, A>>;
 
-export const pipeline: <A>(iterator: Iterable<any> | AsyncIterable<any>, ...fns: Function[]) => A;
-
-export const compose: (...fns: Function[]) => <A>(iterator: Iterable<any> | AsyncIterable<any>) => A;
+export const pipe: <A>(iterator: Iterable<any> | AsyncIterable<any>, ...fns: Function[]) => A;

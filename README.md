@@ -13,10 +13,10 @@ npm install @hyperjump/pact --save
 ## Usage
 
 ```javascript
-import { pipeline, range, map, filter, reduce, asyncMap, asyncFilter, asyncReduce } from "./lib/index.js";
+import { pipe, range, map, filter, reduce, asyncMap, asyncFilter, asyncReduce } from "./lib/index.js";
 
 
-const foo = pipeline(
+const foo = pipe(
   range(1, 10),
   filter((n) => n % 2 === 0),
   map((n) => n * 2),
@@ -36,7 +36,7 @@ for await (const value of asyncSequence()) {
   console.log(value);
 }
 
-const asyncFoo = await pipeline(
+const asyncFoo = await pipe(
   asyncSequence(),
   asyncFilter((n) => n % 2 === 0),
   asyncMap((n) => n * 2),
@@ -46,96 +46,91 @@ console.log(asyncFoo);
 ```
 
 ## API
-* map: (fn: Function, iterator: Iterable) => Generator
+* **map**: (fn: Function, iterator: Iterable) => Generator
 
     Apply a function to every value in the iterator
-* asyncMap: (fn: Function, iterator: AsyncIterable) => AsyncGenerator
+* **asyncMap**: (fn: Function, iterator: AsyncIterable) => AsyncGenerator
 
     Same as `map`, but works with promises.
-* filter: (fn: Function, iterator: Iterable) => Generator
+* **filter**: (fn: Function, iterator: Iterable) => Generator
 
     Yields only the values in the iterator that pass the predicate function.
-* asyncFilter: (fn: Function, iterator: AsyncIterable) => AsyncGenerator
+* **asyncFilter**: (fn: Function, iterator: AsyncIterable) => AsyncGenerator
 
     Same as `filter`, but works with promises.
-* drop: (n: number, iterator: Iterable) => Generator
+* **drop**: (n: number, iterator: Iterable) => Generator
 
     Yields all the values in the iterator except for the first `n` values.
-* asyncDrop: (n: number, iterator: AsyncIterable) => AsyncGenerator
+* **asyncDrop**: (n: number, iterator: AsyncIterable) => AsyncGenerator
 
     Same as `drop`, but works with promises.
-* take: (n: number, iterator: Iterable) => Generator
+* **take**: (n: number, iterator: Iterable) => Generator
 
     Yields the first `n` values in the iterator.
-* asyncTake: (count: number, iterator: AsyncIterable) => AsyncGenerator
+* **asyncTake**: (count: number, iterator: AsyncIterable) => AsyncGenerator
 
     Same as `take`, but works with promises.
-* range: (from: number, to?: number) => Generator
+* **range**: (from: number, to?: number) => Generator
 
     Yields numbers starting from `from` until `to`. If `to` is not passed, the
     iterator will be infinite.
-* zip: (iter1: Iterable, iter2: Iterable) => Generator
+* **zip**: (iter1: Iterable, iter2: Iterable) => Generator
 
     Yields tuples containing a value from each iterator. The iterator will have
     the same length as `iter1`. If `iter1` is longer than `iter2`, the second
     value of the tuple will be undefined. If `iter2` is longer than `iter1`, the
     remaining values in `iter2` will be ignored.
-* asyncZip: (iter1: AsyncIterable, iter2: AsyncIterable) => AsyncGenerator
+* **asyncZip**: (iter1: AsyncIterable, iter2: AsyncIterable) => AsyncGenerator
 
     Same as `zip` but works with promises.
-* reduce: (fn: Function, acc: any, iter: Iterable) => any
+* **reduce**: (fn: Function, acc: any, iter: Iterable) => any
 
     Reduce an iterator to a single value.
-* asyncReduce: (fn: AsyncReducer, acc: any, iter: AsyncIterable) => Promise<any>
+* **asyncReduce**: (fn: AsyncReducer, acc: any, iter: AsyncIterable) => Promise<any>
 
     Same as `reduce`, but works with promises.
-* every: (fn: Function, iterator: Iterable) => boolean
+* **every**: (fn: Function, iterator: Iterable) => boolean
 
     Returns a boolean indicating whether or not all values in the iterator
     passes the predicate function.
-* asyncEvery: (fn: AsyncPredicate, iterator: AsyncIterable) => Promise<boolean>
+* **asyncEvery**: (fn: AsyncPredicate, iterator: AsyncIterable) => Promise<boolean>
 
     Same as `every`, but works with promises.
-* some: (fn: Function, iterator: Iterable) => boolean
+* **some**: (fn: Function, iterator: Iterable) => boolean
 
     Returns a boolean indicating whether or not there exists a value in the
     iterator that passes the predicate function.
-* asyncSome: (fn: AsyncPredicate, iterator: AsyncIterable) => Promise<boolean>
+* **asyncSome**: (fn: AsyncPredicate, iterator: AsyncIterable) => Promise<boolean>
 
     Same as `some`, but works with promises.
-* collectArray: (fn: Iterable) => Array;
+* **collectArray**: (fn: Iterable) => Array;
 
     Collect all the items in the iterator into an array.
-* asyncCollectArray: (fn: AsyncIterable) => Promise<Array>;
+* **asyncCollectArray**: (fn: AsyncIterable) => Promise<Array>;
 
     Same as `collectArray`, but works with promises.
-* collectSet: (fn: Iterable) => Set;
+* **collectSet**: (fn: Iterable) => Set;
 
     Collect all the items in the iterator into a Set.
-* asyncCollectSet: (fn: AsyncIterable) => Promise<Set>;
+* **asyncCollectSet**: (fn: AsyncIterable) => Promise<Set>;
 
     Same as `collectSet`, but works with promises.
-* collectMap: (fn: Iterable) => Map;
+* **collectMap**: (fn: Iterable) => Map;
 
     Collect all the key/value tuples in the iterator into a Map.
-* asyncCollectMap: (fn: AsyncIterable) => Promise<Map>;
+* **asyncCollectMap**: (fn: AsyncIterable) => Promise<Map>;
 
     Same as `collectMap`, but works with promises.
-* collectObject: (fn: Iterable) => Object;
+* **collectObject**: (fn: Iterable) => Object;
 
     Collect all the key/value tuples in the iterator into an Object.
-* asyncCollectObject: (fn: AsyncIterable) => Promise<Object>;
+* **asyncCollectObject**: (fn: AsyncIterable) => Promise<Object>;
 
     Same as `collectObject`, but works with promises.
-* pipeline: (iterator: Iterable | AsyncIterable, ...fns: Function) => any;
+* **pipe**: (iterator: Iterable | AsyncIterable, ...fns: Function) => any;
 
     Starting with an iterator, apply any number of functions to transform the
     values and return the result.
-* compose: (...fns: Function) => (iterator: Iterable | AsyncIterable) => any;
-
-    Similar to `pipeline`, but instead of taking an iterator as the first
-    argument, it returns a function that takes an iterator and applies the
-    composed functions.
 
 ## Contributing
 
