@@ -256,3 +256,53 @@ describe("zip", () => {
     expect([...result]).to.eql([[1, "a"], [2, "b"]]);
   });
 });
+
+describe("asyncZip", () => {
+  it("same number of items", async () => {
+    const iter1 = (async function* () {
+      yield Promise.resolve(1);
+      yield Promise.resolve(2);
+    }());
+
+    const iter2 = (async function* () {
+      yield Promise.resolve("a");
+      yield Promise.resolve("b");
+    }());
+    const result = asyncZip(iter1, iter2);
+    expect((await result.next()).value).to.eql([1, "a"]);
+    expect((await result.next()).value).to.eql([2, "b"]);
+  });
+
+  it("iter1 has more items", async () => {
+    const iter1 = (async function* () {
+      yield Promise.resolve(1);
+      yield Promise.resolve(2);
+      yield Promise.resolve(3);
+    }());
+
+    const iter2 = (async function* () {
+      yield Promise.resolve("a");
+      yield Promise.resolve("b");
+    }());
+    const result = asyncZip(iter1, iter2);
+    expect((await result.next()).value).to.eql([1, "a"]);
+    expect((await result.next()).value).to.eql([2, "b"]);
+    expect((await result.next()).value).to.eql([3, undefined]);
+  });
+
+  it("iter2 has more items", async () => {
+    const iter1 = (async function* () {
+      yield Promise.resolve(1);
+      yield Promise.resolve(2);
+    }());
+
+    const iter2 = (async function* () {
+      yield Promise.resolve("a");
+      yield Promise.resolve("b");
+      yield Promise.resolve("c");
+    }());
+    const result = asyncZip(iter1, iter2);
+    expect((await result.next()).value).to.eql([1, "a"]);
+    expect((await result.next()).value).to.eql([2, "b"]);
+  });
+});
