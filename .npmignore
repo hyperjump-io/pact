@@ -1,4 +1,5 @@
 tsconfig.json
 .eslintrc.json
+.mocharc.json
 **/*.spec.ts
 worksheet.js
