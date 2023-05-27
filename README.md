@@ -13,16 +13,21 @@ npm install @hyperjump/pact --save
 ## Usage
 
 ```javascript
-import { pipe, range, map, filter, reduce, asyncMap, asyncFilter, asyncReduce } from "./lib/index.js";
+import { pipe, range, map, filter, reduce } from "@hyperjump/pact";
 
 
-const foo = pipe(
+const result = pipe(
   range(1, 10),
   filter((n) => n % 2 === 0),
   map((n) => n * 2),
   reduce((sum, n) => sum + n, 0)
 );
-console.log(foo);
+console.log(result);
+```
+
+```javascript
+import { pipe, asyncMap, asyncFilter, asyncReduce } from "@hyperjump/pact";
+
 
 const asyncSequence = async function* () {
   yield Promise.resolve(1);
@@ -36,13 +41,13 @@ for await (const value of asyncSequence()) {
   console.log(value);
 }
 
-const asyncFoo = await pipe(
+const result = await pipe(
   asyncSequence(),
   asyncFilter((n) => n % 2 === 0),
   asyncMap((n) => n * 2),
   asyncReduce((sum, n) => sum + n, 0)
 );
-console.log(asyncFoo);
+console.log(result);
 ```
 
 ## API
