@@ -53,11 +53,11 @@ describe("async pipe", () => {
 
   beforeEach(() => {
     subject = (async function* () {
-      yield Promise.resolve(1);
-      yield Promise.resolve(2);
-      yield Promise.resolve(3);
-      yield Promise.resolve(4);
-      yield Promise.resolve(5);
+      yield 1;
+      yield 2;
+      yield 3;
+      yield 4;
+      yield 5;
     }());
   });
 

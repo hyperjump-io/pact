@@ -34,9 +34,9 @@ describe("asyncReduce", () => {
 
   beforeEach(() => {
     subject = (async function* () {
-      yield Promise.resolve(1);
-      yield Promise.resolve(2);
-      yield Promise.resolve(3);
+      yield 1;
+      yield 2;
+      yield 3;
     }());
   });
 
@@ -91,9 +91,9 @@ describe("asyncEvery", () => {
 
   beforeEach(() => {
     subject = (async function* () {
-      yield Promise.resolve(1);
-      yield Promise.resolve(2);
-      yield Promise.resolve(3);
+      yield 1;
+      yield 2;
+      yield 3;
     }());
   });
 
@@ -159,9 +159,9 @@ describe("asyncSome", () => {
 
   beforeEach(() => {
     subject = (async function* () {
-      yield Promise.resolve(1);
-      yield Promise.resolve(2);
-      yield Promise.resolve(3);
+      yield 1;
+      yield 2;
+      yield 3;
     }());
   });
 

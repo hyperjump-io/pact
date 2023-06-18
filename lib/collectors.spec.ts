@@ -29,9 +29,9 @@ describe("asyncCollectArray", () => {
 
   beforeEach(() => {
     subject = (async function* () {
-      yield Promise.resolve(1);
-      yield Promise.resolve(2);
-      yield Promise.resolve(3);
+      yield 1;
+      yield 2;
+      yield 3;
     }());
   });
 
@@ -63,9 +63,9 @@ describe("asyncCollectSet", () => {
 
   beforeEach(() => {
     subject = (async function* () {
-      yield Promise.resolve(1);
-      yield Promise.resolve(2);
-      yield Promise.resolve(3);
+      yield 1;
+      yield 2;
+      yield 3;
     }());
   });
 
@@ -97,9 +97,9 @@ describe("asyncCollectMap", () => {
 
   beforeEach(() => {
     subject = (async function* () {
-      yield Promise.resolve(["foo", 1]);
-      yield Promise.resolve(["bar", 2]);
-      yield Promise.resolve(["baz", 3]);
+      yield ["foo", 1];
+      yield ["bar", 2];
+      yield ["baz", 3];
     }()) as AsyncGenerator<[string, number]>;
   });
 
@@ -131,9 +131,9 @@ describe("asyncCollectObject", () => {
 
   beforeEach(() => {
     subject = (async function* () {
-      yield Promise.resolve(["foo", 1]);
-      yield Promise.resolve(["bar", 2]);
-      yield Promise.resolve(["baz", 3]);
+      yield ["foo", 1];
+      yield ["bar", 2];
+      yield ["baz", 3];
     }()) as AsyncGenerator<[string, number]>;
   });
 
