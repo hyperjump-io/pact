@@ -26,6 +26,12 @@ export const asyncFilter: (
 );
 export type AsyncPredicate<A> = (item: A) => Promise<boolean> | boolean;
 
+export const flatten: <A>(iterator: NestedIterable<A>, depth?: number) => Generator<A | NestedIterable<A>>;
+export type NestedIterable<A> = Iterable<A | NestedIterable<A>>;
+
+export const asyncFlatten: <A>(iterator: NestedAsyncIterable<A>, depth?: number) => AsyncGenerator<A | NestedIterable<A> | NestedAsyncIterable<A>>;
+export type NestedAsyncIterable<A> = AsyncIterable<A | NestedAsyncIterable<A> | NestedIterable<A>>;
+
 export const drop: (
   <A>(count: number, iterator: Iterable<A>) => Generator<A>
 ) & (

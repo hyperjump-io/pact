@@ -63,6 +63,13 @@ console.log(result);
 * **asyncFilter**: (fn: Function, iterator: AsyncIterable) => AsyncGenerator
 
     Same as `filter`, but works with promises.
+* **flatten**: (iterator: NestedIterable, depth: number = 1) => Generator
+
+    Yields values from the iterator with all sub-iterator elements concatenated
+    into it recursively up to the specified depth.
+* **asyncFlatten**: (iterator: NestedAsyncIterable, depth: number = 1) => AsyncGenerator
+
+    Same as `flatten`, but works with promises.
 * **drop**: (n: number, iterator: Iterable) => Generator
 
     Yields all the values in the iterator except for the first `n` values.

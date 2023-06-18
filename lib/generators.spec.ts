@@ -2,11 +2,13 @@ import { expect } from "chai";
 import {
   map, asyncMap,
   filter, asyncFilter,
+  flatten, asyncFlatten,
   drop, asyncDrop,
   take, asyncTake,
   range,
   zip, asyncZip
 } from "./index.js";
+import type { NestedIterable, NestedAsyncIterable } from "./index.js";
 
 
 describe("map", () => {
@@ -102,6 +104,122 @@ describe("asyncFilter", () => {
     const greaterThanTwo = asyncFilter((n: number) => n > 2);
     const result = greaterThanTwo(subject);
     expect((await result.next()).value).to.equal(3);
+  });
+});
+
+describe("flatten", () => {
+  let subject: NestedIterable<number | string | boolean | null>;
+  let deeplyNested: NestedIterable<number | string | boolean | null>;
+
+  beforeEach(() => {
+    deeplyNested = [3, 4];
+
+    subject = (function* () {
+      yield 1;
+      yield (function* () {
+        yield 2;
+        yield deeplyNested;
+      }());
+      yield "foo";
+      yield true;
+      yield false;
+      yield null;
+    }());
+  });
+
+  it("default depth", () => {
+    const result = flatten(subject);
+    expect([...result]).to.eql([1, 2, deeplyNested, "foo", true, false, null]);
+  });
+
+  it("depth 1", () => {
+    const result = flatten(subject, 1);
+    expect([...result]).to.eql([1, 2, deeplyNested, "foo", true, false, null]);
+  });
+
+  it("depth 2", () => {
+    const result = flatten(subject, 2);
+    expect([...result]).to.eql([1, 2, 3, 4, "foo", true, false, null]);
+  });
+
+  it("depth Infinity", () => {
+    const result = flatten(subject, Infinity);
+    expect([...result]).to.eql([1, 2, 3, 4, "foo", true, false, null]);
+  });
+});
+
+describe("asyncFlatten", () => {
+  let subject: NestedAsyncIterable<number | string | boolean | null>;
+  let deeplyNested: NestedAsyncIterable<number | string | boolean | null>;
+
+  beforeEach(() => {
+    deeplyNested = (async function* () {
+      yield 3;
+      yield 4;
+    }());
+
+    subject = (async function* () {
+      yield 1;
+      yield (async function* () {
+        yield 2;
+        yield deeplyNested;
+      }());
+      yield [5];
+      yield "foo";
+      yield true;
+      yield false;
+      yield null;
+    }());
+  });
+
+  it("default depth", async () => {
+    const result = asyncFlatten(subject);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).value).to.equal(deeplyNested);
+    expect((await result.next()).value).to.equal(5);
+    expect((await result.next()).value).to.equal("foo");
+    expect((await result.next()).value).to.equal(true);
+    expect((await result.next()).value).to.equal(false);
+    expect((await result.next()).value).to.equal(null);
+  });
+
+  it("depth 1", async () => {
+    const result = asyncFlatten(subject, 1);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).value).to.equal(deeplyNested);
+    expect((await result.next()).value).to.equal(5);
+    expect((await result.next()).value).to.equal("foo");
+    expect((await result.next()).value).to.equal(true);
+    expect((await result.next()).value).to.equal(false);
+    expect((await result.next()).value).to.equal(null);
+  });
+
+  it("depth 2", async () => {
+    const result = asyncFlatten(subject, 2);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).value).to.equal(4);
+    expect((await result.next()).value).to.equal(5);
+    expect((await result.next()).value).to.equal("foo");
+    expect((await result.next()).value).to.equal(true);
+    expect((await result.next()).value).to.equal(false);
+    expect((await result.next()).value).to.equal(null);
+  });
+
+  it("depth Infinity", async () => {
+    const result = asyncFlatten(subject, Infinity);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).value).to.equal(4);
+    expect((await result.next()).value).to.equal(5);
+    expect((await result.next()).value).to.equal("foo");
+    expect((await result.next()).value).to.equal(true);
+    expect((await result.next()).value).to.equal(false);
+    expect((await result.next()).value).to.equal(null);
   });
 });
 
