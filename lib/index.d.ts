@@ -12,6 +12,20 @@ export const asyncMap: (
 );
 export type AsyncMapper<A, B> = (item: A) => Promise<B> | B;
 
+export const tap: (
+  <A>(fn: Tapper<A>, iterator: Iterable<A>) => Generator<A>
+) & (
+  <A>(fn: Tapper<A>) => (iterator: Iterable<A>) => Generator<A>
+);
+export type Tapper<A> = (item: A) => void;
+
+export const asyncTap: (
+  <A>(fn: AsyncTapper<A>, iterator: AsyncIterable<A>) => AsyncGenerator<A>
+) & (
+  <A>(fn: AsyncTapper<A>) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
+);
+export type AsyncTapper<A> = (item: A) => void;
+
 export const filter: (
   <A>(fn: Predicate<A>, iterator: Iterable<A>) => Generator<A>
 ) & (

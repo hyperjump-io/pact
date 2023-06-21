@@ -57,6 +57,13 @@ console.log(result);
 * **asyncMap**: (fn: Function, iterator: AsyncIterable) => AsyncGenerator
 
     Same as `map`, but works with promises.
+* **tap**: (fn: Function, iterator: Iterable) => Generator
+
+    Apply a function to every value in the iterator, but yield the original
+    value, not the result of the function.
+* **asyncTap**: (fn: Function, iterator: AsyncIterable) => AsyncGenerator
+
+    Same as `tap`, but works with promises.
 * **filter**: (fn: Function, iterator: Iterable) => Generator
 
     Yields only the values in the iterator that pass the predicate function.

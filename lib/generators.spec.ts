@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import {
   map, asyncMap,
+  tap, asyncTap,
   filter, asyncFilter,
   scan, asyncScan,
   flatten, asyncFlatten,
@@ -59,6 +60,64 @@ describe("asyncMap", () => {
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(4);
     expect((await result.next()).value).to.equal(6);
+  });
+});
+
+describe("tap", () => {
+  let subject: Iterable<number>;
+
+  beforeEach(() => {
+    subject = (function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+  });
+
+  it("uncurried", () => {
+    let count = 0;
+    const result = tap(() => count++, subject);
+    expect([...result]).to.eql([1, 2, 3]);
+    expect(count).to.equal(3);
+  });
+
+  it("curried", () => {
+    let count = 0;
+    const double = tap(() => count++);
+    const result = double(subject);
+    expect([...result]).to.eql([1, 2, 3]);
+    expect(count).to.equal(3);
+  });
+});
+
+describe("asyncTap", () => {
+  let subject: AsyncGenerator<number>;
+
+  beforeEach(() => {
+    subject = (async function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+  });
+
+  it("uncurried", async () => {
+    let count = 0;
+    const result = asyncTap(() => count++, subject);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).value).to.equal(3);
+    expect(count).to.equal(3);
+  });
+
+  it("curried", async () => {
+    let count = 0;
+    const tapped = asyncTap(() => count++);
+    const result = tapped(subject);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).value).to.equal(3);
+    expect(count).to.equal(3);
   });
 });
 
