@@ -2,6 +2,7 @@ import { expect } from "chai";
 import {
   map, asyncMap,
   filter, asyncFilter,
+  scan, asyncScan,
   flatten, asyncFlatten,
   drop, asyncDrop,
   take, asyncTake,
@@ -104,6 +105,56 @@ describe("asyncFilter", () => {
     const greaterThanTwo = asyncFilter((n: number) => n > 2);
     const result = greaterThanTwo(subject);
     expect((await result.next()).value).to.equal(3);
+  });
+});
+
+describe("scan", () => {
+  let subject: Iterable<number>;
+
+  beforeEach(() => {
+    subject = (function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+  });
+
+  it("uncurried", () => {
+    const result = scan((acc, n) => acc + n, 0, subject);
+    expect([...result]).to.eql([1, 3, 6]);
+  });
+
+  it("curried", () => {
+    const sum = scan((acc, n: number) => acc + n, 0);
+    const result = sum(subject);
+    expect([...result]).to.eql([1, 3, 6]);
+  });
+});
+
+describe("asyncScan", () => {
+  let subject: AsyncGenerator<number>;
+
+  beforeEach(() => {
+    subject = (async function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+  });
+
+  it("uncurried", async () => {
+    const result = asyncScan((acc, n) => acc + n, 0, subject);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).value).to.equal(6);
+  });
+
+  it("curried", async () => {
+    const sum = asyncScan((acc, n: number) => acc + n, 0);
+    const result = sum(subject);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).value).to.equal(6);
   });
 });
 

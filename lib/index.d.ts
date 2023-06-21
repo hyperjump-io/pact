@@ -26,6 +26,18 @@ export const asyncFilter: (
 );
 export type AsyncPredicate<A> = (item: A) => Promise<boolean> | boolean;
 
+export const scan: (
+  <A, B>(fn: Reducer<A, B>, acc: B, iter: Iterable<A>) => Generator<B>
+) & (
+  <A, B>(fn: Reducer<A, B>, acc: B) => (iter: Iterable<A>) => Generator<B>
+);
+
+export const asyncScan: (
+  <A, B>(fn: AsyncReducer<A, B>, acc: B, iter: AsyncIterable<A>) => AsyncGenerator<B>
+) & (
+  <A, B>(fn: AsyncReducer<A, B>, acc: B) => (iter: AsyncIterable<A>) => AsyncGenerator<B>
+);
+
 export const flatten: <A>(iterator: NestedIterable<A>, depth?: number) => Generator<A | NestedIterable<A>>;
 export type NestedIterable<A> = Iterable<A | NestedIterable<A>>;
 

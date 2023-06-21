@@ -63,6 +63,12 @@ console.log(result);
 * **asyncFilter**: (fn: Function, iterator: AsyncIterable) => AsyncGenerator
 
     Same as `filter`, but works with promises.
+* **scan**: (fn: Function, acc: any, iter: Iterable) => any
+
+    Same as `reduce` except it emits the accumulated value after each update
+* **asyncScan**: (fn: AsyncReducer, acc: any, iter: AsyncIterable) => Promise<any>
+
+    Same as `scan`, but works with promises.
 * **flatten**: (iterator: NestedIterable, depth: number = 1) => Generator
 
     Yields values from the iterator with all sub-iterator elements concatenated
