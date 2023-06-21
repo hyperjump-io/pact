@@ -5,7 +5,8 @@
   "type": "module",
   "main": "./lib/index.js",
   "exports": {
-    ".": "./lib/index.js"
+    ".": "./lib/index.js",
+    "./async": "./lib/async.js"
   },
   "scripts": {
     "clean": "xargs -a .gitignore rm -rf",

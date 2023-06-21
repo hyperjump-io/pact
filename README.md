@@ -27,6 +27,8 @@ console.log(result);
 
 ```javascript
 import { pipe, asyncMap, asyncFilter, asyncReduce } from "@hyperjump/pact";
+// You can alternatively import the async functions without the prefix
+// import { pipe, map, filter, reduce } from "@hyperjump/pact/async";
 
 
 const asyncSequence = async function* () {
