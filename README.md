@@ -66,7 +66,7 @@ console.log(result);
 * **scan**: (fn: Function, acc: any, iter: Iterable) => any
 
     Same as `reduce` except it emits the accumulated value after each update
-* **asyncScan**: (fn: AsyncReducer, acc: any, iter: AsyncIterable) => Promise<any>
+* **asyncScan**: (fn: Function, acc: any, iter: AsyncIterable) => Promise<any>
 
     Same as `scan`, but works with promises.
 * **flatten**: (iterator: NestedIterable, depth: number = 1) => Generator
@@ -104,45 +104,45 @@ console.log(result);
 * **reduce**: (fn: Function, acc: any, iter: Iterable) => any
 
     Reduce an iterator to a single value.
-* **asyncReduce**: (fn: AsyncReducer, acc: any, iter: AsyncIterable) => Promise<any>
+* **asyncReduce**: (fn: Function, acc: any, iter: AsyncIterable) => Promise<any>
 
     Same as `reduce`, but works with promises.
 * **every**: (fn: Function, iterator: Iterable) => boolean
 
     Returns a boolean indicating whether or not all values in the iterator
     passes the predicate function.
-* **asyncEvery**: (fn: AsyncPredicate, iterator: AsyncIterable) => Promise<boolean>
+* **asyncEvery**: (fn: Function, iterator: AsyncIterable) => Promise<boolean>
 
     Same as `every`, but works with promises.
 * **some**: (fn: Function, iterator: Iterable) => boolean
 
     Returns a boolean indicating whether or not there exists a value in the
     iterator that passes the predicate function.
-* **asyncSome**: (fn: AsyncPredicate, iterator: AsyncIterable) => Promise<boolean>
+* **asyncSome**: (fn: Function, iterator: AsyncIterable) => Promise<boolean>
 
     Same as `some`, but works with promises.
-* **collectArray**: (fn: Iterable) => Array;
+* **collectArray**: (iterator: Iterable) => Array;
 
     Collect all the items in the iterator into an array.
-* **asyncCollectArray**: (fn: AsyncIterable) => Promise<Array>;
+* **asyncCollectArray**: (iterator: AsyncIterable) => Promise<Array>;
 
     Same as `collectArray`, but works with promises.
-* **collectSet**: (fn: Iterable) => Set;
+* **collectSet**: (iterator: Iterable) => Set;
 
     Collect all the items in the iterator into a Set.
-* **asyncCollectSet**: (fn: AsyncIterable) => Promise<Set>;
+* **asyncCollectSet**: (iterator: AsyncIterable) => Promise<Set>;
 
     Same as `collectSet`, but works with promises.
-* **collectMap**: (fn: Iterable) => Map;
+* **collectMap**: (iterator: Iterable) => Map;
 
     Collect all the key/value tuples in the iterator into a Map.
-* **asyncCollectMap**: (fn: AsyncIterable) => Promise<Map>;
+* **asyncCollectMap**: (iterator: AsyncIterable) => Promise<Map>;
 
     Same as `collectMap`, but works with promises.
-* **collectObject**: (fn: Iterable) => Object;
+* **collectObject**: (iterator: Iterable) => Object;
 
     Collect all the key/value tuples in the iterator into an Object.
-* **asyncCollectObject**: (fn: AsyncIterable) => Promise<Object>;
+* **asyncCollectObject**: (iterator: AsyncIterable) => Promise<Object>;
 
     Same as `collectObject`, but works with promises.
 * **pipe**: (iterator: Iterable | AsyncIterable, ...fns: Function) => any;

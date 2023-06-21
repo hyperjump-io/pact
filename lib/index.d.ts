@@ -111,17 +111,17 @@ export const asyncSome: (
   <A>(fn: AsyncPredicate<A>) => (iterator: AsyncIterable<A>) => Promise<boolean>
 );
 
-export const collectArray: <A>(fn: Iterable<A>) => A[];
-export const asyncCollectArray: <A>(fn: AsyncIterable<A>) => Promise<A[]>;
+export const collectArray: <A>(iterator: Iterable<A>) => A[];
+export const asyncCollectArray: <A>(iterator: AsyncIterable<A>) => Promise<A[]>;
 
-export const collectSet: <A>(fn: Iterable<A>) => Set<A>;
-export const asyncCollectSet: <A>(fn: AsyncIterable<A>) => Promise<Set<A>>;
+export const collectSet: <A>(iterator: Iterable<A>) => Set<A>;
+export const asyncCollectSet: <A>(iterator: AsyncIterable<A>) => Promise<Set<A>>;
 
-export const collectMap: <A, B>(fn: Iterable<[A, B]>) => Map<A, B>;
-export const asyncCollectMap: <A, B>(fn: AsyncIterable<[A, B]>) => Promise<Map<A, B>>;
+export const collectMap: <A, B>(iterator: Iterable<[A, B]>) => Map<A, B>;
+export const asyncCollectMap: <A, B>(iterator: AsyncIterable<[A, B]>) => Promise<Map<A, B>>;
 
-export const collectObject: <A>(fn: Iterable<[string, A]>) => Record<string, A>;
-export const asyncCollectObject: <A>(fn: AsyncIterable<[string, A]>) => Promise<Record<string, A>>;
+export const collectObject: <A>(iterator: Iterable<[string, A]>) => Record<string, A>;
+export const asyncCollectObject: <A>(iterator: AsyncIterable<[string, A]>) => Promise<Record<string, A>>;
 
 // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
 export const pipe: <A>(iterator: Iterable<any> | AsyncIterable<any>, ...fns: Function[]) => A;
