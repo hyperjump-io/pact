@@ -531,6 +531,12 @@ describe("empty", () => {
   });
 });
 
+describe("empty", () => {
+  it("should be empty", () => {
+    expect([...empty()]).to.equal([]);
+  });
+});
+
 describe("zip", () => {
   it("same number of items", () => {
     const iter1 = (function* () {
