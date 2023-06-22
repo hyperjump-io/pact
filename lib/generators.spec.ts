@@ -7,6 +7,7 @@ import {
   flatten, asyncFlatten,
   drop, asyncDrop,
   take, asyncTake,
+  head, asyncHead,
   range,
   empty,
   zip, asyncZip,
@@ -465,6 +466,50 @@ describe("asyncTake", () => {
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
+  });
+});
+
+describe("head", () => {
+  let subject: Iterable<number>;
+
+  beforeEach(() => {
+    subject = (function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+  });
+
+  it("empty iterator", () => {
+    expect(head(empty())).to.eql(undefined);
+  });
+
+  it("non-empty iterator", () => {
+    expect(head(subject)).to.eql(1);
+    expect([...subject]).to.eql([2, 3]);
+  });
+});
+
+describe("asyncHead", () => {
+  let subject: AsyncGenerator<number>;
+
+  beforeEach(() => {
+    subject = (async function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+  });
+
+  it("empty iterator", async () => {
+    expect(await asyncHead(empty())).to.eql(undefined);
+  });
+
+  it("non-empty iterator", async () => {
+    expect(await asyncHead(subject)).to.eql(1);
+    expect((await subject.next()).value).to.equal(2);
+    expect((await subject.next()).value).to.equal(3);
+    expect((await subject.next()).done).to.equal(true);
   });
 });
 

@@ -97,6 +97,12 @@ console.log(result);
 * **asyncTake**: (n: number, iterator: AsyncIterable) => AsyncGenerator
 
     Same as `take`, but works with promises.
+* **head**: (iterator: Iterable) => A
+
+    Returns the first value in the iterator.
+* **asyncHead**: (iterator: AsyncIterable) => A
+
+    Same as `head`, but works with promises.
 * **range**: (from: number, to?: number) => Generator
 
     Yields numbers starting from `from` until `to`. If `to` is not passed, the
