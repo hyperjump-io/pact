@@ -119,7 +119,7 @@ console.log(result);
 * **reduce**: (fn: Function, acc: any, iter: Iterable) => any
 
     Reduce an iterator to a single value.
-* **asyncReduce**: (fn: Function, acc: any, iter: AsyncIterable) => Promise<any>
+* **asyncReduce**: (fn: Function, acc: A, iter: AsyncIterable) => Promise<A>
 
     Same as `reduce`, but works with promises.
 * **every**: (fn: Function, iterator: Iterable) => boolean
