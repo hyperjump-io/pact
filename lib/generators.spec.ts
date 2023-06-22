@@ -409,12 +409,19 @@ describe("take", () => {
   it("uncurried", () => {
     const result = take(2, subject);
     expect([...result]).to.eql([1, 2]);
+    expect([...subject]).to.eql([3]);
   });
 
   it("curried", () => {
     const takeTwo = take(2);
     const result = takeTwo(subject);
     expect([...result]).to.eql([1, 2]);
+    expect([...subject]).to.eql([3]);
+  });
+
+  it("take more than is available", () => {
+    const result = take(10, subject);
+    expect([...result]).to.eql([1, 2, 3]);
   });
 });
 
@@ -431,16 +438,32 @@ describe("asyncTake", () => {
 
   it("uncurried", async () => {
     const result = asyncTake(2, subject);
+
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).done).to.equal(true);
+
+    expect((await subject.next()).value).to.equal(3);
+    expect((await subject.next()).done).to.equal(true);
   });
 
   it("curried", async () => {
     const takeTwo = asyncTake(2);
     const result = takeTwo(subject);
+
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).done).to.equal(true);
+
+    expect((await subject.next()).value).to.equal(3);
+    expect((await subject.next()).done).to.equal(true);
+  });
+
+  it("take more than is available", async () => {
+    const result = asyncTake(10, subject);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 });
@@ -452,8 +475,8 @@ describe("range", () => {
   });
 
   it("infinite", () => {
-    const result = take(3, range(0));
-    expect([...result]).to.eql([0, 1, 2]);
+    const result = take(3, range(3));
+    expect([...result]).to.eql([3, 4, 5]);
   });
 });
 

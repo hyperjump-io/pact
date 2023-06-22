@@ -94,7 +94,7 @@ console.log(result);
 * **take**: (n: number, iterator: Iterable) => Generator
 
     Yields the first `n` values in the iterator.
-* **asyncTake**: (count: number, iterator: AsyncIterable) => AsyncGenerator
+* **asyncTake**: (n: number, iterator: AsyncIterable) => AsyncGenerator
 
     Same as `take`, but works with promises.
 * **range**: (from: number, to?: number) => Generator
