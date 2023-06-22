@@ -53,6 +53,7 @@ describe("asyncMap", () => {
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(4);
     expect((await result.next()).value).to.equal(6);
+    expect((await result.next()).done).to.equal(true);
   });
 
   it("curried", async () => {
@@ -61,6 +62,7 @@ describe("asyncMap", () => {
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(4);
     expect((await result.next()).value).to.equal(6);
+    expect((await result.next()).done).to.equal(true);
   });
 });
 
@@ -108,6 +110,7 @@ describe("asyncTap", () => {
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).done).to.equal(true);
     expect(count).to.equal(3);
   });
 
@@ -118,6 +121,7 @@ describe("asyncTap", () => {
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).done).to.equal(true);
     expect(count).to.equal(3);
   });
 });
@@ -159,12 +163,14 @@ describe("asyncFilter", () => {
   it("uncurried", async () => {
     const result = asyncFilter((n) => n > 2, subject);
     expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).done).to.equal(true);
   });
 
   it("curried", async () => {
     const greaterThanTwo = asyncFilter((n: number) => n > 2);
     const result = greaterThanTwo(subject);
     expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).done).to.equal(true);
   });
 });
 
@@ -207,6 +213,7 @@ describe("asyncScan", () => {
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).value).to.equal(6);
+    expect((await result.next()).done).to.equal(true);
   });
 
   it("curried", async () => {
@@ -215,6 +222,7 @@ describe("asyncScan", () => {
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).value).to.equal(6);
+    expect((await result.next()).done).to.equal(true);
   });
 });
 
@@ -293,6 +301,7 @@ describe("asyncFlatten", () => {
     expect((await result.next()).value).to.equal(true);
     expect((await result.next()).value).to.equal(false);
     expect((await result.next()).value).to.equal(null);
+    expect((await result.next()).done).to.equal(true);
   });
 
   it("depth 1", async () => {
@@ -305,6 +314,7 @@ describe("asyncFlatten", () => {
     expect((await result.next()).value).to.equal(true);
     expect((await result.next()).value).to.equal(false);
     expect((await result.next()).value).to.equal(null);
+    expect((await result.next()).done).to.equal(true);
   });
 
   it("depth 2", async () => {
@@ -318,6 +328,7 @@ describe("asyncFlatten", () => {
     expect((await result.next()).value).to.equal(true);
     expect((await result.next()).value).to.equal(false);
     expect((await result.next()).value).to.equal(null);
+    expect((await result.next()).done).to.equal(true);
   });
 
   it("depth Infinity", async () => {
@@ -331,6 +342,7 @@ describe("asyncFlatten", () => {
     expect((await result.next()).value).to.equal(true);
     expect((await result.next()).value).to.equal(false);
     expect((await result.next()).value).to.equal(null);
+    expect((await result.next()).done).to.equal(true);
   });
 });
 
@@ -371,12 +383,14 @@ describe("asyncDrop", () => {
   it("uncurried", async () => {
     const result = asyncDrop(2, subject);
     expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).done).to.equal(true);
   });
 
   it("curried", async () => {
     const dropTwo = asyncDrop(2);
     const result = dropTwo(subject);
     expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).done).to.equal(true);
   });
 });
 
@@ -418,6 +432,7 @@ describe("asyncTake", () => {
     const result = asyncTake(2, subject);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).done).to.equal(true);
   });
 
   it("curried", async () => {
@@ -425,6 +440,7 @@ describe("asyncTake", () => {
     const result = takeTwo(subject);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).done).to.equal(true);
   });
 });
 
@@ -500,6 +516,7 @@ describe("asyncZip", () => {
     const result = asyncZip(iter1, iter2);
     expect((await result.next()).value).to.eql([1, "a"]);
     expect((await result.next()).value).to.eql([2, "b"]);
+    expect((await result.next()).done).to.equal(true);
   });
 
   it("iter1 has more items", async () => {
@@ -517,6 +534,7 @@ describe("asyncZip", () => {
     expect((await result.next()).value).to.eql([1, "a"]);
     expect((await result.next()).value).to.eql([2, "b"]);
     expect((await result.next()).value).to.eql([3, undefined]);
+    expect((await result.next()).done).to.equal(true);
   });
 
   it("iter2 has more items", async () => {
@@ -533,6 +551,7 @@ describe("asyncZip", () => {
     const result = asyncZip(iter1, iter2);
     expect((await result.next()).value).to.eql([1, "a"]);
     expect((await result.next()).value).to.eql([2, "b"]);
+    expect((await result.next()).done).to.equal(true);
   });
 });
 
@@ -570,6 +589,7 @@ describe("asyncConcat", () => {
     expect((await result.next()).value).to.eql(2);
     expect((await result.next()).value).to.eql(3);
     expect((await result.next()).value).to.eql(4);
+    expect((await result.next()).done).to.equal(true);
   });
 
   it("mixed sync/async", async () => {
@@ -588,5 +608,6 @@ describe("asyncConcat", () => {
     expect((await result.next()).value).to.eql(2);
     expect((await result.next()).value).to.eql(3);
     expect((await result.next()).value).to.eql(4);
+    expect((await result.next()).done).to.equal(true);
   });
 });

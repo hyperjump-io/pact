@@ -66,9 +66,10 @@ describe("async pipe", () => {
       subject,
       asyncFilter((n: number) => n > 2)
     );
-    expect((await result.next()).value).to.eql(3);
-    expect((await result.next()).value).to.eql(4);
-    expect((await result.next()).value).to.eql(5);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).value).to.equal(4);
+    expect((await result.next()).value).to.equal(5);
+    expect((await result.next()).done).to.equal(true);
   });
 
   it("two functions", async () => {
@@ -77,9 +78,10 @@ describe("async pipe", () => {
       asyncFilter((n: number) => n > 2),
       asyncMap((n: number) => n * 2)
     );
-    expect((await result.next()).value).to.eql(6);
-    expect((await result.next()).value).to.eql(8);
-    expect((await result.next()).value).to.eql(10);
+    expect((await result.next()).value).to.equal(6);
+    expect((await result.next()).value).to.equal(8);
+    expect((await result.next()).value).to.equal(10);
+    expect((await result.next()).done).to.equal(true);
   });
 
   it("three functions", async () => {
