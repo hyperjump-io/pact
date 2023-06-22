@@ -8,7 +8,8 @@ import {
   drop, asyncDrop,
   take, asyncTake,
   range,
-  zip, asyncZip
+  zip, asyncZip,
+  concat, asyncConcat
 } from "./index.js";
 import type { NestedIterable, NestedAsyncIterable } from "./index.js";
 
@@ -532,5 +533,60 @@ describe("asyncZip", () => {
     const result = asyncZip(iter1, iter2);
     expect((await result.next()).value).to.eql([1, "a"]);
     expect((await result.next()).value).to.eql([2, "b"]);
+  });
+});
+
+describe("concat", () => {
+  it("two iterators", () => {
+    const iter1 = (function* () {
+      yield 1;
+      yield 2;
+    }());
+
+    const iter2 = (function* () {
+      yield 3;
+      yield 4;
+    }());
+
+    const result = concat(iter1, iter2);
+    expect([...result]).to.eql([1, 2, 3, 4]);
+  });
+});
+
+describe("asyncConcat", () => {
+  it("two iterators", async () => {
+    const iter1 = (async function* () {
+      yield 1;
+      yield 2;
+    }());
+
+    const iter2 = (async function* () {
+      yield 3;
+      yield 4;
+    }());
+
+    const result = asyncConcat(iter1, iter2);
+    expect((await result.next()).value).to.eql(1);
+    expect((await result.next()).value).to.eql(2);
+    expect((await result.next()).value).to.eql(3);
+    expect((await result.next()).value).to.eql(4);
+  });
+
+  it("mixed sync/async", async () => {
+    const iter1 = (function* () {
+      yield 1;
+      yield 2;
+    }());
+
+    const iter2 = (async function* () {
+      yield 3;
+      yield 4;
+    }());
+
+    const result = asyncConcat(iter1, iter2);
+    expect((await result.next()).value).to.eql(1);
+    expect((await result.next()).value).to.eql(2);
+    expect((await result.next()).value).to.eql(3);
+    expect((await result.next()).value).to.eql(4);
   });
 });

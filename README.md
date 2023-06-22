@@ -110,6 +110,12 @@ console.log(result);
 * **asyncZip**: (iter1: AsyncIterable, iter2: AsyncIterable) => AsyncGenerator
 
     Same as `zip` but works with promises.
+* **concat**: (...iters: Iterable[]) => Generator
+
+    Yields values from each iterator in order.
+* **asyncConcat**: (...iters: AsyncIterable[]) => AsyncGenerator
+
+    Same as `concat` but works with promises.
 * **reduce**: (fn: Function, acc: any, iter: Iterable) => any
 
     Reduce an iterator to a single value.
