@@ -8,6 +8,7 @@ import {
   drop, asyncDrop,
   take, asyncTake,
   range,
+  empty,
   zip, asyncZip,
   concat, asyncConcat
 } from "./index.js";
@@ -453,6 +454,12 @@ describe("range", () => {
   it("infinite", () => {
     const result = take(3, range(0));
     expect([...result]).to.eql([0, 1, 2]);
+  });
+});
+
+describe("empty", () => {
+  it("should be empty", () => {
+    expect([...empty()]).to.eql([]);
   });
 });
 

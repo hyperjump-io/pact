@@ -101,6 +101,9 @@ console.log(result);
 
     Yields numbers starting from `from` until `to`. If `to` is not passed, the
     iterator will be infinite.
+* **empty**: () => Generator
+
+    Yields nothing.
 * **zip**: (iter1: Iterable, iter2: Iterable) => Generator
 
     Yields tuples containing a value from each iterator. The iterator will have
