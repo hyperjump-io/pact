@@ -125,6 +125,9 @@ export const asyncSome: (
   <A>(fn: AsyncPredicate<A>) => (iterator: AsyncIterable<A>) => Promise<boolean>
 );
 
+export const count: <A>(iterator: Iterable<A>) => number;
+export const asyncCount: <A>(iterator: AsyncIterable<A>) => Promise<number>;
+
 export const collectArray: <A>(iterator: Iterable<A>) => A[];
 export const asyncCollectArray: <A>(iterator: AsyncIterable<A>) => Promise<A[]>;
 

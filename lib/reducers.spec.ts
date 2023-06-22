@@ -2,7 +2,8 @@ import { expect } from "chai";
 import {
   reduce, asyncReduce,
   every, asyncEvery,
-  some, asyncSome
+  some, asyncSome,
+  count, asyncCount
 } from "./index.js";
 
 
@@ -185,5 +186,39 @@ describe("asyncSome", () => {
     const someGreaterThanFive = asyncSome((n: number) => n > 5);
     const result = await someGreaterThanFive(subject);
     expect(result).to.eql(false);
+  });
+});
+
+describe("count", () => {
+  let subject: Iterable<number>;
+
+  beforeEach(() => {
+    subject = (function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+  });
+
+  it("uncurried", () => {
+    const result = count(subject);
+    expect(result).to.eql(3);
+  });
+});
+
+describe("asyncCount", () => {
+  let subject: AsyncGenerator<number>;
+
+  beforeEach(() => {
+    subject = (async function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+  });
+
+  it("uncurried", async () => {
+    const result = await asyncCount(subject);
+    expect(result).to.equal(3);
   });
 });

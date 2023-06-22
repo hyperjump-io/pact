@@ -130,6 +130,12 @@ console.log(result);
 * **asyncSome**: (fn: Function, iterator: AsyncIterable) => Promise<boolean>
 
     Same as `some`, but works with promises.
+* **count**: (iterator: Iterable) => number
+
+    Returns the number of items in the iterator.
+* **asyncCount**: (iterator: AsyncIterable) => Promise<number>
+
+    Same as `count`, but works with promises.
 * **collectArray**: (iterator: Iterable) => Array;
 
     Collect all the items in the iterator into an array.
