@@ -148,5 +148,17 @@ export const asyncCollectMap: <A, B>(iterator: AsyncIterable<[A, B]>) => Promise
 export const collectObject: <A>(iterator: Iterable<[string, A]>) => Record<string, A>;
 export const asyncCollectObject: <A>(iterator: AsyncIterable<[string, A]>) => Promise<Record<string, A>>;
 
+export const join: (
+  (separator: string, iterator: Iterable<string>) => string
+) & (
+  (separator: string) => (iterator: Iterable<string>) => string
+);
+
+export const asyncJoin: (
+  (separator: string, iterator: Iterable<string> | AsyncIterable<string>) => Promise<string>
+) & (
+  (separator: string) => (iterator: Iterable<string> | AsyncIterable<string>) => Promise<string>
+);
+
 // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
 export const pipe: <A>(iterator: Iterable<any> | AsyncIterable<any>, ...fns: Function[]) => A;

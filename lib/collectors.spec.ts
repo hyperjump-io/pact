@@ -3,7 +3,9 @@ import {
   collectArray, asyncCollectArray,
   collectSet, asyncCollectSet,
   collectMap, asyncCollectMap,
-  collectObject, asyncCollectObject
+  collectObject, asyncCollectObject,
+  join, asyncJoin,
+  empty
 } from "./index.js";
 
 
@@ -140,5 +142,59 @@ describe("asyncCollectObject", () => {
   it("collect", async () => {
     const result = await asyncCollectObject(subject);
     expect(result).to.eql({ "foo": 1, "bar": 2, "baz": 3 });
+  });
+});
+
+describe("join", () => {
+  it("empty", () => {
+    const result = join(",", empty());
+    expect(result).to.equal("");
+  });
+
+  it("one item", () => {
+    const subject = (function* () {
+      yield "foo";
+    }());
+
+    const result = join(",", subject);
+    expect(result).to.equal("foo");
+  });
+
+  it("multiple items", () => {
+    const subject = (function* () {
+      yield "foo";
+      yield "bar";
+      yield "baz";
+    }());
+
+    const result = join(",", subject);
+    expect(result).to.equal("foo,bar,baz");
+  });
+});
+
+describe("asyncJoin", () => {
+  it("empty", async () => {
+    const result = await asyncJoin(",", empty());
+    expect(result).to.equal("");
+  });
+
+  it("one item", async () => {
+    const subject = (async function* () {
+      yield "foo";
+    }());
+
+    const result = await asyncJoin(",", subject);
+    expect(result).to.equal("foo");
+  });
+
+  it("multiple items", async () => {
+    const subject = (async function* () {
+      yield "foo";
+      yield "bar";
+      yield "baz";
+    }());
+
+    const result = await asyncJoin(",", subject);
+    expect(result).to.equal("foo,bar,baz");
   });
 });

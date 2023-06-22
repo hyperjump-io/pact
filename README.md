@@ -175,6 +175,13 @@ console.log(result);
 * **asyncCollectObject**: (iterator: AsyncIterable) => Promise<Object>;
 
     Same as `collectObject`, but works with promises.
+* **join**: (separator: string, iterator: Iterable) => string;
+
+    Collect all the items in the iterator into a string separated by the
+    separator token.
+* **asyncJoin**: (separator: string, iterator: AsyncIterable) => Promise<string>;
+
+    Same as `join`, but works with promises.
 * **pipe**: (iterator: Iterable | AsyncIterable, ...fns: Function) => any;
 
     Starting with an iterator, apply any number of functions to transform the
