@@ -82,7 +82,7 @@ export const asyncTake: (
 );
 
 export const head: <A>(iterator: Iterable<A>) => A | undefined;
-export const asyncHead: <A>(iterator: Iterable<A> | AsyncIterable<A>) => Promise<A | undefined>;
+export const asyncHead: <A>(iterator: AsyncIterable<A>) => Promise<A | undefined>;
 
 export const range: (from: number, to?: number) => Generator<number>;
 

@@ -17,66 +17,84 @@ import type { NestedIterable, NestedAsyncIterable } from "./index.js";
 
 
 describe("map", () => {
-  let subject: Iterable<number>;
+  let generator: Generator<number>;
+  let array: number[];
 
   beforeEach(() => {
-    subject = (function* () {
+    generator = (function* () {
       yield 1;
       yield 2;
       yield 3;
     }());
+
+    array = [1, 2, 3];
   });
 
-  it("uncurried", () => {
-    const result = map((n) => n * 2, subject);
+  it("generator", () => {
+    const result = map((n) => n * 2, generator);
     expect([...result]).to.eql([2, 4, 6]);
   });
 
-  it("curried", () => {
+  it("generator curried", () => {
     const double = map((n: number) => n * 2);
-    const result = double(subject);
+    const result = double(generator);
+    expect([...result]).to.eql([2, 4, 6]);
+  });
+
+  it("array", () => {
+    const result = map((n) => n * 2, array);
     expect([...result]).to.eql([2, 4, 6]);
   });
 });
 
 describe("asyncMap", () => {
-  let subject: AsyncGenerator<number>;
+  let generator: Generator<number>;
+  let asyncGenerator: AsyncGenerator<number>;
+  let array: number[];
 
-  describe("currying", () => {
-    beforeEach(() => {
-      subject = (async function* () {
-        yield 1;
-        yield 2;
-        yield 3;
-      }());
-    });
-
-    it("uncurried", async () => {
-      const result = asyncMap((n) => n * 2, subject);
-      expect((await result.next()).value).to.equal(2);
-      expect((await result.next()).value).to.equal(4);
-      expect((await result.next()).value).to.equal(6);
-      expect((await result.next()).done).to.equal(true);
-    });
-
-    it("curried", async () => {
-      const double = asyncMap((n: number) => n * 2);
-      const result = double(subject);
-      expect((await result.next()).value).to.equal(2);
-      expect((await result.next()).value).to.equal(4);
-      expect((await result.next()).value).to.equal(6);
-      expect((await result.next()).done).to.equal(true);
-    });
-  });
-
-  it("synchronous iterator with async mapper", async () => {
-    const subject = (function* () {
+  beforeEach(() => {
+    generator = (function* () {
       yield 1;
       yield 2;
       yield 3;
     }());
 
-    const result = asyncMap(async (n) => n * 2, subject);
+    asyncGenerator = (async function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+
+    array = [1, 2, 3];
+  });
+
+  it("generator with async mapper", async () => {
+    const result = asyncMap(async (n) => n * 2, generator);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).value).to.equal(4);
+    expect((await result.next()).value).to.equal(6);
+    expect((await result.next()).done).to.equal(true);
+  });
+
+  it("async-generator with sync mapper", async () => {
+    const result = asyncMap((n) => n * 2, asyncGenerator);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).value).to.equal(4);
+    expect((await result.next()).value).to.equal(6);
+    expect((await result.next()).done).to.equal(true);
+  });
+
+  it("async-generator with sync mapper curried", async () => {
+    const double = asyncMap((n: number) => n * 2);
+    const result = double(asyncGenerator);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).value).to.equal(4);
+    expect((await result.next()).value).to.equal(6);
+    expect((await result.next()).done).to.equal(true);
+  });
+
+  it("array with async mapper", async () => {
+    const result = asyncMap(async (n) => n * 2, array);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(4);
     expect((await result.next()).value).to.equal(6);
@@ -85,226 +103,258 @@ describe("asyncMap", () => {
 });
 
 describe("tap", () => {
-  let subject: Iterable<number>;
+  let generator: Generator<number>;
+  let array: number[];
 
   beforeEach(() => {
-    subject = (function* () {
+    generator = (function* () {
       yield 1;
       yield 2;
       yield 3;
     }());
+
+    array = [1, 2, 3];
   });
 
-  it("uncurried", () => {
+  it("generator", () => {
     let count = 0;
     const result = tap(() => {
       count++;
-    }, subject);
+    }, generator);
     expect([...result]).to.eql([1, 2, 3]);
     expect(count).to.equal(3);
   });
 
-  it("curried", () => {
+  it("generator curried", () => {
     let count = 0;
     const double = tap(() => {
       count++;
     });
-    const result = double(subject);
+    const result = double(generator);
+    expect([...result]).to.eql([1, 2, 3]);
+    expect(count).to.equal(3);
+  });
+
+  it("array", () => {
+    let count = 0;
+    const result = tap(() => {
+      count++;
+    }, array);
     expect([...result]).to.eql([1, 2, 3]);
     expect(count).to.equal(3);
   });
 });
 
 describe("asyncTap", () => {
-  describe("currying", () => {
-    let subject: AsyncGenerator<number>;
-
-    beforeEach(() => {
-      subject = (async function* () {
-        yield 1;
-        yield 2;
-        yield 3;
-      }());
-    });
-
-    it("uncurried", async () => {
-      let count = 0;
-      const result = asyncTap(() => {
-        count++;
-      }, subject);
-
-      expect((await result.next()).value).to.equal(1);
-      expect((await result.next()).value).to.equal(2);
-      expect((await result.next()).value).to.equal(3);
-      expect((await result.next()).done).to.equal(true);
-      expect(count).to.equal(3);
-    });
-
-    it("curried", async () => {
-      let count = 0;
-      const tapped = asyncTap(() => {
-        count++;
-      });
-
-      const result = tapped(subject);
-      expect((await result.next()).value).to.equal(1);
-      expect((await result.next()).value).to.equal(2);
-      expect((await result.next()).value).to.equal(3);
-      expect((await result.next()).done).to.equal(true);
-      expect(count).to.equal(3);
-    });
-  });
-});
-
-describe("filter", () => {
-  let subject: Iterable<number>;
+  let asyncGenerator: AsyncGenerator<number>;
 
   beforeEach(() => {
-    subject = (function* () {
+    asyncGenerator = (async function* () {
       yield 1;
       yield 2;
       yield 3;
     }());
   });
 
-  it("uncurried", () => {
-    const result = filter((n) => n > 2, subject);
+  it("async-generator", async () => {
+    let count = 0;
+    const result = asyncTap(() => {
+      count++;
+    }, asyncGenerator);
+
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).done).to.equal(true);
+    expect(count).to.equal(3);
+  });
+
+  it("async-generator curried", async () => {
+    let count = 0;
+    const tapped = asyncTap(() => {
+      count++;
+    });
+
+    const result = tapped(asyncGenerator);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).done).to.equal(true);
+    expect(count).to.equal(3);
+  });
+});
+
+describe("filter", () => {
+  let generator: Generator<number>;
+  let array: number[];
+
+  beforeEach(() => {
+    generator = (function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+
+    array = [1, 2, 3];
+  });
+
+  it("generator", () => {
+    const result = filter((n) => n > 2, generator);
     expect([...result]).to.eql([3]);
   });
 
-  it("curried", () => {
+  it("generator curried", () => {
     const greaterThanTwo = filter((n: number) => n > 2);
-    const result = greaterThanTwo(subject);
+    const result = greaterThanTwo(generator);
+    expect([...result]).to.eql([3]);
+  });
+
+  it("array", () => {
+    const result = filter((n) => n > 2, array);
     expect([...result]).to.eql([3]);
   });
 });
 
 describe("asyncFilter", () => {
-  describe("currying", () => {
-    let subject: AsyncGenerator<number>;
+  let generator: Generator<number>;
+  let asyncGenerator: AsyncGenerator<number>;
+  let array: number[];
 
-    beforeEach(() => {
-      subject = (async function* () {
-        yield 1;
-        yield 2;
-        yield 3;
-      }());
-    });
-
-    it("uncurried", async () => {
-      const result = asyncFilter((n) => n > 2, subject);
-      expect((await result.next()).value).to.equal(3);
-      expect((await result.next()).done).to.equal(true);
-    });
-
-    it("curried", async () => {
-      const greaterThanTwo = asyncFilter((n: number) => n > 2);
-      const result = greaterThanTwo(subject);
-      expect((await result.next()).value).to.equal(3);
-      expect((await result.next()).done).to.equal(true);
-    });
-  });
-
-  it("synchronous iterable with async predicate", async () => {
-    const subject = (function* () {
+  beforeEach(() => {
+    generator = (function* () {
       yield 1;
       yield 2;
       yield 3;
     }());
 
-    const result = asyncFilter(async (n) => n > 2, subject);
+    asyncGenerator = (async function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+
+    array = [1, 2, 3];
+  });
+
+  it("async-generator with sync predicate", async () => {
+    const result = asyncFilter((n) => n > 2, asyncGenerator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 
-  it("asynchronous iterable with async predicate", async () => {
-    const subject = (async function* () {
-      yield 1;
-      yield 2;
-      yield 3;
-    }());
+  it("async-generator with sync predicate curried", async () => {
+    const greaterThanTwo = asyncFilter((n: number) => n > 2);
+    const result = greaterThanTwo(asyncGenerator);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).done).to.equal(true);
+  });
 
-    const result = asyncFilter(async (n) => n > 2, subject);
+  it("generator with async predicate", async () => {
+    const result = asyncFilter(async (n) => n > 2, generator);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).done).to.equal(true);
+  });
+
+  it("async-generator with async predicate", async () => {
+    const result = asyncFilter(async (n) => n > 2, asyncGenerator);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).done).to.equal(true);
+  });
+
+  it("array with async predicate", async () => {
+    const result = asyncFilter(async (n) => n > 2, array);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 });
 
 describe("scan", () => {
-  let subject: Iterable<number>;
+  let generator: Generator<number>;
+  let array: number[];
 
   beforeEach(() => {
-    subject = (function* () {
+    generator = (function* () {
       yield 1;
       yield 2;
       yield 3;
     }());
+
+    array = [1, 2, 3];
   });
 
-  it("uncurried", () => {
-    const result = scan((acc, n) => acc + n, 0, subject);
+  it("generator", () => {
+    const result = scan((acc, n) => acc + n, 0, generator);
     expect([...result]).to.eql([1, 3, 6]);
   });
 
-  it("curried", () => {
+  it("generator curried", () => {
     const sum = scan((acc, n: number) => acc + n, 0);
-    const result = sum(subject);
+    const result = sum(generator);
+    expect([...result]).to.eql([1, 3, 6]);
+  });
+
+  it("array", () => {
+    const result = scan((acc, n) => acc + n, 0, array);
     expect([...result]).to.eql([1, 3, 6]);
   });
 });
 
 describe("asyncScan", () => {
-  describe("currying", () => {
-    let subject: AsyncGenerator<number>;
+  let generator: Generator<number>;
+  let asyncGenerator: AsyncGenerator<number>;
+  let array: number[];
 
-    beforeEach(() => {
-      subject = (async function* () {
-        yield 1;
-        yield 2;
-        yield 3;
-      }());
-    });
-
-    it("uncurried", async () => {
-      const result = asyncScan((acc, n) => acc + n, 0, subject);
-      expect((await result.next()).value).to.equal(1);
-      expect((await result.next()).value).to.equal(3);
-      expect((await result.next()).value).to.equal(6);
-      expect((await result.next()).done).to.equal(true);
-    });
-
-    it("curried", async () => {
-      const sum = asyncScan((acc, n: number) => acc + n, 0);
-      const result = sum(subject);
-      expect((await result.next()).value).to.equal(1);
-      expect((await result.next()).value).to.equal(3);
-      expect((await result.next()).value).to.equal(6);
-      expect((await result.next()).done).to.equal(true);
-    });
-  });
-
-  it("synchronous iterable with asynchronous reducer", async () => {
-    const subject = (function* () {
+  beforeEach(() => {
+    generator = (function* () {
       yield 1;
       yield 2;
       yield 3;
     }());
 
-    const result = asyncScan(async (acc, n) => acc + n, 0, subject);
+    asyncGenerator = (async function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+
+    array = [1, 2, 3];
+  });
+
+  it("async-generator with sync reducer", async () => {
+    const result = asyncScan((acc, n) => acc + n, 0, asyncGenerator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).value).to.equal(6);
     expect((await result.next()).done).to.equal(true);
   });
 
-  it("asynchronous iterable with asynchronous reducer", async () => {
-    const subject = (async function* () {
-      yield 1;
-      yield 2;
-      yield 3;
-    }());
+  it("async-generator with sync reducer curried", async () => {
+    const sum = asyncScan((acc, n: number) => acc + n, 0);
+    const result = sum(asyncGenerator);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).value).to.equal(6);
+    expect((await result.next()).done).to.equal(true);
+  });
 
-    const result = asyncScan(async (acc, n) => acc + n, 0, subject);
+  it("generator with async reducer", async () => {
+    const result = asyncScan(async (acc, n) => acc + n, 0, generator);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).value).to.equal(6);
+    expect((await result.next()).done).to.equal(true);
+  });
+
+  it("async-generator with async reducer", async () => {
+    const result = asyncScan(async (acc, n) => acc + n, 0, asyncGenerator);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).value).to.equal(6);
+    expect((await result.next()).done).to.equal(true);
+  });
+
+  it("array with async reducer", async () => {
+    const result = asyncScan(async (acc, n) => acc + n, 0, array);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).value).to.equal(6);
@@ -433,119 +483,135 @@ describe("asyncFlatten", () => {
 });
 
 describe("drop", () => {
-  let subject: Iterable<number>;
+  let generator: Generator<number>;
+  let array: number[];
 
   beforeEach(() => {
-    subject = (function* () {
+    generator = (function* () {
       yield 1;
       yield 2;
       yield 3;
     }());
+
+    array = [1, 2, 3];
   });
 
-  it("uncurried", () => {
-    const result = drop(2, subject);
+  it("generator", () => {
+    const result = drop(2, generator);
     expect([...result]).to.eql([3]);
   });
 
-  it("curried", () => {
+  it("generator curried", () => {
     const dropTwo = drop(2);
-    const result = dropTwo(subject);
+    const result = dropTwo(generator);
+    expect([...result]).to.eql([3]);
+  });
+
+  it("array", () => {
+    const result = drop(2, array);
     expect([...result]).to.eql([3]);
   });
 });
 
 describe("asyncDrop", () => {
-  let subject: AsyncGenerator<number>;
+  let asyncGenerator: AsyncGenerator<number>;
 
   beforeEach(() => {
-    subject = (async function* () {
+    asyncGenerator = (async function* () {
       yield 1;
       yield 2;
       yield 3;
     }());
   });
 
-  it("uncurried", async () => {
-    const result = asyncDrop(2, subject);
+  it("async-generator", async () => {
+    const result = asyncDrop(2, asyncGenerator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 
-  it("curried", async () => {
+  it("async-generator curried", async () => {
     const dropTwo = asyncDrop(2);
-    const result = dropTwo(subject);
+    const result = dropTwo(asyncGenerator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 });
 
 describe("take", () => {
-  let subject: Iterable<number>;
+  let generator: Generator<number>;
+  let array: number[];
 
   beforeEach(() => {
-    subject = (function* () {
+    generator = (function* () {
       yield 1;
       yield 2;
       yield 3;
     }());
+
+    array = [1, 2, 3];
   });
 
-  it("uncurried", () => {
-    const result = take(2, subject);
+  it("generator", () => {
+    const result = take(2, generator);
     expect([...result]).to.eql([1, 2]);
-    expect([...subject]).to.eql([3]);
+    expect([...generator]).to.eql([3]);
   });
 
-  it("curried", () => {
+  it("generator curried", () => {
     const takeTwo = take(2);
-    const result = takeTwo(subject);
+    const result = takeTwo(generator);
     expect([...result]).to.eql([1, 2]);
-    expect([...subject]).to.eql([3]);
+    expect([...generator]).to.eql([3]);
+  });
+
+  it("array", () => {
+    const result = take(2, generator);
+    expect([...result]).to.eql([1, 2]);
   });
 
   it("take more than is available", () => {
-    const result = take(10, subject);
+    const result = take(10, generator);
     expect([...result]).to.eql([1, 2, 3]);
   });
 });
 
 describe("asyncTake", () => {
-  let subject: AsyncGenerator<number>;
+  let asyncGenerator: AsyncGenerator<number>;
 
   beforeEach(() => {
-    subject = (async function* () {
+    asyncGenerator = (async function* () {
       yield 1;
       yield 2;
       yield 3;
     }());
   });
 
-  it("uncurried", async () => {
-    const result = asyncTake(2, subject);
+  it("async-generator", async () => {
+    const result = asyncTake(2, asyncGenerator);
 
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).done).to.equal(true);
 
-    expect((await subject.next()).value).to.equal(3);
-    expect((await subject.next()).done).to.equal(true);
+    expect((await asyncGenerator.next()).value).to.equal(3);
+    expect((await asyncGenerator.next()).done).to.equal(true);
   });
 
-  it("curried", async () => {
+  it("async-generator curried", async () => {
     const takeTwo = asyncTake(2);
-    const result = takeTwo(subject);
+    const result = takeTwo(asyncGenerator);
 
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).done).to.equal(true);
 
-    expect((await subject.next()).value).to.equal(3);
-    expect((await subject.next()).done).to.equal(true);
+    expect((await asyncGenerator.next()).value).to.equal(3);
+    expect((await asyncGenerator.next()).done).to.equal(true);
   });
 
   it("take more than is available", async () => {
-    const result = asyncTake(10, subject);
+    const result = asyncTake(10, asyncGenerator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(3);
@@ -554,23 +620,30 @@ describe("asyncTake", () => {
 });
 
 describe("head", () => {
-  let subject: Iterable<number>;
+  let generator: Generator<number>;
+  let array: number[];
 
   beforeEach(() => {
-    subject = (function* () {
+    generator = (function* () {
       yield 1;
       yield 2;
       yield 3;
     }());
+
+    array = [1, 2, 3];
   });
 
-  it("empty iterator", () => {
+  it("empty generator", () => {
     expect(head(empty())).to.eql(undefined);
   });
 
-  it("non-empty iterator", () => {
-    expect(head(subject)).to.eql(1);
-    expect([...subject]).to.eql([2, 3]);
+  it("generator", () => {
+    expect(head(generator)).to.eql(1);
+    expect([...generator]).to.eql([2, 3]);
+  });
+
+  it("array", () => {
+    expect(head(array)).to.eql(1);
   });
 });
 
@@ -585,11 +658,11 @@ describe("asyncHead", () => {
     }());
   });
 
-  it("empty iterator", async () => {
-    expect(await asyncHead(empty())).to.eql(undefined);
+  it("empty async-generator", async () => {
+    expect(await asyncHead(asyncEmpty())).to.eql(undefined);
   });
 
-  it("non-empty iterator", async () => {
+  it("non-empty async-generator", async () => {
     expect(await asyncHead(subject)).to.eql(1);
     expect((await subject.next()).value).to.equal(2);
     expect((await subject.next()).value).to.equal(3);
