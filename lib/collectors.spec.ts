@@ -5,7 +5,7 @@ import {
   collectMap, asyncCollectMap,
   collectObject, asyncCollectObject,
   join, asyncJoin,
-  empty
+  empty, asyncEmpty
 } from "./index.js";
 
 
@@ -174,7 +174,7 @@ describe("join", () => {
 
 describe("asyncJoin", () => {
   it("empty", async () => {
-    const result = await asyncJoin(",", empty());
+    const result = await asyncJoin(",", asyncEmpty());
     expect(result).to.equal("");
   });
 

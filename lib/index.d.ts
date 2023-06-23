@@ -6,9 +6,9 @@ export const map: (
 export type Mapper<A, B> = (item: A) => B;
 
 export const asyncMap: (
-  <A, B>(fn: AsyncMapper<A, B>, iterator: AsyncIterable<A>) => AsyncGenerator<B>
+  <A, B>(fn: AsyncMapper<A, B>, iterator: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<B>
 ) & (
-  <A, B>(fn: AsyncMapper<A, B>) => (iterator: AsyncIterable<A>) => AsyncGenerator<B>
+  <A, B>(fn: AsyncMapper<A, B>) => (iterator: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<B>
 );
 export type AsyncMapper<A, B> = (item: A) => Promise<B> | B;
 
@@ -17,14 +17,13 @@ export const tap: (
 ) & (
   <A>(fn: Tapper<A>) => (iterator: Iterable<A>) => Generator<A>
 );
-export type Tapper<A> = (item: A) => void;
+export type Tapper<A> = (item: A) => void | Promise<void>;
 
 export const asyncTap: (
-  <A>(fn: AsyncTapper<A>, iterator: AsyncIterable<A>) => AsyncGenerator<A>
+  <A>(fn: Tapper<A>, iterator: AsyncIterable<A>) => AsyncGenerator<A>
 ) & (
-  <A>(fn: AsyncTapper<A>) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
+  <A>(fn: Tapper<A>) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
 );
-export type AsyncTapper<A> = (item: A) => void;
 
 export const filter: (
   <A>(fn: Predicate<A>, iterator: Iterable<A>) => Generator<A>
@@ -34,9 +33,9 @@ export const filter: (
 export type Predicate<A> = (item: A) => boolean;
 
 export const asyncFilter: (
-  <A>(fn: AsyncPredicate<A>, iterator: AsyncIterable<A>) => AsyncGenerator<A>
+  <A>(fn: AsyncPredicate<A>, iterator: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<A>
 ) & (
-  <A>(fn: AsyncPredicate<A>) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
+  <A>(fn: AsyncPredicate<A>) => (iterator: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<A>
 );
 export type AsyncPredicate<A> = (item: A) => Promise<boolean> | boolean;
 
@@ -47,9 +46,9 @@ export const scan: (
 );
 
 export const asyncScan: (
-  <A, B>(fn: AsyncReducer<A, B>, acc: B, iter: AsyncIterable<A>) => AsyncGenerator<B>
+  <A, B>(fn: AsyncReducer<A, B>, acc: B, iter: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<B>
 ) & (
-  <A, B>(fn: AsyncReducer<A, B>, acc: B) => (iter: AsyncIterable<A>) => AsyncGenerator<B>
+  <A, B>(fn: AsyncReducer<A, B>, acc: B) => (iter: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<B>
 );
 
 export const flatten: <A>(iterator: NestedIterable<A>, depth?: number) => Generator<A | NestedIterable<A>>;
@@ -88,6 +87,7 @@ export const asyncHead: <A>(iterator: Iterable<A> | AsyncIterable<A>) => Promise
 export const range: (from: number, to?: number) => Generator<number>;
 
 export const empty: <A>() => Generator<A>;
+export const asyncEmpty: <A>() => AsyncGenerator<A>;
 
 export const zip: <A, B>(iter1: Iterable<A>, iter2: Iterable<B>) => Generator<[A, B]>;
 export const asyncZip: <A, B>(iter1: AsyncIterable<A>, iter2: AsyncIterable<B>) => AsyncGenerator<[A, B]>;
@@ -103,9 +103,9 @@ export const reduce: (
 export type Reducer<A, B> = (acc: B, item: A) => B;
 
 export const asyncReduce: (
-  <A, B>(fn: AsyncReducer<A, B>, acc: B, iter: AsyncIterable<A>) => Promise<B>
+  <A, B>(fn: AsyncReducer<A, B>, acc: B, iter: Iterable<A> | AsyncIterable<A>) => Promise<B>
 ) & (
-  <A, B>(fn: AsyncReducer<A, B>, acc: B) => (iter: AsyncIterable<A>) => Promise<B>
+  <A, B>(fn: AsyncReducer<A, B>, acc: B) => (iter: Iterable<A> | AsyncIterable<A>) => Promise<B>
 );
 export type AsyncReducer<A, B> = (acc: B, item: A) => Promise<B> | B;
 
@@ -116,9 +116,9 @@ export const every: (
 );
 
 export const asyncEvery: (
-  <A>(fn: AsyncPredicate<A>, iterator: AsyncIterable<A>) => Promise<boolean>
+  <A>(fn: AsyncPredicate<A>, iterator: Iterable<A> | AsyncIterable<A>) => Promise<boolean>
 ) & (
-  <A>(fn: AsyncPredicate<A>) => (iterator: AsyncIterable<A>) => Promise<boolean>
+  <A>(fn: AsyncPredicate<A>) => (iterator: Iterable<A> | AsyncIterable<A>) => Promise<boolean>
 );
 
 export const some: (
@@ -128,9 +128,9 @@ export const some: (
 );
 
 export const asyncSome: (
-  <A>(fn: AsyncPredicate<A>, iterator: AsyncIterable<A>) => Promise<boolean>
+  <A>(fn: AsyncPredicate<A>, iterator: Iterable<A> | AsyncIterable<A>) => Promise<boolean>
 ) & (
-  <A>(fn: AsyncPredicate<A>) => (iterator: AsyncIterable<A>) => Promise<boolean>
+  <A>(fn: AsyncPredicate<A>) => (iterator: Iterable<A> | AsyncIterable<A>) => Promise<boolean>
 );
 
 export const count: <A>(iterator: Iterable<A>) => number;
@@ -155,9 +155,9 @@ export const join: (
 );
 
 export const asyncJoin: (
-  (separator: string, iterator: Iterable<string> | AsyncIterable<string>) => Promise<string>
+  (separator: string, iterator: AsyncIterable<string>) => Promise<string>
 ) & (
-  (separator: string) => (iterator: Iterable<string> | AsyncIterable<string>) => Promise<string>
+  (separator: string) => (iterator: AsyncIterable<string>) => Promise<string>
 );
 
 // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
