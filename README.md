@@ -93,12 +93,27 @@ console.log(result);
 * **asyncDrop**: (n: number, iterator: AsyncIterable) => AsyncGenerator
 
     Same as `drop`, but works with AsyncGenerators.
+* **dropWhile**: (fn: Function, iterator: Iterable) => Generator
+
+    Same as `drop` but instead of dropping a specific number of values, it drops
+    values until the `fn(value)` is `false` and then yields the remaining
+    values.
+* **asyncDropWhile**: (fn: Function, iterator: AsyncIterable) => AsyncGenerator
+
+    Same as `dropWhile`, but works with AsyncGenerators.
 * **take**: (n: number, iterator: Iterable) => Generator
 
     Yields the first `n` values in the iterator.
 * **asyncTake**: (n: number, iterator: AsyncIterable) => AsyncGenerator
 
     Same as `take`, but works with AsyncGenerators.
+* **takeWhile**: (fn: Function, iterator: Iterable) => Generator
+
+    Same as `take` but instead of yielding a specific number of values, it
+    yields values as long as the `fn(value)` returns `true` and drops the rest.
+* **asyncTakeWhile**: (fn: Function, iterator: AsyncIterable) => AsyncGenerator
+
+    Same as `takeWhile`, but works with AsyncGenerators.
 * **head**: (iterator: Iterable) => A
 
     Returns the first value in the iterator.
@@ -152,6 +167,13 @@ console.log(result);
 * **asyncSome**: (fn: Function, iterator: AsyncIterable) => Promise<boolean>
 
     Same as `some`, but works with AsyncGenerators and async predicate
+    functions.
+* **find**: (fn: Function, iterator: Iterable) => any
+
+    Returns the first value that passes the predicate function.
+* **asyncFind**: (fn: Function, iterator: AsyncIterable) => Promise<any>
+
+    Same as `find`, but works with AsyncGenerators and async predicate
     functions.
 * **count**: (iterator: Iterable) => number
 
