@@ -69,6 +69,18 @@ export const asyncDrop: (
   <A>(count: number) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
 );
 
+export const dropWhile: (
+  <A>(fn: Predicate<A>, iterator: Iterable<A>) => Generator<A>
+) & (
+  <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => Generator<A>
+);
+
+export const asyncDropWhile: (
+  <A>(fn: AsyncPredicate<A>, iterator: AsyncIterable<A>) => AsyncGenerator<A>
+) & (
+  <A>(fn: AsyncPredicate<A>) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
+);
+
 export const take: (
   <A>(count: number, iterator: Iterable<A>) => Generator<A>
 ) & (
@@ -79,6 +91,18 @@ export const asyncTake: (
   <A>(count: number, iterator: AsyncIterable<A>) => AsyncGenerator<A>
 ) & (
   <A>(count: number) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
+);
+
+export const takeWhile: (
+  <A>(fn: Predicate<A>, iterator: Iterable<A>) => Generator<A>
+) & (
+  <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => Generator<A>
+);
+
+export const asyncTakeWhile: (
+  <A>(fn: AsyncPredicate<A>, iterator: AsyncIterable<A>) => AsyncGenerator<A>
+) & (
+  <A>(fn: AsyncPredicate<A>) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
 );
 
 export const head: <A>(iterator: Iterable<A>) => A | undefined;

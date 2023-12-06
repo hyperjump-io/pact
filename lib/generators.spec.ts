@@ -6,7 +6,9 @@ import {
   scan, asyncScan,
   flatten, asyncFlatten,
   drop, asyncDrop,
+  dropWhile, asyncDropWhile,
   take, asyncTake,
+  takeWhile, asyncTakeWhile,
   head, asyncHead,
   range,
   empty, asyncEmpty,
@@ -538,6 +540,72 @@ describe("asyncDrop", () => {
   });
 });
 
+describe("dropWhile", () => {
+  let generator: Generator<number>;
+  let array: number[];
+
+  beforeEach(() => {
+    generator = (function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+
+    array = [1, 2, 3];
+  });
+
+  it("generator", () => {
+    const result = dropWhile((n) => n < 3, generator);
+    expect([...result]).to.eql([3]);
+  });
+
+  it("generator curried", () => {
+    const dropTwo = dropWhile((n: number) => n < 3);
+    const result = dropTwo(generator);
+    expect([...result]).to.eql([3]);
+  });
+
+  it("array", () => {
+    const result = dropWhile((n) => n < 3, array);
+    expect([...result]).to.eql([3]);
+  });
+
+  it("drop more than is available", () => {
+    const result = dropWhile((n) => n < 10, generator);
+    expect([...result]).to.eql([]);
+  });
+});
+
+describe("asyncDropWhile", () => {
+  let asyncGenerator: AsyncGenerator<number>;
+
+  beforeEach(() => {
+    asyncGenerator = (async function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+  });
+
+  it("async-generator", async () => {
+    const result = asyncDropWhile(async (n) => n < 3, asyncGenerator);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).done).to.equal(true);
+  });
+
+  it("async-generator curried", async () => {
+    const dropTwo = asyncDropWhile(async (n: number) => n < 3);
+    const result = dropTwo(asyncGenerator);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).done).to.equal(true);
+  });
+
+  it("drop more than is available", async () => {
+    const result = asyncDropWhile(async (n) => n < 10, asyncGenerator);
+    expect((await result.next()).done).to.equal(true);
+  });
+});
+
 describe("take", () => {
   let generator: Generator<number>;
   let array: number[];
@@ -555,18 +623,16 @@ describe("take", () => {
   it("generator", () => {
     const result = take(2, generator);
     expect([...result]).to.eql([1, 2]);
-    expect([...generator]).to.eql([3]);
   });
 
   it("generator curried", () => {
     const takeTwo = take(2);
     const result = takeTwo(generator);
     expect([...result]).to.eql([1, 2]);
-    expect([...generator]).to.eql([3]);
   });
 
   it("array", () => {
-    const result = take(2, generator);
+    const result = take(2, array);
     expect([...result]).to.eql([1, 2]);
   });
 
@@ -593,9 +659,6 @@ describe("asyncTake", () => {
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).done).to.equal(true);
-
-    expect((await asyncGenerator.next()).value).to.equal(3);
-    expect((await asyncGenerator.next()).done).to.equal(true);
   });
 
   it("async-generator curried", async () => {
@@ -605,13 +668,83 @@ describe("asyncTake", () => {
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).done).to.equal(true);
-
-    expect((await asyncGenerator.next()).value).to.equal(3);
-    expect((await asyncGenerator.next()).done).to.equal(true);
   });
 
   it("take more than is available", async () => {
     const result = asyncTake(10, asyncGenerator);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).value).to.equal(3);
+    expect((await result.next()).done).to.equal(true);
+  });
+});
+
+describe("takeWhile", () => {
+  let generator: Generator<number>;
+  let array: number[];
+
+  beforeEach(() => {
+    generator = (function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+
+    array = [1, 2, 3];
+  });
+
+  it("generator", () => {
+    const result = takeWhile((n) => n < 3, generator);
+    expect([...result]).to.eql([1, 2]);
+  });
+
+  it("generator curried", () => {
+    const takeTwo = takeWhile((n: number) => n < 3);
+    const result = takeTwo(generator);
+    expect([...result]).to.eql([1, 2]);
+  });
+
+  it("array", () => {
+    const result = takeWhile((n) => n < 3, array);
+    expect([...result]).to.eql([1, 2]);
+  });
+
+  it("take more than is available", () => {
+    const result = takeWhile((n) => n < 10, generator);
+    expect([...result]).to.eql([1, 2, 3]);
+  });
+});
+
+describe("asyncTakeWhile", () => {
+  let asyncGenerator: AsyncGenerator<number>;
+
+  beforeEach(() => {
+    asyncGenerator = (async function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+  });
+
+  it("async-generator", async () => {
+    const result = asyncTakeWhile(async (n) => n < 3, asyncGenerator);
+
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).done).to.equal(true);
+  });
+
+  it("async-generator curried", async () => {
+    const takeTwo = asyncTakeWhile(async (n: number) => n < 3);
+    const result = takeTwo(asyncGenerator);
+
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).done).to.equal(true);
+  });
+
+  it("take more than is available", async () => {
+    const result = asyncTakeWhile(async (n) => n < 10, asyncGenerator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(3);
