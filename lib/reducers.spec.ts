@@ -3,6 +3,7 @@ import {
   reduce, asyncReduce,
   every, asyncEvery,
   some, asyncSome,
+  find, asyncFind,
   count, asyncCount
 } from "./index.js";
 
@@ -356,6 +357,143 @@ describe("asyncSome", () => {
     it("negative", async () => {
       const result = await asyncSome(async (n) => n > 5, array);
       expect(result).to.eql(false);
+    });
+  });
+});
+
+describe("find", () => {
+  let generator: Generator<number>;
+  let array: number[];
+
+  beforeEach(() => {
+    generator = (function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+
+    array = [1, 2, 3];
+  });
+
+  describe("generator", () => {
+    it("positive", () => {
+      const result = find((n) => n > 2, generator);
+      expect(result).to.equal(3);
+    });
+
+    it("negative", () => {
+      const result = find((n) => n > 5, generator);
+      expect(result).to.equal(undefined);
+    });
+  });
+
+  describe("generator curried", () => {
+    it("positive", () => {
+      const someGreaterThanTwo = find((n: number) => n > 2);
+      const result = someGreaterThanTwo(generator);
+      expect(result).to.equal(3);
+    });
+
+    it("negative", () => {
+      const someGreaterThanFive = find((n: number) => n > 5);
+      const result = someGreaterThanFive(generator);
+      expect(result).to.equal(undefined);
+    });
+  });
+
+  describe("array", () => {
+    it("positive", () => {
+      const result = find((n) => n > 2, array);
+      expect(result).to.equal(3);
+    });
+
+    it("negative", () => {
+      const result = find((n) => n > 5, array);
+      expect(result).to.equal(undefined);
+    });
+  });
+});
+
+describe("asyncFind", () => {
+  let generator: Generator<number>;
+  let asyncGenerator: AsyncGenerator<number>;
+  let array: number[];
+
+  beforeEach(() => {
+    generator = (function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+
+    asyncGenerator = (async function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    }());
+
+    array = [1, 2, 3];
+  });
+
+  describe("async-generator with sync predicate", () => {
+    it("positive", async () => {
+      const result = await asyncFind((n) => n > 2, asyncGenerator);
+      expect(result).to.eql(3);
+    });
+
+    it("negative", async () => {
+      const result = await asyncFind((n) => n > 5, asyncGenerator);
+      expect(result).to.eql(undefined);
+    });
+  });
+
+  describe("async-generator with sync predicate curried", () => {
+    it("positive", async () => {
+      const someGreaterThanTwo = asyncFind((n: number) => n > 2);
+      const result = await someGreaterThanTwo(asyncGenerator);
+      expect(result).to.eql(3);
+    });
+
+    it("negative", async () => {
+      const someGreaterThanFive = asyncFind((n: number) => n > 5);
+      const result = await someGreaterThanFive(asyncGenerator);
+      expect(result).to.eql(undefined);
+    });
+  });
+
+  describe("generator with async predicate", () => {
+    it("positive", async () => {
+      const result = await asyncFind(async (n) => n > 2, generator);
+      expect(result).to.equal(3);
+    });
+
+    it("negative", async () => {
+      const result = await asyncFind(async (n) => n > 5, generator);
+      expect(result).to.eql(undefined);
+    });
+  });
+
+  describe("async-generator with async predicate", () => {
+    it("positive", async () => {
+      const result = await asyncFind(async (n) => n > 2, asyncGenerator);
+      expect(result).to.eql(3);
+    });
+
+    it("negative", async () => {
+      const result = await asyncFind(async (n) => n > 5, asyncGenerator);
+      expect(result).to.eql(undefined);
+    });
+  });
+
+  describe("array with async predicate", () => {
+    it("positive", async () => {
+      const result = await asyncFind(async (n) => n > 2, array);
+      expect(result).to.equal(3);
+    });
+
+    it("negative", async () => {
+      const result = await asyncFind(async (n) => n > 5, array);
+      expect(result).to.eql(undefined);
     });
   });
 });

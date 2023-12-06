@@ -133,6 +133,18 @@ export const asyncSome: (
   <A>(fn: AsyncPredicate<A>) => (iterator: Iterable<A> | AsyncIterable<A>) => Promise<boolean>
 );
 
+export const find: (
+  <A>(fn: Predicate<A>, iterator: Iterable<A>) => A
+) & (
+  <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => A
+);
+
+export const asyncFind: (
+  <A>(fn: AsyncPredicate<A>, iterator: Iterable<A> | AsyncIterable<A>) => Promise<A>
+) & (
+  <A>(fn: AsyncPredicate<A>) => (iterator: Iterable<A> | AsyncIterable<A>) => Promise<A>
+);
+
 export const count: <A>(iterator: Iterable<A>) => number;
 export const asyncCount: <A>(iterator: AsyncIterable<A>) => Promise<number>;
 
