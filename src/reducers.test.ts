@@ -1,4 +1,4 @@
-import { expect } from "chai";
+import { beforeEach, describe, expect, test } from "vitest";
 import {
   reduce, asyncReduce,
   every, asyncEvery,
@@ -22,18 +22,18 @@ describe("reduce", () => {
     array = [1, 2, 3];
   });
 
-  it("generator", () => {
+  test("generator", () => {
     const result = reduce((acc, n) => acc + n, 0, generator);
     expect(result).to.eql(6);
   });
 
-  it("generator curried", () => {
+  test("generator curried", () => {
     const sum = reduce((acc, n: number) => acc + n, 0);
     const result = sum(generator);
     expect(result).to.eql(6);
   });
 
-  it("array", () => {
+  test("array", () => {
     const result = reduce((acc, n) => acc + n, 0, array);
     expect(result).to.eql(6);
   });
@@ -51,6 +51,7 @@ describe("asyncReduce", () => {
       yield 3;
     }());
 
+    // eslint-disable-next-line @typescript-eslint/require-await
     asyncGenerator = (async function* () {
       yield 1;
       yield 2;
@@ -60,28 +61,31 @@ describe("asyncReduce", () => {
     array = [1, 2, 3];
   });
 
-  it("async-generator with sync reducer", async () => {
+  test("async-generator with sync reducer", async () => {
     const result = await asyncReduce((acc, n) => acc + n, 0, asyncGenerator);
     expect(result).to.equal(6);
   });
 
-  it("async-generator with sync reducer curried", async () => {
+  test("async-generator with sync reducer curried", async () => {
     const sum = asyncReduce((acc, n: number) => acc + n, 0);
     const result = await sum(asyncGenerator);
     expect(result).to.equal(6);
   });
 
-  it("generator with async reducer", async () => {
+  test("generator with async reducer", async () => {
+    // eslint-disable-next-line @typescript-eslint/require-await
     const result = await asyncReduce(async (acc, n) => acc + n, 0, generator);
     expect(result).to.equal(6);
   });
 
-  it("async-generator with async reducer", async () => {
+  test("async-generator with async reducer", async () => {
+    // eslint-disable-next-line @typescript-eslint/require-await
     const result = await asyncReduce(async (acc, n) => acc + n, 0, asyncGenerator);
     expect(result).to.equal(6);
   });
 
-  it("array with async reducer", async () => {
+  test("array with async reducer", async () => {
+    // eslint-disable-next-line @typescript-eslint/require-await
     const result = await asyncReduce(async (acc, n) => acc + n, 0, array);
     expect(result).to.equal(6);
   });
@@ -102,25 +106,25 @@ describe("every", () => {
   });
 
   describe("generator", () => {
-    it("positive", () => {
+    test("positive", () => {
       const result = every((n) => n > 2, generator);
       expect(result).to.equal(false);
     });
 
-    it("negative", () => {
+    test("negative", () => {
       const result = every((n) => n < 5, generator);
       expect(result).to.equal(true);
     });
   });
 
   describe("generator curried", () => {
-    it("positive", () => {
+    test("positive", () => {
       const allLessThanFive = every((n: number) => n < 5);
       const result = allLessThanFive(generator);
       expect(result).to.equal(true);
     });
 
-    it("negative", () => {
+    test("negative", () => {
       const allGreaterThanTwo = every((n: number) => n > 2);
       const result = allGreaterThanTwo(generator);
       expect(result).to.equal(false);
@@ -128,12 +132,12 @@ describe("every", () => {
   });
 
   describe("array", () => {
-    it("positive", () => {
+    test("positive", () => {
       const result = every((n) => n > 2, array);
       expect(result).to.equal(false);
     });
 
-    it("negative", () => {
+    test("negative", () => {
       const result = every((n) => n < 5, array);
       expect(result).to.equal(true);
     });
@@ -152,6 +156,7 @@ describe("asyncEvery", () => {
       yield 3;
     }());
 
+    // eslint-disable-next-line @typescript-eslint/require-await
     asyncGenerator = (async function* () {
       yield 1;
       yield 2;
@@ -162,25 +167,25 @@ describe("asyncEvery", () => {
   });
 
   describe("async-generator with sync predicate", () => {
-    it("positive", async () => {
+    test("positive", async () => {
       const result = await asyncEvery((n: number) => n < 5, asyncGenerator);
       expect(result).to.equal(true);
     });
 
-    it("negative", async () => {
+    test("negative", async () => {
       const result = await asyncEvery((n) => n > 2, asyncGenerator);
       expect(result).to.equal(false);
     });
   });
 
   describe("async-generator with sync predicate curried", () => {
-    it("positive", async () => {
+    test("positive", async () => {
       const allLessThanFive = asyncEvery((n: number) => n < 5);
       const result = await allLessThanFive(asyncGenerator);
       expect(result).to.equal(true);
     });
 
-    it("negative", async () => {
+    test("negative", async () => {
       const allGreaterThanTwo = asyncEvery((n: number) => n > 2);
       const result = await allGreaterThanTwo(asyncGenerator);
       expect(result).to.equal(false);
@@ -188,36 +193,42 @@ describe("asyncEvery", () => {
   });
 
   describe("generator with async predicate", () => {
-    it("positive", async () => {
+    test("positive", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncEvery(async (n) => n < 5, generator);
       expect(result).to.equal(true);
     });
 
-    it("negative", async () => {
+    test("negative", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncEvery(async (n) => n > 2, generator);
       expect(result).to.equal(false);
     });
   });
 
   describe("async-generator with async predicate", () => {
-    it("positive", async () => {
+    test("positive", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncEvery(async (n) => n < 5, asyncGenerator);
       expect(result).to.equal(true);
     });
 
-    it("negative", async () => {
+    test("negative", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncEvery(async (n) => n > 2, asyncGenerator);
       expect(result).to.equal(false);
     });
   });
 
   describe("array with async predicate", () => {
-    it("positive", async () => {
+    test("positive", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncEvery(async (n) => n < 5, array);
       expect(result).to.equal(true);
     });
 
-    it("negative", async () => {
+    test("negative", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncEvery(async (n) => n > 2, array);
       expect(result).to.equal(false);
     });
@@ -239,25 +250,25 @@ describe("some", () => {
   });
 
   describe("generator", () => {
-    it("positive", () => {
+    test("positive", () => {
       const result = some((n) => n > 2, generator);
       expect(result).to.equal(true);
     });
 
-    it("negative", () => {
+    test("negative", () => {
       const result = some((n) => n > 5, generator);
       expect(result).to.equal(false);
     });
   });
 
   describe("generator curried", () => {
-    it("positive", () => {
+    test("positive", () => {
       const someGreaterThanTwo = some((n: number) => n > 2);
       const result = someGreaterThanTwo(generator);
       expect(result).to.equal(true);
     });
 
-    it("negative", () => {
+    test("negative", () => {
       const someGreaterThanFive = some((n: number) => n > 5);
       const result = someGreaterThanFive(generator);
       expect(result).to.equal(false);
@@ -265,12 +276,12 @@ describe("some", () => {
   });
 
   describe("array", () => {
-    it("positive", () => {
+    test("positive", () => {
       const result = some((n) => n > 2, array);
       expect(result).to.equal(true);
     });
 
-    it("negative", () => {
+    test("negative", () => {
       const result = some((n) => n > 5, array);
       expect(result).to.equal(false);
     });
@@ -289,6 +300,7 @@ describe("asyncSome", () => {
       yield 3;
     }());
 
+    // eslint-disable-next-line @typescript-eslint/require-await
     asyncGenerator = (async function* () {
       yield 1;
       yield 2;
@@ -299,25 +311,25 @@ describe("asyncSome", () => {
   });
 
   describe("async-generator with sync predicate", () => {
-    it("positive", async () => {
+    test("positive", async () => {
       const result = await asyncSome((n) => n > 2, asyncGenerator);
       expect(result).to.eql(true);
     });
 
-    it("negative", async () => {
+    test("negative", async () => {
       const result = await asyncSome((n) => n > 5, asyncGenerator);
       expect(result).to.eql(false);
     });
   });
 
   describe("async-generator with sync predicate curried", () => {
-    it("positive", async () => {
+    test("positive", async () => {
       const someGreaterThanTwo = asyncSome((n: number) => n > 2);
       const result = await someGreaterThanTwo(asyncGenerator);
       expect(result).to.eql(true);
     });
 
-    it("negative", async () => {
+    test("negative", async () => {
       const someGreaterThanFive = asyncSome((n: number) => n > 5);
       const result = await someGreaterThanFive(asyncGenerator);
       expect(result).to.eql(false);
@@ -325,36 +337,42 @@ describe("asyncSome", () => {
   });
 
   describe("generator with async predicate", () => {
-    it("positive", async () => {
+    test("positive", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncSome(async (n) => n > 2, generator);
       expect(result).to.equal(true);
     });
 
-    it("negative", async () => {
+    test("negative", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncSome(async (n) => n > 5, generator);
       expect(result).to.eql(false);
     });
   });
 
   describe("async-generator with async predicate", () => {
-    it("positive", async () => {
+    test("positive", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncSome(async (n) => n > 2, asyncGenerator);
       expect(result).to.eql(true);
     });
 
-    it("negative", async () => {
+    test("negative", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncSome(async (n) => n > 5, asyncGenerator);
       expect(result).to.eql(false);
     });
   });
 
   describe("array with async predicate", () => {
-    it("positive", async () => {
+    test("positive", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncSome(async (n) => n > 2, array);
       expect(result).to.equal(true);
     });
 
-    it("negative", async () => {
+    test("negative", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncSome(async (n) => n > 5, array);
       expect(result).to.eql(false);
     });
@@ -376,25 +394,25 @@ describe("find", () => {
   });
 
   describe("generator", () => {
-    it("positive", () => {
+    test("positive", () => {
       const result = find((n) => n > 2, generator);
       expect(result).to.equal(3);
     });
 
-    it("negative", () => {
+    test("negative", () => {
       const result = find((n) => n > 5, generator);
       expect(result).to.equal(undefined);
     });
   });
 
   describe("generator curried", () => {
-    it("positive", () => {
+    test("positive", () => {
       const someGreaterThanTwo = find((n: number) => n > 2);
       const result = someGreaterThanTwo(generator);
       expect(result).to.equal(3);
     });
 
-    it("negative", () => {
+    test("negative", () => {
       const someGreaterThanFive = find((n: number) => n > 5);
       const result = someGreaterThanFive(generator);
       expect(result).to.equal(undefined);
@@ -402,12 +420,12 @@ describe("find", () => {
   });
 
   describe("array", () => {
-    it("positive", () => {
+    test("positive", () => {
       const result = find((n) => n > 2, array);
       expect(result).to.equal(3);
     });
 
-    it("negative", () => {
+    test("negative", () => {
       const result = find((n) => n > 5, array);
       expect(result).to.equal(undefined);
     });
@@ -426,6 +444,7 @@ describe("asyncFind", () => {
       yield 3;
     }());
 
+    // eslint-disable-next-line @typescript-eslint/require-await
     asyncGenerator = (async function* () {
       yield 1;
       yield 2;
@@ -436,25 +455,25 @@ describe("asyncFind", () => {
   });
 
   describe("async-generator with sync predicate", () => {
-    it("positive", async () => {
+    test("positive", async () => {
       const result = await asyncFind((n) => n > 2, asyncGenerator);
       expect(result).to.eql(3);
     });
 
-    it("negative", async () => {
+    test("negative", async () => {
       const result = await asyncFind((n) => n > 5, asyncGenerator);
       expect(result).to.eql(undefined);
     });
   });
 
   describe("async-generator with sync predicate curried", () => {
-    it("positive", async () => {
+    test("positive", async () => {
       const someGreaterThanTwo = asyncFind((n: number) => n > 2);
       const result = await someGreaterThanTwo(asyncGenerator);
       expect(result).to.eql(3);
     });
 
-    it("negative", async () => {
+    test("negative", async () => {
       const someGreaterThanFive = asyncFind((n: number) => n > 5);
       const result = await someGreaterThanFive(asyncGenerator);
       expect(result).to.eql(undefined);
@@ -462,36 +481,42 @@ describe("asyncFind", () => {
   });
 
   describe("generator with async predicate", () => {
-    it("positive", async () => {
+    test("positive", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncFind(async (n) => n > 2, generator);
       expect(result).to.equal(3);
     });
 
-    it("negative", async () => {
+    test("negative", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncFind(async (n) => n > 5, generator);
       expect(result).to.eql(undefined);
     });
   });
 
   describe("async-generator with async predicate", () => {
-    it("positive", async () => {
+    test("positive", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncFind(async (n) => n > 2, asyncGenerator);
       expect(result).to.eql(3);
     });
 
-    it("negative", async () => {
+    test("negative", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncFind(async (n) => n > 5, asyncGenerator);
       expect(result).to.eql(undefined);
     });
   });
 
   describe("array with async predicate", () => {
-    it("positive", async () => {
+    test("positive", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncFind(async (n) => n > 2, array);
       expect(result).to.equal(3);
     });
 
-    it("negative", async () => {
+    test("negative", async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
       const result = await asyncFind(async (n) => n > 5, array);
       expect(result).to.eql(undefined);
     });
@@ -512,12 +537,12 @@ describe("count", () => {
     array = [1, 2, 3];
   });
 
-  it("generator", () => {
+  test("generator", () => {
     const result = count(generator);
     expect(result).to.eql(3);
   });
 
-  it("array", () => {
+  test("array", () => {
     const result = count(array);
     expect(result).to.eql(3);
   });
@@ -527,6 +552,7 @@ describe("asyncCount", () => {
   let asyncGenerator: AsyncGenerator<number>;
 
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/require-await
     asyncGenerator = (async function* () {
       yield 1;
       yield 2;
@@ -534,7 +560,7 @@ describe("asyncCount", () => {
     }());
   });
 
-  it("async-generator", async () => {
+  test("async-generator", async () => {
     const result = await asyncCount(asyncGenerator);
     expect(result).to.equal(3);
   });

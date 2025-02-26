@@ -1,4 +1,4 @@
-import { expect } from "chai";
+import { beforeEach, describe, expect, test } from "vitest";
 import {
   map, asyncMap,
   filter, asyncFilter,
@@ -20,7 +20,7 @@ describe("pipe", () => {
     }());
   });
 
-  it("one function", () => {
+  test("one function", () => {
     const result: Iterable<number> = pipe(
       subject,
       filter((n: number) => n > 2)
@@ -28,7 +28,7 @@ describe("pipe", () => {
     expect([...result]).to.eql([3, 4, 5]);
   });
 
-  it("two functions", () => {
+  test("two functions", () => {
     const result: Iterable<number> = pipe(
       subject,
       filter((n: number) => n > 2),
@@ -37,7 +37,7 @@ describe("pipe", () => {
     expect([...result]).to.eql([6, 8, 10]);
   });
 
-  it("three functions", () => {
+  test("three functions", () => {
     const result: number = pipe(
       subject,
       filter((n: number) => n > 2),
@@ -52,6 +52,7 @@ describe("async pipe", () => {
   let subject: AsyncGenerator<number>;
 
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/require-await
     subject = (async function* () {
       yield 1;
       yield 2;
@@ -61,7 +62,7 @@ describe("async pipe", () => {
     }());
   });
 
-  it("one function", async () => {
+  test("one function", async () => {
     const result: AsyncGenerator<number> = pipe(
       subject,
       asyncFilter((n: number) => n > 2)
@@ -72,7 +73,7 @@ describe("async pipe", () => {
     expect((await result.next()).done).to.equal(true);
   });
 
-  it("two functions", async () => {
+  test("two functions", async () => {
     const result: AsyncGenerator<number> = pipe(
       subject,
       asyncFilter((n: number) => n > 2),
@@ -84,7 +85,7 @@ describe("async pipe", () => {
     expect((await result.next()).done).to.equal(true);
   });
 
-  it("three functions", async () => {
+  test("three functions", async () => {
     const result: number = await pipe(
       subject,
       asyncFilter((n: number) => n > 2),
