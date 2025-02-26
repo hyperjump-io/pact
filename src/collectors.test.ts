@@ -1,4 +1,4 @@
-import { expect } from "chai";
+import { beforeEach, describe, expect, test } from "vitest";
 import {
   collectArray, asyncCollectArray,
   collectSet, asyncCollectSet,
@@ -20,7 +20,7 @@ describe("collectArray", () => {
     }());
   });
 
-  it("collect", () => {
+  test("collect", () => {
     const result = collectArray(subject);
     expect(result).to.eql([1, 2, 3]);
   });
@@ -30,6 +30,7 @@ describe("asyncCollectArray", () => {
   let subject: AsyncGenerator<number>;
 
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/require-await
     subject = (async function* () {
       yield 1;
       yield 2;
@@ -37,7 +38,7 @@ describe("asyncCollectArray", () => {
     }());
   });
 
-  it("collect", async () => {
+  test("collect", async () => {
     const result = await asyncCollectArray(subject);
     expect(result).to.eql([1, 2, 3]);
   });
@@ -54,7 +55,7 @@ describe("collectSet", () => {
     }());
   });
 
-  it("collect", () => {
+  test("collect", () => {
     const result = collectSet(subject);
     expect(result).to.eql(new Set([1, 2, 3]));
   });
@@ -64,6 +65,7 @@ describe("asyncCollectSet", () => {
   let subject: AsyncGenerator<number>;
 
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/require-await
     subject = (async function* () {
       yield 1;
       yield 2;
@@ -71,7 +73,7 @@ describe("asyncCollectSet", () => {
     }());
   });
 
-  it("collect", async () => {
+  test("collect", async () => {
     const result = await asyncCollectSet(subject);
     expect(result).to.eql(new Set([1, 2, 3]));
   });
@@ -88,7 +90,7 @@ describe("collectMap", () => {
     }());
   });
 
-  it("collect", () => {
+  test("collect", () => {
     const result = collectMap(subject);
     expect(result).to.eql(new Map([["foo", 1], ["bar", 2], ["baz", 3]]));
   });
@@ -98,6 +100,7 @@ describe("asyncCollectMap", () => {
   let subject: AsyncGenerator<[string, number]>;
 
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/require-await
     subject = (async function* () {
       yield ["foo", 1];
       yield ["bar", 2];
@@ -105,7 +108,7 @@ describe("asyncCollectMap", () => {
     }()) as AsyncGenerator<[string, number]>;
   });
 
-  it("collect", async () => {
+  test("collect", async () => {
     const result = await asyncCollectMap(subject);
     expect(result).to.eql(new Map([["foo", 1], ["bar", 2], ["baz", 3]]));
   });
@@ -122,9 +125,9 @@ describe("collectObject", () => {
     }());
   });
 
-  it("collect", () => {
+  test("collect", () => {
     const result = collectObject(subject);
-    expect(result).to.eql({ "foo": 1, "bar": 2, "baz": 3 });
+    expect(result).to.eql({ foo: 1, bar: 2, baz: 3 });
   });
 });
 
@@ -132,6 +135,7 @@ describe("asyncCollectObject", () => {
   let subject: AsyncGenerator<[string, number]>;
 
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/require-await
     subject = (async function* () {
       yield ["foo", 1];
       yield ["bar", 2];
@@ -139,19 +143,19 @@ describe("asyncCollectObject", () => {
     }()) as AsyncGenerator<[string, number]>;
   });
 
-  it("collect", async () => {
+  test("collect", async () => {
     const result = await asyncCollectObject(subject);
-    expect(result).to.eql({ "foo": 1, "bar": 2, "baz": 3 });
+    expect(result).to.eql({ foo: 1, bar: 2, baz: 3 });
   });
 });
 
 describe("join", () => {
-  it("empty", () => {
+  test("empty", () => {
     const result = join(",", empty());
     expect(result).to.equal("");
   });
 
-  it("one item", () => {
+  test("one item", () => {
     const subject = (function* () {
       yield "foo";
     }());
@@ -160,7 +164,7 @@ describe("join", () => {
     expect(result).to.equal("foo");
   });
 
-  it("multiple items", () => {
+  test("multiple items", () => {
     const subject = (function* () {
       yield "foo";
       yield "bar";
@@ -173,12 +177,13 @@ describe("join", () => {
 });
 
 describe("asyncJoin", () => {
-  it("empty", async () => {
+  test("empty", async () => {
     const result = await asyncJoin(",", asyncEmpty());
     expect(result).to.equal("");
   });
 
-  it("one item", async () => {
+  test("one item", async () => {
+    // eslint-disable-next-line @typescript-eslint/require-await
     const subject = (async function* () {
       yield "foo";
     }());
@@ -187,7 +192,8 @@ describe("asyncJoin", () => {
     expect(result).to.equal("foo");
   });
 
-  it("multiple items", async () => {
+  test("multiple items", async () => {
+    // eslint-disable-next-line @typescript-eslint/require-await
     const subject = (async function* () {
       yield "foo";
       yield "bar";

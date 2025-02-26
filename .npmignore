@@ -1,5 +1,3 @@
 tsconfig.json
-.eslintrc.json
-.mocharc.json
-**/*.spec.ts
-worksheet.js
+eslint.config.js
+**/*.test.ts
