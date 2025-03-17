@@ -33,12 +33,12 @@
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "*",
-    "@types/node": "^22.13.5",
+    "@types/node": "*",
     "@typescript-eslint/eslint-plugin": "*",
     "@typescript-eslint/parser": "*",
     "eslint-import-resolver-typescript": "*",
     "eslint-plugin-import": "*",
-    "typedoc": "^0.27.9",
+    "typedoc": "*",
     "typescript-eslint": "*",
     "vitest": "*"
   }
