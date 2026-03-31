@@ -29,7 +29,7 @@
   "license": "MIT",
   "funding": {
     "type": "github",
-    "url": "https://github.com/sponsors/jdesrosiers"
+    "url": "https://github.com/sponsors/hyperump-io"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "*",
