@@ -24,7 +24,8 @@ changes the API (see `design/README.md`).
 - `npm test`, `npm run lint`, `npm run type-check`
 - The API is declared in hand-written `.d.ts` files next to the JS, which is
   typed with JSDoc. Type-checking includes the declaration files.
-- `benchmark/` isn't committed. `benchmark/claude/` has one-off
+- `benchmark/` isn't committed. `npm run bench` there compares v1 and v2
+  (`design/benchmarks/pipelines.md`), and `benchmark/claude/` has one-off
   benchmarks.
 
 ## Working agreements

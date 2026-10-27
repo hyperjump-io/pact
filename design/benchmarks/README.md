@@ -8,3 +8,4 @@ benchmarks in `benchmark/benchmarks/` are kept up to date. The ones in
 `benchmark/claude/` were written for one-off investigations.
 
 - [Generators](generators.md) (2026-10-27)
+- [Pipelines](pipelines.md) (2026-10-27): the benchmarks kept up to date
