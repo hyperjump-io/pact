@@ -58,7 +58,8 @@ export const asyncFilter = curry((fn) => async function* (iter) {
 });
 
 export const scan = /** @type API.scan */ (curry(
-  (/** @type API.Reducer<any, any> */ fn, /** @type any */ acc) => function* (/** @type Iterable<any> */ iter) {
+  (/** @type API.Reducer<any, any> */ fn, /** @type any */ initial) => function* (/** @type Iterable<any> */ iter) {
+    let acc = initial;
     for (const item of iter) {
       acc = fn(acc, /** @type any */ (item));
       yield acc;
@@ -67,7 +68,8 @@ export const scan = /** @type API.scan */ (curry(
 ));
 
 export const asyncScan = /** @type API.asyncScan */ (curry(
-  (/** @type API.AsyncReducer<any, any> */ fn, /** @type any */ acc) => async function* (/** @type Iterable<any> | AsyncIterable<any> */ iter) {
+  (/** @type API.AsyncReducer<any, any> */ fn, /** @type any */ initial) => async function* (/** @type Iterable<any> | AsyncIterable<any> */ iter) {
+    let acc = initial;
     for await (const item of iter) {
       acc = await fn(acc, /** @type any */ (item));
       yield acc;
@@ -153,8 +155,9 @@ export const asyncDropWhile = curry((fn) => async function* (iter) {
 export const take = curry((count) => function* (iter) {
   const iterator = getIterator(iter);
 
+  let remaining = count;
   let current;
-  while (count-- > 0 && !(current = iterator.next())?.done) {
+  while (remaining-- > 0 && !(current = iterator.next())?.done) {
     yield current.value;
   }
 });
@@ -163,8 +166,9 @@ export const take = curry((count) => function* (iter) {
 export const asyncTake = curry((count) => async function* (iter) {
   const iterator = getAsyncIterator(iter);
 
+  let remaining = count;
   let current;
-  while (count-- > 0 && !(current = await iterator.next())?.done) {
+  while (remaining-- > 0 && !(current = await iterator.next())?.done) {
     yield current.value;
   }
 });
@@ -259,7 +263,8 @@ export const asyncConcat = async function* (...iters) {
 };
 
 export const reduce = /** @type API.reduce */ (curry(
-  (/** @type API.Reducer<any, any> */ fn, /** @type any */ acc) => (/** @type Iterable<any> */ iter) => {
+  (/** @type API.Reducer<any, any> */ fn, /** @type any */ initial) => (/** @type Iterable<any> */ iter) => {
+    let acc = initial;
     for (const item of iter) {
       acc = fn(acc, /** @type any */ (item));
     }
@@ -269,7 +274,8 @@ export const reduce = /** @type API.reduce */ (curry(
 ));
 
 export const asyncReduce = /** @type API.asyncReduce */ (curry(
-  (/** @type API.AsyncReducer<any, any> */ fn, /** @type any */ acc) => async (/** @type Iterable<any> | AsyncIterable<any> */ iter) => {
+  (/** @type API.AsyncReducer<any, any> */ fn, /** @type any */ initial) => async (/** @type Iterable<any> | AsyncIterable<any> */ iter) => {
+    let acc = initial;
     for await (const item of iter) {
       acc = await fn(acc, /** @type any */ (item));
     }
