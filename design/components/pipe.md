@@ -21,7 +21,10 @@ pipe(range(1, 10), filter(isEven), map(double), reduce(add, 0));
 v1's setup cost per pipeline was about 6 times the native helpers' (see
 [Generators](../benchmarks/generators.md)). Part of that was `curry`, which
 every call goes through to decide whether it got the iterable, and `pipe`,
-which ran its steps with the curried `reduce` instead of a loop.
+which ran its steps with the curried `reduce` instead of a loop. Removing
+them made a short pipeline about 11% faster (see
+[Pipelines](../benchmarks/pipelines.md#pipe-only)). Most of the rest is
+generators.
 
 Dropping the direct form costs dependents little. Between them they have
 three `pipe` calls and five direct calls (`drop`, `some`, and `reduce`),

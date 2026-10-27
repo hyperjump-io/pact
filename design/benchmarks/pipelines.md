@@ -40,3 +40,14 @@ v2 has to beat.
   about 2 times faster than generators.
 - Async from an array costs about 3.5 times a `for await` loop over the
   same array.
+
+## Pipe-only
+
+2026-10-27, after every function became a step with no direct form, and
+`pipe` became a loop (see [Pipe](../components/pipe.md)).
+
+- The short pipeline is about 11% faster than v1 (36.6 times the array
+  methods' time, from 40.9).
+- The others are the same as v1 within noise.
+- Most of a short pipeline's setup is creating a generator for each step,
+  not `curry`. That's what [Iterators](../components/iterators.md) is for.

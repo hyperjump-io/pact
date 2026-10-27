@@ -154,7 +154,7 @@ describe("asyncCollectObject", () => {
 
 describe("join", () => {
   test("empty", () => {
-    const result = join(",", empty());
+    const result = join(",")(empty());
     expect(result).to.equal("");
   });
 
@@ -163,7 +163,7 @@ describe("join", () => {
       yield "foo";
     }());
 
-    const result = join(",", subject);
+    const result = join(",")(subject);
     expect(result).to.equal("foo");
   });
 
@@ -174,24 +174,24 @@ describe("join", () => {
       yield "baz";
     }());
 
-    const result = join(",", subject);
+    const result = join(",")(subject);
     expect(result).to.equal("foo,bar,baz");
   });
 
   test("array", () => {
-    const result = join(",", ["foo", "bar", "baz"]);
+    const result = join(",")(["foo", "bar", "baz"]);
     expect(result).to.equal("foo,bar,baz");
   });
 
   test("set", () => {
-    const result = join(",", new Set(["foo", "bar", "baz"]));
+    const result = join(",")(new Set(["foo", "bar", "baz"]));
     expect(result).to.equal("foo,bar,baz");
   });
 });
 
 describe("asyncJoin", () => {
   test("empty", async () => {
-    const result = await asyncJoin(",", asyncEmpty());
+    const result = await asyncJoin(",")(asyncEmpty());
     expect(result).to.equal("");
   });
 
@@ -200,7 +200,7 @@ describe("asyncJoin", () => {
       yield "foo";
     }());
 
-    const result = await asyncJoin(",", subject);
+    const result = await asyncJoin(",")(subject);
     expect(result).to.equal("foo");
   });
 
@@ -211,17 +211,17 @@ describe("asyncJoin", () => {
       yield "baz";
     }());
 
-    const result = await asyncJoin(",", subject);
+    const result = await asyncJoin(",")(subject);
     expect(result).to.equal("foo,bar,baz");
   });
 
   test("array", async () => {
-    const result = await asyncJoin(",", ["foo", "bar", "baz"]);
+    const result = await asyncJoin(",")(["foo", "bar", "baz"]);
     expect(result).to.equal("foo,bar,baz");
   });
 
   test("set", async () => {
-    const result = await asyncJoin(",", new Set(["foo", "bar", "baz"]));
+    const result = await asyncJoin(",")(new Set(["foo", "bar", "baz"]));
     expect(result).to.equal("foo,bar,baz");
   });
 });

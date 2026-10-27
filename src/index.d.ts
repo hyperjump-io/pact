@@ -3,170 +3,106 @@ import type { LastReturnType } from "./type-utils.d.ts";
 /**
  * Apply a function to every value in the iterator
  */
-export const map: (
-  <A, B>(fn: Mapper<A, B>, iterator: Iterable<A>) => Generator<B>
-) & (
-  <A, B>(fn: Mapper<A, B>) => (iterator: Iterable<A>) => Generator<B>
-);
+export const map: <A, B>(fn: Mapper<A, B>) => (iterator: Iterable<A>) => Generator<B>;
 export type Mapper<A, B> = (item: A) => B;
 
 /**
  * Same as `map`, but works with AsyncIterables and async mapping functions.
  */
-export const asyncMap: (
-  <A, B>(fn: AsyncMapper<A, B>, iterator: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<B>
-) & (
-  <A, B>(fn: AsyncMapper<A, B>) => (iterator: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<B>
-);
+export const asyncMap: <A, B>(fn: AsyncMapper<A, B>) => (iterator: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<B>;
 export type AsyncMapper<A, B> = (item: A) => Promise<B> | B;
 
 /**
  * Apply a function to every value in the iterator, but yield the original
  * value, not the result of the function.
  */
-export const tap: (
-  <A>(fn: Tapper<A>, iterator: Iterable<A>) => Generator<A>
-) & (
-  <A>(fn: Tapper<A>) => (iterator: Iterable<A>) => Generator<A>
-);
+export const tap: <A>(fn: Tapper<A>) => (iterator: Iterable<A>) => Generator<A>;
 export type Tapper<A> = (item: A) => void;
 
 /**
  * Same as `tap`, but works with AsyncIterables.
  */
-export const asyncTap: (
-  <A>(fn: AsyncTapper<A>, iterator: AsyncIterable<A>) => AsyncGenerator<A>
-) & (
-  <A>(fn: AsyncTapper<A>) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
-);
+export const asyncTap: <A>(fn: AsyncTapper<A>) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>;
 export type AsyncTapper<A> = (item: A) => Promise<void> | void;
 
 /**
  * Yields only the values in the iterator that pass the predicate function.
  */
-export const filter: (
-  <A>(fn: Predicate<A>, iterator: Iterable<A>) => Generator<A>
-) & (
-  <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => Generator<A>
-);
+export const filter: <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => Generator<A>;
 export type Predicate<A> = (item: A) => boolean;
 
 /**
  * Same as `filter`, but works with AsyncIterables and async predicate
  * functions.
  */
-export const asyncFilter: (
-  <A>(fn: AsyncPredicate<A>, iterator: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<A>
-) & (
-  <A>(fn: AsyncPredicate<A>) => (iterator: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<A>
-);
+export const asyncFilter: <A>(fn: AsyncPredicate<A>) => (iterator: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<A>;
 export type AsyncPredicate<A> = (item: A) => Promise<boolean> | boolean;
 
 /**
  * Same as `reduce` except it emits the accumulated value after each update
  */
-export const scan: (
-  <A, B>(fn: Reducer<A, B>, acc: B, iter: Iterable<A>) => Generator<B>
-) & (
-  <A, B>(fn: Reducer<A, B>, acc: B) => (iter: Iterable<A>) => Generator<B>
-);
+export const scan: <A, B>(fn: Reducer<A, B>, initial: B) => (iter: Iterable<A>) => Generator<B>;
 
 /**
  * Same as `scan`, but works with AsyncIterables and async predicate
  * functions.
  */
-export const asyncScan: (
-  <A, B>(fn: AsyncReducer<A, B>, acc: B, iter: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<B>
-) & (
-  <A, B>(fn: AsyncReducer<A, B>, acc: B) => (iter: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<B>
-);
+export const asyncScan: <A, B>(fn: AsyncReducer<A, B>, initial: B) => (iter: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<B>;
 
 /**
  * Yields values from the iterator with all sub-iterator elements concatenated
- * into it recursively up to the specified depth.
+ * into it recursively up to the specified depth. The default depth is 1.
  */
-export const flatten: <A>(iterator: NestedIterable<A>, depth?: number) => Generator<A | NestedIterable<A>>;
+export const flatten: (depth?: number) => <A>(iterator: NestedIterable<A>) => Generator<A | NestedIterable<A>>;
 export type NestedIterable<A> = Iterable<A | NestedIterable<A>>;
 
 /**
  * Same as `flatten`, but works with AsyncGenerators.
  */
-export const asyncFlatten: <A>(iterator: NestedIterable<A> | NestedAsyncIterable<A>, depth?: number) => AsyncGenerator<A | NestedIterable<A> | NestedAsyncIterable<A>>;
+export const asyncFlatten: (depth?: number) => <A>(iterator: NestedIterable<A> | NestedAsyncIterable<A>) => AsyncGenerator<A | NestedIterable<A> | NestedAsyncIterable<A>>;
 export type NestedAsyncIterable<A> = AsyncIterable<A | NestedAsyncIterable<A> | NestedIterable<A>>;
 
 /**
  * Yields all the values in the iterator except for the first `n` values.
  */
-export const drop: (
-  <A>(count: number, iterator: Iterable<A>) => Generator<A>
-) & (
-  <A>(count: number) => (iterator: Iterable<A>) => Generator<A>
-);
+export const drop: <A>(count: number) => (iterator: Iterable<A>) => Generator<A>;
 
 /**
  * Same as `drop`, but works with AsyncIterables.
  */
-export const asyncDrop: (
-  <A>(count: number, iterator: AsyncIterable<A>) => AsyncGenerator<A>
-) & (
-  <A>(count: number) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
-);
+export const asyncDrop: <A>(count: number) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>;
 
 /**
  * Same as `drop` but instead of dropping a specific number of values, it drops
  * values until the `fn(value)` is `false` and then yields the remaining values.
  */
-export const dropWhile: (
-  <A>(fn: Predicate<A>, iterator: Iterable<A>) => Generator<A>
-) & (
-  <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => Generator<A>
-);
+export const dropWhile: <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => Generator<A>;
 
 /**
  * Same as `dropWhile`, but works with AsyncIterables.
  */
-export const asyncDropWhile: (
-  <A>(fn: AsyncPredicate<A>, iterator: AsyncIterable<A>) => AsyncGenerator<A>
-) & (
-  <A>(fn: AsyncPredicate<A>) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
-);
+export const asyncDropWhile: <A>(fn: AsyncPredicate<A>) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>;
 
 /**
  * Yields the first `n` values in the iterator.
  */
-export const take: (
-  <A>(count: number, iterator: Iterable<A>) => Generator<A>
-) & (
-  <A>(count: number) => (iterator: Iterable<A>) => Generator<A>
-);
+export const take: <A>(count: number) => (iterator: Iterable<A>) => Generator<A>;
 
 /**
  * Same as `take`, but works with AsyncIterables.
  */
-export const asyncTake: (
-  <A>(count: number, iterator: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<A>
-) & (
-  <A>(count: number) => (iterator: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<A>
-);
+export const asyncTake: <A>(count: number) => (iterator: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<A>;
 
 /**
  * Same as `take` but instead of yielding a specific number of values, it yields
  * values as long as the `fn(value)` returns `true` and drops the rest.
  */
-export const takeWhile: (
-  <A>(fn: Predicate<A>, iterator: Iterable<A>) => Generator<A>
-) & (
-  <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => Generator<A>
-);
+export const takeWhile: <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => Generator<A>;
 
 /**
  * Same as `takeWhile`, but works with AsyncGenerators.
  */
-export const asyncTakeWhile: (
-  <A>(fn: AsyncPredicate<A>, iterator: AsyncIterable<A>) => AsyncGenerator<A>
-) & (
-  <A>(fn: AsyncPredicate<A>) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
-);
+export const asyncTakeWhile: <A>(fn: AsyncPredicate<A>) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>;
 
 /**
  * Returns the first value in the iterator. The iterator is closed after
@@ -221,78 +157,46 @@ export const asyncConcat: <A>(...iters: (Iterable<A> | AsyncIterable<A>)[]) => A
 /**
  * Reduce an iterator to a single value.
  */
-export const reduce: (
-  <A, B>(fn: Reducer<A, B>, acc: B, iter: Iterable<A>) => B
-) & (
-  <A, B>(fn: Reducer<A, B>, acc: B) => (iter: Iterable<A>) => B
-);
+export const reduce: <A, B>(fn: Reducer<A, B>, initial: B) => (iter: Iterable<A>) => B;
 export type Reducer<A, B> = (acc: B, item: A) => B;
 
 /**
  * Same as `reduce`, but works with AsyncGenerators and async reducer functions.
  */
-export const asyncReduce: (
-  <A, B>(fn: AsyncReducer<A, B>, acc: B, iter: Iterable<A> | AsyncIterable<A>) => Promise<B>
-) & (
-  <A, B>(fn: AsyncReducer<A, B>, acc: B) => (iter: Iterable<A> | AsyncIterable<A>) => Promise<B>
-);
+export const asyncReduce: <A, B>(fn: AsyncReducer<A, B>, initial: B) => (iter: Iterable<A> | AsyncIterable<A>) => Promise<B>;
 export type AsyncReducer<A, B> = (acc: B, item: A) => Promise<B> | B;
 
 /**
  * Returns a boolean indicating whether or not all values in the iterator passes
  * the predicate function.
  */
-export const every: (
-  <A>(fn: Predicate<A>, iterator: Iterable<A>) => boolean
-) & (
-  <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => boolean
-);
+export const every: <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => boolean;
 
 /**
  * Same as `every`, but works with AsyncIterables and async predicate functions.
  */
-export const asyncEvery: (
-  <A>(fn: AsyncPredicate<A>, iterator: Iterable<A> | AsyncIterable<A>) => Promise<boolean>
-) & (
-  <A>(fn: AsyncPredicate<A>) => (iterator: Iterable<A> | AsyncIterable<A>) => Promise<boolean>
-);
+export const asyncEvery: <A>(fn: AsyncPredicate<A>) => (iterator: Iterable<A> | AsyncIterable<A>) => Promise<boolean>;
 
 /**
  * Returns a boolean indicating whether or not there exists a value in the
  * iterator that passes the predicate function.
  */
-export const some: (
-  <A>(fn: Predicate<A>, iterator: Iterable<A>) => boolean
-) & (
-  <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => boolean
-);
+export const some: <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => boolean;
 
 /**
  * Same as `some`, but works with AsyncIterables and async predicate functions.
  */
-export const asyncSome: (
-  <A>(fn: AsyncPredicate<A>, iterator: Iterable<A> | AsyncIterable<A>) => Promise<boolean>
-) & (
-  <A>(fn: AsyncPredicate<A>) => (iterator: Iterable<A> | AsyncIterable<A>) => Promise<boolean>
-);
+export const asyncSome: <A>(fn: AsyncPredicate<A>) => (iterator: Iterable<A> | AsyncIterable<A>) => Promise<boolean>;
 
 /**
  * Returns the first value that passes the predicate function.
  */
-export const find: (
-  <A>(fn: Predicate<A>, iterator: Iterable<A>) => A | undefined
-) & (
-  <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => A | undefined
-);
+export const find: <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => A | undefined;
 
 /**
  * Same as `find`, but works with AsyncIterables and async predicate functions.
  */
-export const asyncFind: (
-  <A>(fn: AsyncPredicate<A>, iterator: Iterable<A> | AsyncIterable<A>) => Promise<A | undefined>
-) & (
-  <A>(fn: AsyncPredicate<A>) => (iterator: Iterable<A> | AsyncIterable<A>) => Promise<A | undefined>
-);
+export const asyncFind: <A>(fn: AsyncPredicate<A>) => (iterator: Iterable<A> | AsyncIterable<A>) => Promise<A | undefined>;
 
 /**
  * Returns the number of items in the iterator.
@@ -348,20 +252,12 @@ export const asyncCollectObject: <A>(iterator: AsyncIterable<[string, A]>) => Pr
  * Collect all the items in the iterator into a string separated by the
  * separator token.
  */
-export const join: (
-  (separator: string, iterator: Iterable<string>) => string
-) & (
-  (separator: string) => (iterator: Iterable<string>) => string
-);
+export const join: (separator: string) => (iterator: Iterable<string>) => string;
 
 /**
  * Same as `join`, but works with AsyncIterables.
  */
-export const asyncJoin: (
-  (separator: string, iterator: Iterable<string> | AsyncIterable<string>) => Promise<string>
-) & (
-  (separator: string) => (iterator: Iterable<string> | AsyncIterable<string>) => Promise<string>
-);
+export const asyncJoin: (separator: string) => (iterator: Iterable<string> | AsyncIterable<string>) => Promise<string>;
 
 /**
  * Starting with an iterator, apply any number of functions to transform the

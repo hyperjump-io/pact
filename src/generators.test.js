@@ -35,18 +35,12 @@ describe("map", () => {
   });
 
   test("generator", () => {
-    const result = map((n) => n * 2, generator);
-    expect([...result]).to.eql([2, 4, 6]);
-  });
-
-  test("generator curried", () => {
-    const double = map((/** @type number */ n) => n * 2);
-    const result = double(generator);
+    const result = map((n) => n * 2)(generator);
     expect([...result]).to.eql([2, 4, 6]);
   });
 
   test("array", () => {
-    const result = map((n) => n * 2, array);
+    const result = map((n) => n * 2)(array);
     expect([...result]).to.eql([2, 4, 6]);
   });
 });
@@ -76,7 +70,7 @@ describe("asyncMap", () => {
   });
 
   test("generator with async mapper", async () => {
-    const result = asyncMap(async (n) => n * 2, generator);
+    const result = asyncMap(async (n) => n * 2)(generator);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(4);
     expect((await result.next()).value).to.equal(6);
@@ -84,16 +78,7 @@ describe("asyncMap", () => {
   });
 
   test("async-generator with sync mapper", async () => {
-    const result = asyncMap((n) => n * 2, asyncGenerator);
-    expect((await result.next()).value).to.equal(2);
-    expect((await result.next()).value).to.equal(4);
-    expect((await result.next()).value).to.equal(6);
-    expect((await result.next()).done).to.equal(true);
-  });
-
-  test("async-generator with sync mapper curried", async () => {
-    const double = asyncMap((/** @type number */ n) => n * 2);
-    const result = double(asyncGenerator);
+    const result = asyncMap((n) => n * 2)(asyncGenerator);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(4);
     expect((await result.next()).value).to.equal(6);
@@ -101,7 +86,7 @@ describe("asyncMap", () => {
   });
 
   test("array with async mapper", async () => {
-    const result = asyncMap(async (n) => n * 2, array);
+    const result = asyncMap(async (n) => n * 2)(array);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(4);
     expect((await result.next()).value).to.equal(6);
@@ -129,17 +114,7 @@ describe("tap", () => {
     let count = 0;
     const result = tap(() => {
       count++;
-    }, generator);
-    expect([...result]).to.eql([1, 2, 3]);
-    expect(count).to.equal(3);
-  });
-
-  test("generator curried", () => {
-    let count = 0;
-    const double = tap(() => {
-      count++;
-    });
-    const result = double(generator);
+    })(generator);
     expect([...result]).to.eql([1, 2, 3]);
     expect(count).to.equal(3);
   });
@@ -148,7 +123,7 @@ describe("tap", () => {
     let count = 0;
     const result = tap(() => {
       count++;
-    }, array);
+    })(array);
     expect([...result]).to.eql([1, 2, 3]);
     expect(count).to.equal(3);
   });
@@ -170,22 +145,8 @@ describe("asyncTap", () => {
     let count = 0;
     const result = asyncTap(() => {
       count++;
-    }, asyncGenerator);
+    })(asyncGenerator);
 
-    expect((await result.next()).value).to.equal(1);
-    expect((await result.next()).value).to.equal(2);
-    expect((await result.next()).value).to.equal(3);
-    expect((await result.next()).done).to.equal(true);
-    expect(count).to.equal(3);
-  });
-
-  test("async-generator curried", async () => {
-    let count = 0;
-    const tapped = asyncTap(() => {
-      count++;
-    });
-
-    const result = tapped(asyncGenerator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(3);
@@ -211,18 +172,12 @@ describe("filter", () => {
   });
 
   test("generator", () => {
-    const result = filter((n) => n > 2, generator);
-    expect([...result]).to.eql([3]);
-  });
-
-  test("generator curried", () => {
-    const greaterThanTwo = filter((/** @type number */ n) => n > 2);
-    const result = greaterThanTwo(generator);
+    const result = filter((n) => n > 2)(generator);
     expect([...result]).to.eql([3]);
   });
 
   test("array", () => {
-    const result = filter((n) => n > 2, array);
+    const result = filter((n) => n > 2)(array);
     expect([...result]).to.eql([3]);
   });
 });
@@ -252,32 +207,25 @@ describe("asyncFilter", () => {
   });
 
   test("async-generator with sync predicate", async () => {
-    const result = asyncFilter((n) => n > 2, asyncGenerator);
-    expect((await result.next()).value).to.equal(3);
-    expect((await result.next()).done).to.equal(true);
-  });
-
-  test("async-generator with sync predicate curried", async () => {
-    const greaterThanTwo = asyncFilter((/** @type number */ n) => n > 2);
-    const result = greaterThanTwo(asyncGenerator);
+    const result = asyncFilter((n) => n > 2)(asyncGenerator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 
   test("generator with async predicate", async () => {
-    const result = asyncFilter(async (n) => n > 2, generator);
+    const result = asyncFilter(async (n) => n > 2)(generator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 
   test("async-generator with async predicate", async () => {
-    const result = asyncFilter(async (n) => n > 2, asyncGenerator);
+    const result = asyncFilter(async (n) => n > 2)(asyncGenerator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 
   test("array with async predicate", async () => {
-    const result = asyncFilter(async (n) => n > 2, array);
+    const result = asyncFilter(async (n) => n > 2)(array);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
@@ -300,18 +248,12 @@ describe("scan", () => {
   });
 
   test("generator", () => {
-    const result = scan((acc, n) => acc + n, 0, generator);
-    expect([...result]).to.eql([1, 3, 6]);
-  });
-
-  test("generator curried", () => {
-    const sum = scan((acc, /** @type number */ n) => acc + n, 0);
-    const result = sum(generator);
+    const result = scan((acc, n) => acc + n, 0)(generator);
     expect([...result]).to.eql([1, 3, 6]);
   });
 
   test("array", () => {
-    const result = scan((acc, n) => acc + n, 0, array);
+    const result = scan((acc, n) => acc + n, 0)(array);
     expect([...result]).to.eql([1, 3, 6]);
   });
 });
@@ -341,16 +283,7 @@ describe("asyncScan", () => {
   });
 
   test("async-generator with sync reducer", async () => {
-    const result = asyncScan((acc, n) => acc + n, 0, asyncGenerator);
-    expect((await result.next()).value).to.equal(1);
-    expect((await result.next()).value).to.equal(3);
-    expect((await result.next()).value).to.equal(6);
-    expect((await result.next()).done).to.equal(true);
-  });
-
-  test("async-generator with sync reducer curried", async () => {
-    const sum = asyncScan((acc, /** @type number */ n) => acc + n, 0);
-    const result = sum(asyncGenerator);
+    const result = asyncScan((acc, n) => acc + n, 0)(asyncGenerator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).value).to.equal(6);
@@ -358,7 +291,7 @@ describe("asyncScan", () => {
   });
 
   test("generator with async reducer", async () => {
-    const result = asyncScan(async (acc, n) => acc + n, 0, generator);
+    const result = asyncScan(async (acc, n) => acc + n, 0)(generator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).value).to.equal(6);
@@ -366,7 +299,7 @@ describe("asyncScan", () => {
   });
 
   test("async-generator with async reducer", async () => {
-    const result = asyncScan(async (acc, n) => acc + n, 0, asyncGenerator);
+    const result = asyncScan(async (acc, n) => acc + n, 0)(asyncGenerator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).value).to.equal(6);
@@ -374,7 +307,7 @@ describe("asyncScan", () => {
   });
 
   test("array with async reducer", async () => {
-    const result = asyncScan(async (acc, n) => acc + n, 0, array);
+    const result = asyncScan(async (acc, n) => acc + n, 0)(array);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).value).to.equal(6);
@@ -405,22 +338,22 @@ describe("flatten", () => {
   });
 
   test("default depth", () => {
-    const result = flatten(subject);
+    const result = flatten()(subject);
     expect([...result]).to.eql([1, 2, deeplyNested, "foo", true, false, null]);
   });
 
   test("depth 1", () => {
-    const result = flatten(subject, 1);
+    const result = flatten(1)(subject);
     expect([...result]).to.eql([1, 2, deeplyNested, "foo", true, false, null]);
   });
 
   test("depth 2", () => {
-    const result = flatten(subject, 2);
+    const result = flatten(2)(subject);
     expect([...result]).to.eql([1, 2, 3, 4, "foo", true, false, null]);
   });
 
   test("depth Infinity", () => {
-    const result = flatten(subject, Infinity);
+    const result = flatten(Infinity)(subject);
     expect([...result]).to.eql([1, 2, 3, 4, "foo", true, false, null]);
   });
 });
@@ -452,7 +385,7 @@ describe("asyncFlatten", () => {
   });
 
   test("default depth", async () => {
-    const result = asyncFlatten(subject);
+    const result = asyncFlatten()(subject);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(deeplyNested);
@@ -465,7 +398,7 @@ describe("asyncFlatten", () => {
   });
 
   test("depth 1", async () => {
-    const result = asyncFlatten(subject, 1);
+    const result = asyncFlatten(1)(subject);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(deeplyNested);
@@ -478,7 +411,7 @@ describe("asyncFlatten", () => {
   });
 
   test("depth 2", async () => {
-    const result = asyncFlatten(subject, 2);
+    const result = asyncFlatten(2)(subject);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(3);
@@ -492,7 +425,7 @@ describe("asyncFlatten", () => {
   });
 
   test("depth Infinity", async () => {
-    const result = asyncFlatten(subject, Infinity);
+    const result = asyncFlatten(Infinity)(subject);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(3);
@@ -523,18 +456,12 @@ describe("drop", () => {
   });
 
   test("generator", () => {
-    const result = drop(2, generator);
-    expect([...result]).to.eql([3]);
-  });
-
-  test("generator curried", () => {
-    const dropTwo = drop(2);
-    const result = dropTwo(generator);
+    const result = drop(2)(generator);
     expect([...result]).to.eql([3]);
   });
 
   test("array", () => {
-    const result = drop(2, array);
+    const result = drop(2)(array);
     expect([...result]).to.eql([3]);
   });
 });
@@ -552,14 +479,7 @@ describe("asyncDrop", () => {
   });
 
   test("async-generator", async () => {
-    const result = asyncDrop(2, asyncGenerator);
-    expect((await result.next()).value).to.equal(3);
-    expect((await result.next()).done).to.equal(true);
-  });
-
-  test("async-generator curried", async () => {
-    const dropTwo = asyncDrop(2);
-    const result = dropTwo(asyncGenerator);
+    const result = asyncDrop(2)(asyncGenerator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
@@ -582,23 +502,17 @@ describe("dropWhile", () => {
   });
 
   test("generator", () => {
-    const result = dropWhile((n) => n < 3, generator);
-    expect([...result]).to.eql([3]);
-  });
-
-  test("generator curried", () => {
-    const dropTwo = dropWhile((/** @type number */ n) => n < 3);
-    const result = dropTwo(generator);
+    const result = dropWhile((n) => n < 3)(generator);
     expect([...result]).to.eql([3]);
   });
 
   test("array", () => {
-    const result = dropWhile((n) => n < 3, array);
+    const result = dropWhile((n) => n < 3)(array);
     expect([...result]).to.eql([3]);
   });
 
   test("drop more than is available", () => {
-    const result = dropWhile((n) => n < 10, generator);
+    const result = dropWhile((n) => n < 10)(generator);
     expect([...result]).to.eql([]);
   });
 });
@@ -616,20 +530,13 @@ describe("asyncDropWhile", () => {
   });
 
   test("async-generator", async () => {
-    const result = asyncDropWhile(async (n) => n < 3, asyncGenerator);
-    expect((await result.next()).value).to.equal(3);
-    expect((await result.next()).done).to.equal(true);
-  });
-
-  test("async-generator curried", async () => {
-    const dropTwo = asyncDropWhile(async (/** @type number */ n) => n < 3);
-    const result = dropTwo(asyncGenerator);
+    const result = asyncDropWhile(async (n) => n < 3)(asyncGenerator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 
   test("drop more than is available", async () => {
-    const result = asyncDropWhile(async (n) => n < 10, asyncGenerator);
+    const result = asyncDropWhile(async (n) => n < 10)(asyncGenerator);
     expect((await result.next()).done).to.equal(true);
   });
 });
@@ -651,36 +558,30 @@ describe("take", () => {
   });
 
   test("generator", () => {
-    const result = take(2, generator);
-    expect([...result]).to.eql([1, 2]);
-  });
-
-  test("generator curried", () => {
-    const takeTwo = take(2);
-    const result = takeTwo(generator);
+    const result = take(2)(generator);
     expect([...result]).to.eql([1, 2]);
   });
 
   test("array", () => {
-    const result = take(2, array);
+    const result = take(2)(array);
     expect([...result]).to.eql([1, 2]);
   });
 
   test("take more than is available", () => {
-    const result = take(10, generator);
+    const result = take(10)(generator);
     expect([...result]).to.eql([1, 2, 3]);
   });
 
   test("the source is closed when it's done taking", () => {
     const source = closable([1, 2, 3]);
-    const result = take(2, source);
+    const result = take(2)(source);
     expect([...result]).to.eql([1, 2]);
     expect(source.closed).to.equal(true);
   });
 
   test("the source is closed when the result is closed early", () => {
     const source = closable([1, 2, 3]);
-    const result = take(3, source);
+    const result = take(3)(source);
     result.next();
     result.return(undefined);
     expect(source.closed).to.equal(true);
@@ -700,16 +601,7 @@ describe("asyncTake", () => {
   });
 
   test("async-generator", async () => {
-    const result = asyncTake(2, asyncGenerator);
-
-    expect((await result.next()).value).to.equal(1);
-    expect((await result.next()).value).to.equal(2);
-    expect((await result.next()).done).to.equal(true);
-  });
-
-  test("async-generator curried", async () => {
-    const takeTwo = asyncTake(2);
-    const result = takeTwo(asyncGenerator);
+    const result = asyncTake(2)(asyncGenerator);
 
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
@@ -717,7 +609,7 @@ describe("asyncTake", () => {
   });
 
   test("take more than is available", async () => {
-    const result = asyncTake(10, asyncGenerator);
+    const result = asyncTake(10)(asyncGenerator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(3);
@@ -726,7 +618,7 @@ describe("asyncTake", () => {
 
   test("the source is closed when it's done taking", async () => {
     const source = asyncClosable([1, 2, 3]);
-    const result = asyncTake(2, source);
+    const result = asyncTake(2)(source);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).done).to.equal(true);
@@ -735,7 +627,7 @@ describe("asyncTake", () => {
 
   test("a sync source is closed when it's done taking", async () => {
     const source = closable([1, 2, 3]);
-    const result = asyncTake(2, source);
+    const result = asyncTake(2)(source);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).done).to.equal(true);
@@ -744,7 +636,7 @@ describe("asyncTake", () => {
 
   test("the source is closed when the result is closed early", async () => {
     const source = asyncClosable([1, 2, 3]);
-    const result = asyncTake(3, source);
+    const result = asyncTake(3)(source);
     await result.next();
     await result.return(undefined);
     expect(source.closed).to.equal(true);
@@ -768,23 +660,17 @@ describe("takeWhile", () => {
   });
 
   test("generator", () => {
-    const result = takeWhile((n) => n < 3, generator);
-    expect([...result]).to.eql([1, 2]);
-  });
-
-  test("generator curried", () => {
-    const takeTwo = takeWhile((/** @type number */ n) => n < 3);
-    const result = takeTwo(generator);
+    const result = takeWhile((n) => n < 3)(generator);
     expect([...result]).to.eql([1, 2]);
   });
 
   test("array", () => {
-    const result = takeWhile((n) => n < 3, array);
+    const result = takeWhile((n) => n < 3)(array);
     expect([...result]).to.eql([1, 2]);
   });
 
   test("take more than is available", () => {
-    const result = takeWhile((n) => n < 10, generator);
+    const result = takeWhile((n) => n < 10)(generator);
     expect([...result]).to.eql([1, 2, 3]);
   });
 });
@@ -802,16 +688,7 @@ describe("asyncTakeWhile", () => {
   });
 
   test("async-generator", async () => {
-    const result = asyncTakeWhile(async (n) => n < 3, asyncGenerator);
-
-    expect((await result.next()).value).to.equal(1);
-    expect((await result.next()).value).to.equal(2);
-    expect((await result.next()).done).to.equal(true);
-  });
-
-  test("async-generator curried", async () => {
-    const takeTwo = asyncTakeWhile(async (/** @type number */ n) => n < 3);
-    const result = takeTwo(asyncGenerator);
+    const result = asyncTakeWhile(async (n) => n < 3)(asyncGenerator);
 
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
@@ -819,7 +696,7 @@ describe("asyncTakeWhile", () => {
   });
 
   test("take more than is available", async () => {
-    const result = asyncTakeWhile(async (n) => n < 10, asyncGenerator);
+    const result = asyncTakeWhile(async (n) => n < 10)(asyncGenerator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(3);
@@ -894,7 +771,7 @@ describe("range", () => {
   });
 
   test("infinite", () => {
-    const result = take(3, range(3));
+    const result = take(3)(range(3));
     expect([...result]).to.eql([3, 4, 5]);
   });
 });

@@ -13,12 +13,12 @@ const boom = () => {
 
 /** @type [string, (source: any) => any][] */
 const stopsEarly = [
-  ["take", (source) => [...Pact.take(2, source)]],
-  ["takeWhile", (source) => [...Pact.takeWhile((n) => n < 3, source)]],
+  ["take", (source) => [...Pact.take(2)(source)]],
+  ["takeWhile", (source) => [...Pact.takeWhile((n) => n < 3)(source)]],
   ["head", (source) => Pact.head(source)],
-  ["find", (source) => Pact.find((n) => n > 1, source)],
-  ["some", (source) => Pact.some((n) => n > 1, source)],
-  ["every", (source) => Pact.every((n) => n < 2, source)],
+  ["find", (source) => Pact.find((n) => n > 1)(source)],
+  ["some", (source) => Pact.some((n) => n > 1)(source)],
+  ["every", (source) => Pact.every((n) => n < 2)(source)],
   ["zip (first)", (source) => [...Pact.zip(source, [1])]],
   ["zip (second)", (source) => [...Pact.zip([1], source)]],
   ["pipe", (source) => Pact.pipe(source, Pact.take(1), Pact.collectArray)]
@@ -26,15 +26,15 @@ const stopsEarly = [
 
 /** @type [string, (source: any) => Iterator<any>][] */
 const steps = [
-  ["map", (source) => Pact.map((n) => n, source)],
-  ["tap", (source) => Pact.tap(() => {}, source)],
-  ["filter", (source) => Pact.filter(() => true, source)],
-  ["scan", (source) => Pact.scan((a, n) => a + n, 0, source)],
-  ["flatten", (source) => Pact.flatten(source)],
-  ["drop", (source) => Pact.drop(1, source)],
-  ["dropWhile", (source) => Pact.dropWhile((n) => n < 2, source)],
-  ["take", (source) => Pact.take(4, source)],
-  ["takeWhile", (source) => Pact.takeWhile(() => true, source)],
+  ["map", (source) => Pact.map((n) => n)(source)],
+  ["tap", (source) => Pact.tap(() => {})(source)],
+  ["filter", (source) => Pact.filter(() => true)(source)],
+  ["scan", (source) => Pact.scan((a, n) => a + n, 0)(source)],
+  ["flatten", (source) => Pact.flatten()(source)],
+  ["drop", (source) => Pact.drop(1)(source)],
+  ["dropWhile", (source) => Pact.dropWhile((n) => n < 2)(source)],
+  ["take", (source) => Pact.take(4)(source)],
+  ["takeWhile", (source) => Pact.takeWhile(() => true)(source)],
   ["zip (first)", (source) => Pact.zip(source, items)],
   ["zip (second)", (source) => Pact.zip(items, source)],
   ["concat", (source) => Pact.concat(source, items)]
@@ -42,26 +42,26 @@ const steps = [
 
 /** @type [string, (source: any) => any][] */
 const callbackThrows = [
-  ["map", (source) => [...Pact.map(boom, source)]],
-  ["tap", (source) => [...Pact.tap(boom, source)]],
-  ["filter", (source) => [...Pact.filter(boom, source)]],
-  ["scan", (source) => [...Pact.scan(boom, 0, source)]],
-  ["dropWhile", (source) => [...Pact.dropWhile(boom, source)]],
-  ["takeWhile", (source) => [...Pact.takeWhile(boom, source)]],
-  ["reduce", (source) => Pact.reduce(boom, 0, source)],
-  ["every", (source) => Pact.every(boom, source)],
-  ["some", (source) => Pact.some(boom, source)],
-  ["find", (source) => Pact.find(boom, source)]
+  ["map", (source) => [...Pact.map(boom)(source)]],
+  ["tap", (source) => [...Pact.tap(boom)(source)]],
+  ["filter", (source) => [...Pact.filter(boom)(source)]],
+  ["scan", (source) => [...Pact.scan(boom, 0)(source)]],
+  ["dropWhile", (source) => [...Pact.dropWhile(boom)(source)]],
+  ["takeWhile", (source) => [...Pact.takeWhile(boom)(source)]],
+  ["reduce", (source) => Pact.reduce(boom, 0)(source)],
+  ["every", (source) => Pact.every(boom)(source)],
+  ["some", (source) => Pact.some(boom)(source)],
+  ["find", (source) => Pact.find(boom)(source)]
 ];
 
 /** @type [string, (source: any) => Promise<any>][] */
 const asyncStopsEarly = [
-  ["asyncTake", (source) => toArray(Pact.asyncTake(2, source))],
-  ["asyncTakeWhile", (source) => toArray(Pact.asyncTakeWhile((n) => n < 3, source))],
+  ["asyncTake", (source) => toArray(Pact.asyncTake(2)(source))],
+  ["asyncTakeWhile", (source) => toArray(Pact.asyncTakeWhile((n) => n < 3)(source))],
   ["asyncHead", (source) => Pact.asyncHead(source)],
-  ["asyncFind", (source) => Pact.asyncFind((n) => n > 1, source)],
-  ["asyncSome", (source) => Pact.asyncSome((n) => n > 1, source)],
-  ["asyncEvery", (source) => Pact.asyncEvery((n) => n < 2, source)],
+  ["asyncFind", (source) => Pact.asyncFind((n) => n > 1)(source)],
+  ["asyncSome", (source) => Pact.asyncSome((n) => n > 1)(source)],
+  ["asyncEvery", (source) => Pact.asyncEvery((n) => n < 2)(source)],
   ["asyncZip (first)", (source) => toArray(Pact.asyncZip(source, [1]))],
   ["asyncZip (second)", (source) => toArray(Pact.asyncZip([1], source))],
   ["pipe", (source) => Pact.pipe(source, Pact.asyncTake(1), Pact.asyncCollectArray)]
@@ -69,15 +69,15 @@ const asyncStopsEarly = [
 
 /** @type [string, (source: any) => AsyncIterator<any>][] */
 const asyncSteps = [
-  ["asyncMap", (source) => Pact.asyncMap((n) => n, source)],
-  ["asyncTap", (source) => Pact.asyncTap(() => {}, source)],
-  ["asyncFilter", (source) => Pact.asyncFilter(() => true, source)],
-  ["asyncScan", (source) => Pact.asyncScan((a, n) => a + n, 0, source)],
-  ["asyncFlatten", (source) => Pact.asyncFlatten(source)],
-  ["asyncDrop", (source) => Pact.asyncDrop(1, source)],
-  ["asyncDropWhile", (source) => Pact.asyncDropWhile((n) => n < 2, source)],
-  ["asyncTake", (source) => Pact.asyncTake(4, source)],
-  ["asyncTakeWhile", (source) => Pact.asyncTakeWhile(() => true, source)],
+  ["asyncMap", (source) => Pact.asyncMap((n) => n)(source)],
+  ["asyncTap", (source) => Pact.asyncTap(() => {})(source)],
+  ["asyncFilter", (source) => Pact.asyncFilter(() => true)(source)],
+  ["asyncScan", (source) => Pact.asyncScan((a, n) => a + n, 0)(source)],
+  ["asyncFlatten", (source) => Pact.asyncFlatten()(source)],
+  ["asyncDrop", (source) => Pact.asyncDrop(1)(source)],
+  ["asyncDropWhile", (source) => Pact.asyncDropWhile((n) => n < 2)(source)],
+  ["asyncTake", (source) => Pact.asyncTake(4)(source)],
+  ["asyncTakeWhile", (source) => Pact.asyncTakeWhile(() => true)(source)],
   ["asyncZip (first)", (source) => Pact.asyncZip(source, items)],
   ["asyncZip (second)", (source) => Pact.asyncZip(items, source)],
   ["asyncConcat", (source) => Pact.asyncConcat(source, items)]
@@ -85,16 +85,16 @@ const asyncSteps = [
 
 /** @type [string, (source: any) => Promise<any>][] */
 const asyncCallbackThrows = [
-  ["asyncMap", (source) => toArray(Pact.asyncMap(boom, source))],
-  ["asyncTap", (source) => toArray(Pact.asyncTap(boom, source))],
-  ["asyncFilter", (source) => toArray(Pact.asyncFilter(boom, source))],
-  ["asyncScan", (source) => toArray(Pact.asyncScan(boom, 0, source))],
-  ["asyncDropWhile", (source) => toArray(Pact.asyncDropWhile(boom, source))],
-  ["asyncTakeWhile", (source) => toArray(Pact.asyncTakeWhile(boom, source))],
-  ["asyncReduce", (source) => Pact.asyncReduce(boom, 0, source)],
-  ["asyncEvery", (source) => Pact.asyncEvery(boom, source)],
-  ["asyncSome", (source) => Pact.asyncSome(boom, source)],
-  ["asyncFind", (source) => Pact.asyncFind(boom, source)]
+  ["asyncMap", (source) => toArray(Pact.asyncMap(boom)(source))],
+  ["asyncTap", (source) => toArray(Pact.asyncTap(boom)(source))],
+  ["asyncFilter", (source) => toArray(Pact.asyncFilter(boom)(source))],
+  ["asyncScan", (source) => toArray(Pact.asyncScan(boom, 0)(source))],
+  ["asyncDropWhile", (source) => toArray(Pact.asyncDropWhile(boom)(source))],
+  ["asyncTakeWhile", (source) => toArray(Pact.asyncTakeWhile(boom)(source))],
+  ["asyncReduce", (source) => Pact.asyncReduce(boom, 0)(source)],
+  ["asyncEvery", (source) => Pact.asyncEvery(boom)(source)],
+  ["asyncSome", (source) => Pact.asyncSome(boom)(source)],
+  ["asyncFind", (source) => Pact.asyncFind(boom)(source)]
 ];
 
 describe("stopping early closes the source", () => {
@@ -116,7 +116,7 @@ describe("closing a step closes its source", () => {
 
   test("flatten closes the nested iterable it's in", () => {
     const nested = closable(items);
-    const result = Pact.flatten([nested]);
+    const result = Pact.flatten()([nested]);
     result.next();
     result.return(undefined);
     expect(nested.closed).to.equal(true);
