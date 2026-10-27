@@ -280,18 +280,18 @@ export const asyncSome: (
  * Returns the first value that passes the predicate function.
  */
 export const find: (
-  <A>(fn: Predicate<A>, iterator: Iterable<A>) => A
+  <A>(fn: Predicate<A>, iterator: Iterable<A>) => A | undefined
 ) & (
-  <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => A
+  <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => A | undefined
 );
 
 /**
  * Same as `find`, but works with AsyncIterables and async predicate functions.
  */
 export const asyncFind: (
-  <A>(fn: AsyncPredicate<A>, iterator: Iterable<A> | AsyncIterable<A>) => Promise<A>
+  <A>(fn: AsyncPredicate<A>, iterator: Iterable<A> | AsyncIterable<A>) => Promise<A | undefined>
 ) & (
-  <A>(fn: AsyncPredicate<A>) => (iterator: Iterable<A> | AsyncIterable<A>) => Promise<A>
+  <A>(fn: AsyncPredicate<A>) => (iterator: Iterable<A> | AsyncIterable<A>) => Promise<A | undefined>
 );
 
 /**
