@@ -25,10 +25,11 @@ const result = pipe(
 console.log(result);
 ```
 
+The async versions are in `@hyperjump/pact/async`, with the same names. They
+accept Iterables and AsyncIterables, and their callbacks can return promises.
+
 ```javascript
-import { pipe, asyncMap, asyncFilter, asyncReduce } from "@hyperjump/pact";
-// You can alternatively import the async functions without the prefix
-// import { pipe, map, filter, reduce } from "@hyperjump/pact/async";
+import { pipe, map, filter, reduce } from "@hyperjump/pact/async";
 
 
 const asyncSequence = async function* () {
@@ -39,15 +40,27 @@ const asyncSequence = async function* () {
   yield 5;
 };
 
-for await (const value of asyncSequence()) {
-  console.log(value);
-}
-
 const result = await pipe(
   asyncSequence(),
-  asyncFilter((n) => n % 2 === 0),
-  asyncMap((n) => n * 2),
-  asyncReduce((sum, n) => sum + n, 0)
+  filter((n) => n % 2 === 0),
+  map(async (n) => n * 2),
+  reduce((sum, n) => sum + n, 0)
+);
+console.log(result);
+```
+
+To use both in one module, import one of them as a namespace.
+
+```javascript
+import { pipe, range, filter } from "@hyperjump/pact";
+import * as Async from "@hyperjump/pact/async";
+
+
+const result = await pipe(
+  range(1, 10),
+  filter((n) => n % 2 === 0),
+  Async.map(async (n) => n * 2),
+  Async.collectArray
 );
 console.log(result);
 ```

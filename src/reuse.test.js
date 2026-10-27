@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import * as Pact from "./index.js";
+import * as Async from "./async.js";
 
 // A step made once can be used more than once, and each use starts from
 // the step's configuration, not from where the last use left off.
@@ -26,19 +27,19 @@ const steps = [
 
 /** @type [string, (iter: any) => any][] */
 const asyncSteps = [
-  ["asyncMap", Pact.asyncMap((n) => n * 2)],
-  ["asyncTap", Pact.asyncTap(() => {})],
-  ["asyncFilter", Pact.asyncFilter((n) => n > 1)],
-  ["asyncScan", Pact.asyncScan(add, 0)],
-  ["asyncDrop", Pact.asyncDrop(1)],
-  ["asyncDropWhile", Pact.asyncDropWhile((n) => n < 2)],
-  ["asyncTake", Pact.asyncTake(2)],
-  ["asyncTakeWhile", Pact.asyncTakeWhile((n) => n < 3)],
-  ["asyncReduce", Pact.asyncReduce(add, 0)],
-  ["asyncEvery", Pact.asyncEvery((n) => n > 0)],
-  ["asyncSome", Pact.asyncSome((n) => n > 2)],
-  ["asyncFind", Pact.asyncFind((n) => n > 1)],
-  ["asyncJoin", Pact.asyncJoin(",")]
+  ["Async.map", Async.map((n) => n * 2)],
+  ["Async.tap", Async.tap(() => {})],
+  ["Async.filter", Async.filter((n) => n > 1)],
+  ["Async.scan", Async.scan(add, 0)],
+  ["Async.drop", Async.drop(1)],
+  ["Async.dropWhile", Async.dropWhile((n) => n < 2)],
+  ["Async.take", Async.take(2)],
+  ["Async.takeWhile", Async.takeWhile((n) => n < 3)],
+  ["Async.reduce", Async.reduce(add, 0)],
+  ["Async.every", Async.every((n) => n > 0)],
+  ["Async.some", Async.some((n) => n > 2)],
+  ["Async.find", Async.find((n) => n > 1)],
+  ["Async.join", Async.join(",")]
 ];
 
 describe("a step can be used more than once", () => {

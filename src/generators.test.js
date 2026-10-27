@@ -1,22 +1,24 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import {
-  map, asyncMap,
-  tap, asyncTap,
-  filter, asyncFilter,
-  scan, asyncScan,
-  flatten, asyncFlatten,
-  drop, asyncDrop,
-  dropWhile, asyncDropWhile,
-  take, asyncTake,
-  takeWhile, asyncTakeWhile,
-  head, asyncHead,
+  map,
+  tap,
+  filter,
+  scan,
+  flatten,
+  drop,
+  dropWhile,
+  take,
+  takeWhile,
+  head,
   range,
-  empty, asyncEmpty,
-  zip, asyncZip,
-  concat, asyncConcat
+  empty,
+  zip,
+  concat
 } from "./index.js";
+import * as Async from "./async.js";
 import { closable, asyncClosable } from "./test-utils.js";
-/** @import { NestedIterable, NestedAsyncIterable } from "./index.js" */
+/** @import { NestedIterable } from "./index.js" */
+/** @import { NestedIterable as AsyncNestedIterable } from "./async.js" */
 
 describe("map", () => {
   /** @type Generator<number> */
@@ -45,7 +47,7 @@ describe("map", () => {
   });
 });
 
-describe("asyncMap", () => {
+describe("Async.map", () => {
   /** @type Generator<number> */
   let generator;
   /** @type AsyncGenerator<number> */
@@ -70,7 +72,7 @@ describe("asyncMap", () => {
   });
 
   test("generator with async mapper", async () => {
-    const result = asyncMap(async (n) => n * 2)(generator);
+    const result = Async.map(async (n) => n * 2)(generator);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(4);
     expect((await result.next()).value).to.equal(6);
@@ -78,7 +80,7 @@ describe("asyncMap", () => {
   });
 
   test("async-generator with sync mapper", async () => {
-    const result = asyncMap((n) => n * 2)(asyncGenerator);
+    const result = Async.map((n) => n * 2)(asyncGenerator);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(4);
     expect((await result.next()).value).to.equal(6);
@@ -86,7 +88,7 @@ describe("asyncMap", () => {
   });
 
   test("array with async mapper", async () => {
-    const result = asyncMap(async (n) => n * 2)(array);
+    const result = Async.map(async (n) => n * 2)(array);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(4);
     expect((await result.next()).value).to.equal(6);
@@ -129,7 +131,7 @@ describe("tap", () => {
   });
 });
 
-describe("asyncTap", () => {
+describe("Async.tap", () => {
   /** @type AsyncGenerator<number> */
   let asyncGenerator;
 
@@ -143,7 +145,7 @@ describe("asyncTap", () => {
 
   test("async-generator", async () => {
     let count = 0;
-    const result = asyncTap(() => {
+    const result = Async.tap(() => {
       count++;
     })(asyncGenerator);
 
@@ -182,7 +184,7 @@ describe("filter", () => {
   });
 });
 
-describe("asyncFilter", () => {
+describe("Async.filter", () => {
   /** @type Generator<number> */
   let generator;
   /** @type AsyncGenerator<number> */
@@ -207,25 +209,25 @@ describe("asyncFilter", () => {
   });
 
   test("async-generator with sync predicate", async () => {
-    const result = asyncFilter((n) => n > 2)(asyncGenerator);
+    const result = Async.filter((n) => n > 2)(asyncGenerator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 
   test("generator with async predicate", async () => {
-    const result = asyncFilter(async (n) => n > 2)(generator);
+    const result = Async.filter(async (n) => n > 2)(generator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 
   test("async-generator with async predicate", async () => {
-    const result = asyncFilter(async (n) => n > 2)(asyncGenerator);
+    const result = Async.filter(async (n) => n > 2)(asyncGenerator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 
   test("array with async predicate", async () => {
-    const result = asyncFilter(async (n) => n > 2)(array);
+    const result = Async.filter(async (n) => n > 2)(array);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
@@ -258,7 +260,7 @@ describe("scan", () => {
   });
 });
 
-describe("asyncScan", () => {
+describe("Async.scan", () => {
   /** @type Generator<number> */
   let generator;
   /** @type AsyncGenerator<number> */
@@ -283,7 +285,7 @@ describe("asyncScan", () => {
   });
 
   test("async-generator with sync reducer", async () => {
-    const result = asyncScan((acc, n) => acc + n, 0)(asyncGenerator);
+    const result = Async.scan((acc, n) => acc + n, 0)(asyncGenerator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).value).to.equal(6);
@@ -291,7 +293,7 @@ describe("asyncScan", () => {
   });
 
   test("generator with async reducer", async () => {
-    const result = asyncScan(async (acc, n) => acc + n, 0)(generator);
+    const result = Async.scan(async (acc, n) => acc + n, 0)(generator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).value).to.equal(6);
@@ -299,7 +301,7 @@ describe("asyncScan", () => {
   });
 
   test("async-generator with async reducer", async () => {
-    const result = asyncScan(async (acc, n) => acc + n, 0)(asyncGenerator);
+    const result = Async.scan(async (acc, n) => acc + n, 0)(asyncGenerator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).value).to.equal(6);
@@ -307,7 +309,7 @@ describe("asyncScan", () => {
   });
 
   test("array with async reducer", async () => {
-    const result = asyncScan(async (acc, n) => acc + n, 0)(array);
+    const result = Async.scan(async (acc, n) => acc + n, 0)(array);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).value).to.equal(6);
@@ -358,10 +360,10 @@ describe("flatten", () => {
   });
 });
 
-describe("asyncFlatten", () => {
-  /** @type NestedAsyncIterable<number | string | boolean | null> */
+describe("Async.flatten", () => {
+  /** @type AsyncNestedIterable<number | string | boolean | null> */
   let subject;
-  /** @type NestedAsyncIterable<number | string | boolean | null> */
+  /** @type AsyncNestedIterable<number | string | boolean | null> */
   let deeplyNested;
 
   beforeEach(() => {
@@ -385,7 +387,7 @@ describe("asyncFlatten", () => {
   });
 
   test("default depth", async () => {
-    const result = asyncFlatten()(subject);
+    const result = Async.flatten()(subject);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(deeplyNested);
@@ -398,7 +400,7 @@ describe("asyncFlatten", () => {
   });
 
   test("depth 1", async () => {
-    const result = asyncFlatten(1)(subject);
+    const result = Async.flatten(1)(subject);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(deeplyNested);
@@ -411,7 +413,7 @@ describe("asyncFlatten", () => {
   });
 
   test("depth 2", async () => {
-    const result = asyncFlatten(2)(subject);
+    const result = Async.flatten(2)(subject);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(3);
@@ -425,7 +427,7 @@ describe("asyncFlatten", () => {
   });
 
   test("depth Infinity", async () => {
-    const result = asyncFlatten(Infinity)(subject);
+    const result = Async.flatten(Infinity)(subject);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(3);
@@ -466,7 +468,7 @@ describe("drop", () => {
   });
 });
 
-describe("asyncDrop", () => {
+describe("Async.drop", () => {
   /** @type AsyncGenerator<number> */
   let asyncGenerator;
 
@@ -479,7 +481,7 @@ describe("asyncDrop", () => {
   });
 
   test("async-generator", async () => {
-    const result = asyncDrop(2)(asyncGenerator);
+    const result = Async.drop(2)(asyncGenerator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
@@ -517,7 +519,7 @@ describe("dropWhile", () => {
   });
 });
 
-describe("asyncDropWhile", () => {
+describe("Async.dropWhile", () => {
   /** @type AsyncGenerator<number> */
   let asyncGenerator;
 
@@ -530,13 +532,13 @@ describe("asyncDropWhile", () => {
   });
 
   test("async-generator", async () => {
-    const result = asyncDropWhile(async (n) => n < 3)(asyncGenerator);
+    const result = Async.dropWhile(async (n) => n < 3)(asyncGenerator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 
   test("drop more than is available", async () => {
-    const result = asyncDropWhile(async (n) => n < 10)(asyncGenerator);
+    const result = Async.dropWhile(async (n) => n < 10)(asyncGenerator);
     expect((await result.next()).done).to.equal(true);
   });
 });
@@ -588,7 +590,7 @@ describe("take", () => {
   });
 });
 
-describe("asyncTake", () => {
+describe("Async.take", () => {
   /** @type AsyncGenerator<number> */
   let asyncGenerator;
 
@@ -601,7 +603,7 @@ describe("asyncTake", () => {
   });
 
   test("async-generator", async () => {
-    const result = asyncTake(2)(asyncGenerator);
+    const result = Async.take(2)(asyncGenerator);
 
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
@@ -609,7 +611,7 @@ describe("asyncTake", () => {
   });
 
   test("take more than is available", async () => {
-    const result = asyncTake(10)(asyncGenerator);
+    const result = Async.take(10)(asyncGenerator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(3);
@@ -618,7 +620,7 @@ describe("asyncTake", () => {
 
   test("the source is closed when it's done taking", async () => {
     const source = asyncClosable([1, 2, 3]);
-    const result = asyncTake(2)(source);
+    const result = Async.take(2)(source);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).done).to.equal(true);
@@ -627,7 +629,7 @@ describe("asyncTake", () => {
 
   test("a sync source is closed when it's done taking", async () => {
     const source = closable([1, 2, 3]);
-    const result = asyncTake(2)(source);
+    const result = Async.take(2)(source);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).done).to.equal(true);
@@ -636,7 +638,7 @@ describe("asyncTake", () => {
 
   test("the source is closed when the result is closed early", async () => {
     const source = asyncClosable([1, 2, 3]);
-    const result = asyncTake(3)(source);
+    const result = Async.take(3)(source);
     await result.next();
     await result.return(undefined);
     expect(source.closed).to.equal(true);
@@ -675,7 +677,7 @@ describe("takeWhile", () => {
   });
 });
 
-describe("asyncTakeWhile", () => {
+describe("Async.takeWhile", () => {
   /** @type AsyncGenerator<number> */
   let asyncGenerator;
 
@@ -688,7 +690,7 @@ describe("asyncTakeWhile", () => {
   });
 
   test("async-generator", async () => {
-    const result = asyncTakeWhile(async (n) => n < 3)(asyncGenerator);
+    const result = Async.takeWhile(async (n) => n < 3)(asyncGenerator);
 
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
@@ -696,7 +698,7 @@ describe("asyncTakeWhile", () => {
   });
 
   test("take more than is available", async () => {
-    const result = asyncTakeWhile(async (n) => n < 10)(asyncGenerator);
+    const result = Async.takeWhile(async (n) => n < 10)(asyncGenerator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(3);
@@ -738,7 +740,7 @@ describe("head", () => {
   });
 });
 
-describe("asyncHead", () => {
+describe("Async.head", () => {
   /** @type AsyncGenerator<number> */
   let subject;
 
@@ -751,15 +753,15 @@ describe("asyncHead", () => {
   });
 
   test("empty async-generator", async () => {
-    expect(await asyncHead(asyncEmpty())).to.eql(undefined);
+    expect(await Async.head(Async.empty())).to.eql(undefined);
   });
 
   test("non-empty async-generator", async () => {
-    expect(await asyncHead(subject)).to.eql(1);
+    expect(await Async.head(subject)).to.eql(1);
   });
 
   test("the async-generator is closed", async () => {
-    await asyncHead(subject);
+    await Async.head(subject);
     expect((await subject.next()).done).to.equal(true);
   });
 });
@@ -782,9 +784,9 @@ describe("empty", () => {
   });
 });
 
-describe("asyncEmpty", () => {
+describe("Async.empty", () => {
   test("should be empty", async () => {
-    const subject = asyncEmpty();
+    const subject = Async.empty();
     expect((await subject.next()).done).to.equal(true);
   });
 });
@@ -857,7 +859,7 @@ describe("zip", () => {
   });
 });
 
-describe("asyncZip", () => {
+describe("Async.zip", () => {
   test("same number of items", async () => {
     const iter1 = (async function* () {
       yield 1;
@@ -868,7 +870,7 @@ describe("asyncZip", () => {
       yield "a";
       yield "b";
     }());
-    const result = asyncZip(iter1, iter2);
+    const result = Async.zip(iter1, iter2);
     expect((await result.next()).value).to.eql([1, "a"]);
     expect((await result.next()).value).to.eql([2, "b"]);
     expect((await result.next()).done).to.equal(true);
@@ -885,7 +887,7 @@ describe("asyncZip", () => {
       yield "a";
       yield "b";
     }());
-    const result = asyncZip(iter1, iter2);
+    const result = Async.zip(iter1, iter2);
     expect((await result.next()).value).to.eql([1, "a"]);
     expect((await result.next()).value).to.eql([2, "b"]);
     expect((await result.next()).value).to.eql([3, undefined]);
@@ -903,7 +905,7 @@ describe("asyncZip", () => {
       yield "b";
       yield "c";
     }());
-    const result = asyncZip(iter1, iter2);
+    const result = Async.zip(iter1, iter2);
     expect((await result.next()).value).to.eql([1, "a"]);
     expect((await result.next()).value).to.eql([2, "b"]);
     expect((await result.next()).done).to.equal(true);
@@ -911,7 +913,7 @@ describe("asyncZip", () => {
 
   test("iter2 is closed when iter1 runs out", async () => {
     const iter2 = asyncClosable(["a", "b", "c"]);
-    const result = asyncZip(asyncClosable([1, 2]), iter2);
+    const result = Async.zip(asyncClosable([1, 2]), iter2);
     expect((await result.next()).value).to.eql([1, "a"]);
     expect((await result.next()).value).to.eql([2, "b"]);
     expect((await result.next()).done).to.equal(true);
@@ -921,7 +923,7 @@ describe("asyncZip", () => {
   test("both are closed when the result is closed early", async () => {
     const iter1 = asyncClosable([1, 2, 3]);
     const iter2 = asyncClosable(["a", "b", "c"]);
-    const result = asyncZip(iter1, iter2);
+    const result = Async.zip(iter1, iter2);
     await result.next();
     await result.return(undefined);
     expect(iter1.closed).to.equal(true);
@@ -929,7 +931,7 @@ describe("asyncZip", () => {
   });
 
   test("arrays", async () => {
-    const result = asyncZip([1, 2], ["a", "b"]);
+    const result = Async.zip([1, 2], ["a", "b"]);
     expect((await result.next()).value).to.eql([1, "a"]);
     expect((await result.next()).value).to.eql([2, "b"]);
     expect((await result.next()).done).to.equal(true);
@@ -953,7 +955,7 @@ describe("concat", () => {
   });
 });
 
-describe("asyncConcat", () => {
+describe("Async.concat", () => {
   test("two iterators", async () => {
     const iter1 = (async function* () {
       yield 1;
@@ -965,7 +967,7 @@ describe("asyncConcat", () => {
       yield 4;
     }());
 
-    const result = asyncConcat(iter1, iter2);
+    const result = Async.concat(iter1, iter2);
     expect((await result.next()).value).to.eql(1);
     expect((await result.next()).value).to.eql(2);
     expect((await result.next()).value).to.eql(3);
@@ -984,7 +986,7 @@ describe("asyncConcat", () => {
       yield 4;
     }());
 
-    const result = asyncConcat(iter1, iter2);
+    const result = Async.concat(iter1, iter2);
     expect((await result.next()).value).to.eql(1);
     expect((await result.next()).value).to.eql(2);
     expect((await result.next()).value).to.eql(3);

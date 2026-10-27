@@ -1,28 +1,258 @@
-export {
-  asyncMap as map,
-  asyncTap as tap,
-  asyncFilter as filter,
-  asyncScan as scan,
-  asyncFlatten as flatten,
-  asyncDrop as drop,
-  asyncDropWhile as dropWhile,
-  asyncTake as take,
-  asyncTakeWhile as takeWhile,
-  asyncHead as head,
-  range,
-  asyncEmpty as empty,
-  asyncZip as zip,
-  asyncConcat as concat,
-  asyncReduce as reduce,
-  asyncEvery as every,
-  asyncSome as some,
-  asyncFind as find,
-  asyncCount as count,
-  asyncCollectArray as collectArray,
-  asyncCollectSet as collectSet,
-  asyncCollectMap as collectMap,
-  asyncCollectObject as collectObject,
-  asyncJoin as join,
-  pipe,
-  compose
-} from "./index.js";
+/**
+ * @module pact/async
+ */
+
+export { pipe, compose, range } from "./common.js";
+
+/**
+ * @import { AsyncIterableItem } from "./type-utils.d.ts"
+ * @import * as API from "./async.d.ts"
+ */
+
+/** @type API.map */
+export const map = (fn) => async function* (iter) {
+  for await (const n of iter) {
+    yield fn(n);
+  }
+};
+
+/** @type API.tap */
+export const tap = (fn) => async function* (iter) {
+  for await (const n of iter) {
+    await fn(n);
+    yield n;
+  }
+};
+
+/** @type API.filter */
+export const filter = (fn) => async function* (iter) {
+  for await (const n of iter) {
+    if (await fn(n)) {
+      yield n;
+    }
+  }
+};
+
+/** @type API.scan */
+export const scan = (fn, initial) => async function* (iter) {
+  let acc = initial;
+  for await (const item of iter) {
+    acc = await fn(acc, item);
+    yield acc;
+  }
+};
+
+/** @type API.flatten */
+export const flatten = (depth = 1) => async function* (iter) {
+  for await (const n of iter) {
+    if (depth > 0 && n && typeof n === "object" && (Symbol.asyncIterator in n || Symbol.iterator in n)) {
+      yield* flatten(depth - 1)(n);
+    } else {
+      yield n;
+    }
+  }
+};
+
+/** @type API.drop */
+export const drop = (count) => async function* (iter) {
+  let index = 0;
+  for await (const item of iter) {
+    if (index++ >= count) {
+      yield item;
+    }
+  }
+};
+
+/** @type API.dropWhile */
+export const dropWhile = (fn) => async function* (iter) {
+  let dropping = true;
+  for await (const n of iter) {
+    if (dropping) {
+      if (await fn(n)) {
+        continue;
+      } else {
+        dropping = false;
+      }
+    }
+
+    yield n;
+  }
+};
+
+/** @type API.take */
+export const take = (count) => async function* (iter) {
+  const iterator = getAsyncIterator(iter);
+
+  try {
+    let remaining = count;
+    let current;
+    while (remaining-- > 0 && !(current = await iterator.next())?.done) {
+      yield current.value;
+    }
+  } finally {
+    await iterator.return?.();
+  }
+};
+
+/** @type API.takeWhile */
+export const takeWhile = (fn) => async function* (iter) {
+  for await (const n of iter) {
+    if (await fn(n)) {
+      yield n;
+    } else {
+      break;
+    }
+  }
+};
+
+/** @type API.head */
+export const head = async (iter) => {
+  const iterator = getAsyncIterator(iter);
+  const result = await iterator.next();
+  await iterator.return?.();
+
+  return result.done ? undefined : result.value;
+};
+
+/** @type API.empty */
+export const empty = async function* () {};
+
+/** @type API.zip */
+export const zip = async function* (a, b) {
+  const bIter = getAsyncIterator(b);
+  try {
+    for await (const item1 of a) {
+      yield [item1, (await bIter.next()).value];
+    }
+  } finally {
+    await bIter.return?.();
+  }
+};
+
+/** @type API.concat */
+export const concat = async function* (...iters) {
+  for (const iter of iters) {
+    yield* iter;
+  }
+};
+
+/** @type API.reduce */
+export const reduce = (fn, initial) => async (iter) => {
+  let acc = initial;
+  for await (const item of iter) {
+    acc = await fn(acc, item);
+  }
+
+  return acc;
+};
+
+/** @type API.every */
+export const every = (fn) => async (iter) => {
+  for await (const item of iter) {
+    if (!await fn(item)) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+/** @type API.some */
+export const some = (fn) => async (iter) => {
+  for await (const item of iter) {
+    if (await fn(item)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+/** @type API.find */
+export const find = (fn) => async (iter) => {
+  for await (const item of iter) {
+    if (await fn(item)) {
+      return item;
+    }
+  }
+};
+
+/** @type API.count */
+export const count = (iter) => reduce((count) => count + 1, 0)(iter);
+
+/** @type API.collectArray */
+export const collectArray = async (iter) => {
+  const result = [];
+  for await (const item of iter) {
+    result.push(item);
+  }
+
+  return result;
+};
+
+/** @type API.collectSet */
+export const collectSet = async (iter) => {
+  /** @type Set<AsyncIterableItem<typeof iter>> */
+  const result = new Set();
+  for await (const item of iter) {
+    result.add(item);
+  }
+
+  return result;
+};
+
+/** @type API.collectMap */
+export const collectMap = async (iter) => {
+  /** @typedef {AsyncIterableItem<typeof iter>[0]} K */
+  /** @typedef {AsyncIterableItem<typeof iter>[1]} V */
+
+  /** @type Map<K, V> */
+  const result = new Map();
+  for await (const [key, value] of iter) {
+    result.set(key, value);
+  }
+
+  return result;
+};
+
+/** @type API.collectObject */
+export const collectObject = async (iter) => {
+  /** @typedef {AsyncIterableItem<typeof iter>[1]} V */
+
+  /** @type Record<string, V> */
+  const result = Object.create(null);
+  for await (const [key, value] of iter) {
+    result[key] = value;
+  }
+
+  return result;
+};
+
+/** @type API.join */
+export const join = (separator) => async (iter) => {
+  let result = "";
+  let prefix = "";
+
+  for await (const n of iter) {
+    result += prefix + n;
+    prefix = separator;
+  }
+
+  return result;
+};
+
+/** @type <A>(iter: Iterable<A> | AsyncIterable<A>) => AsyncIterator<A> */
+const getAsyncIterator = (iter) => {
+  if (Symbol.asyncIterator in iter && typeof iter[Symbol.asyncIterator] === "function") {
+    return iter[Symbol.asyncIterator]();
+  } else if (Symbol.iterator in iter && typeof iter[Symbol.iterator] === "function") {
+    return fromSync(iter);
+  } else {
+    throw TypeError("`iter` is not iterable");
+  }
+};
+
+/** @type <A>(iter: Iterable<A>) => AsyncGenerator<A> */
+const fromSync = async function* (iter) {
+  yield* iter;
+};

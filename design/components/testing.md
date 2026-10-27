@@ -24,4 +24,5 @@ so a function can't be missed and an API change updates one row:
   both times. v1's `take`, `scan`, and `reduce` kept their state in the
   step, so `take(2)` gave nothing the second time and `reduce(add, 0)`
   carried its total over.
-- `async.test.js`: `./async` has every async function from the root.
+- `async.test.js`: both entry points have the same functions (see
+  [Entry points](entry-points.md)).

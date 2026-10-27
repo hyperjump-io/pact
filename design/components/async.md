@@ -3,7 +3,9 @@
 Async functions accept sync iterables as well as async ones, as in v1.
 
 - A sync source is adapted to the async protocol by a small iterator, not
-  an async generator. v1 wrapped it with `asyncMap`, which added a whole
+  an async generator. Until the [rewrite](iterators.md), it's an async
+  generator that `yield*`s the source, which is as small as a generator
+  gets. v1 wrapped it with `asyncMap`, which added a whole
   async generator to every pipeline that started from an array.
 - Functions that take a callback await what it returns, so a callback can
   be sync or async.

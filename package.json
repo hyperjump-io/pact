@@ -34,7 +34,7 @@
     "lint": "oxlint",
     "test": "vitest run",
     "type-check": "tsc --noEmit",
-    "docs": "typedoc --excludeExternals"
+    "docs": "typedoc --excludeExternals src/index.d.ts src/async.d.ts"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "*",

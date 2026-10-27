@@ -8,7 +8,30 @@ There are no `async`-prefixed exports (`asyncMap`). Code that uses both
 imports them with a namespace (`import * as Async from
 "@hyperjump/pact/async"`) or renames them.
 
-Each entry point has its own `.d.ts` next to it.
+- Type names don't have the prefix either. `Mapper`, `Predicate`, and
+  `Reducer` from `./async` are the ones whose callbacks can return
+  promises, and `NestedIterable` there can nest AsyncIterables.
+- `pipe`, `compose`, and `range` are in `src/common.js`, which both entry
+  points re-export. It isn't in `exports`.
+- Each entry point has its own `.d.ts` next to it, and the API docs
+  (`npm run docs`) have a module for each.
+- `async.test.js` checks that both entry points export the same names, and
+  that `pipe`, `compose`, and `range` are the same functions in both.
+
+```javascript
+import { pipe, range, filter } from "@hyperjump/pact";
+import * as Async from "@hyperjump/pact/async";
+
+await pipe(
+  range(1, 10),
+  filter((n) => n % 2 === 0),
+  Async.map(async (n) => n * 2),
+  Async.collectArray
+);
+```
+
+A pipeline can start sync and switch to async at the first step that needs
+it, because the async functions accept sync iterables.
 
 ## Why
 
@@ -21,3 +44,7 @@ With one list per module, a function missing from one is easy to see.
 
 - **Keeping the prefixed exports in the root** as aliases. Two names for
   each async function, and the drift above.
+- **Keeping the `Async` prefix on type names** (`AsyncMapper`), so a module
+  that imports types from both entry points doesn't have to rename them.
+  The function names don't have the prefix, and the types are named after
+  what they're for, so they don't either.

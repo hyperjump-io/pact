@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import {
-  collectArray, asyncCollectArray,
-  collectSet, asyncCollectSet,
-  collectMap, asyncCollectMap,
-  collectObject, asyncCollectObject,
-  join, asyncJoin,
-  empty, asyncEmpty
+  collectArray,
+  collectSet,
+  collectMap,
+  collectObject,
+  join,
+  empty
 } from "./index.js";
+import * as Async from "./async.js";
 
 describe("collectArray", () => {
   /** @type Iterable<number> */
@@ -26,7 +27,7 @@ describe("collectArray", () => {
   });
 });
 
-describe("asyncCollectArray", () => {
+describe("Async.collectArray", () => {
   /** @type AsyncGenerator<number> */
   let subject;
 
@@ -39,7 +40,7 @@ describe("asyncCollectArray", () => {
   });
 
   test("collect", async () => {
-    const result = await asyncCollectArray(subject);
+    const result = await Async.collectArray(subject);
     expect(result).to.eql([1, 2, 3]);
   });
 });
@@ -62,7 +63,7 @@ describe("collectSet", () => {
   });
 });
 
-describe("asyncCollectSet", () => {
+describe("Async.collectSet", () => {
   /** @type AsyncGenerator<number> */
   let subject;
 
@@ -75,7 +76,7 @@ describe("asyncCollectSet", () => {
   });
 
   test("collect", async () => {
-    const result = await asyncCollectSet(subject);
+    const result = await Async.collectSet(subject);
     expect(result).to.eql(new Set([1, 2, 3]));
   });
 });
@@ -98,7 +99,7 @@ describe("collectMap", () => {
   });
 });
 
-describe("asyncCollectMap", () => {
+describe("Async.collectMap", () => {
   /** @type AsyncGenerator<[string, number]> */
   let subject;
 
@@ -111,7 +112,7 @@ describe("asyncCollectMap", () => {
   });
 
   test("collect", async () => {
-    const result = await asyncCollectMap(subject);
+    const result = await Async.collectMap(subject);
     expect(result).to.eql(new Map([["foo", 1], ["bar", 2], ["baz", 3]]));
   });
 });
@@ -134,7 +135,7 @@ describe("collectObject", () => {
   });
 });
 
-describe("asyncCollectObject", () => {
+describe("Async.collectObject", () => {
   /** @type AsyncGenerator<[string, number]> */
   let subject;
 
@@ -147,7 +148,7 @@ describe("asyncCollectObject", () => {
   });
 
   test("collect", async () => {
-    const result = await asyncCollectObject(subject);
+    const result = await Async.collectObject(subject);
     expect(result).to.eql({ foo: 1, bar: 2, baz: 3 });
   });
 });
@@ -189,9 +190,9 @@ describe("join", () => {
   });
 });
 
-describe("asyncJoin", () => {
+describe("Async.join", () => {
   test("empty", async () => {
-    const result = await asyncJoin(",")(asyncEmpty());
+    const result = await Async.join(",")(Async.empty());
     expect(result).to.equal("");
   });
 
@@ -200,7 +201,7 @@ describe("asyncJoin", () => {
       yield "foo";
     }());
 
-    const result = await asyncJoin(",")(subject);
+    const result = await Async.join(",")(subject);
     expect(result).to.equal("foo");
   });
 
@@ -211,17 +212,17 @@ describe("asyncJoin", () => {
       yield "baz";
     }());
 
-    const result = await asyncJoin(",")(subject);
+    const result = await Async.join(",")(subject);
     expect(result).to.equal("foo,bar,baz");
   });
 
   test("array", async () => {
-    const result = await asyncJoin(",")(["foo", "bar", "baz"]);
+    const result = await Async.join(",")(["foo", "bar", "baz"]);
     expect(result).to.equal("foo,bar,baz");
   });
 
   test("set", async () => {
-    const result = await asyncJoin(",")(new Set(["foo", "bar", "baz"]));
+    const result = await Async.join(",")(new Set(["foo", "bar", "baz"]));
     expect(result).to.equal("foo,bar,baz");
   });
 });

@@ -2,13 +2,14 @@ import { describe, expect, test } from "vitest";
 import * as Pact from "./index.js";
 import * as Async from "./async.js";
 
-describe("async entry point", () => {
-  test("exports every async function without its prefix", () => {
-    const expected = Object.keys(Pact)
-      .filter((name) => /^async[A-Z]/.test(name))
-      .map((name) => name[5].toLowerCase() + name.slice(6));
+describe("entry points", () => {
+  test("the sync and async entry points have the same functions", () => {
+    expect(Object.keys(Async).toSorted()).to.eql(Object.keys(Pact).toSorted());
+  });
 
-    const missing = expected.filter((name) => !(name in Async));
-    expect(missing).to.eql([]);
+  test("pipe, compose, and range are the same in both", () => {
+    expect(Async.pipe).to.equal(Pact.pipe);
+    expect(Async.compose).to.equal(Pact.compose);
+    expect(Async.range).to.equal(Pact.range);
   });
 });

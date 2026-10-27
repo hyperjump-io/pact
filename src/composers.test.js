@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import {
-  map, asyncMap,
-  filter, asyncFilter,
-  reduce, asyncReduce,
+  map,
+  filter,
+  reduce,
   collectArray,
   pipe, compose
 } from "./index.js";
+import * as Async from "./async.js";
 
 describe("pipe", () => {
   /** @type Iterable<number> */
@@ -70,7 +71,7 @@ describe("async pipe", () => {
     /** @type AsyncGenerator<number> */
     const result = pipe(
       subject,
-      asyncFilter((/** @type number */ n) => n > 2)
+      Async.filter((/** @type number */ n) => n > 2)
     );
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).value).to.equal(4);
@@ -82,8 +83,8 @@ describe("async pipe", () => {
     /** @type AsyncGenerator<number> */
     const result = pipe(
       subject,
-      asyncFilter((/** @type number */ n) => n > 2),
-      asyncMap((/** @type number */ n) => n * 2)
+      Async.filter((/** @type number */ n) => n > 2),
+      Async.map((/** @type number */ n) => n * 2)
     );
     expect((await result.next()).value).to.equal(6);
     expect((await result.next()).value).to.equal(8);
@@ -95,9 +96,9 @@ describe("async pipe", () => {
     /** @type number */
     const result = await pipe(
       subject,
-      asyncFilter((/** @type number */ n) => n > 2),
-      asyncMap((/** @type number */ n) => n * 2),
-      asyncReduce((acc, /** @type number */ n) => acc + n, 0)
+      Async.filter((/** @type number */ n) => n > 2),
+      Async.map((/** @type number */ n) => n * 2),
+      Async.reduce((acc, /** @type number */ n) => acc + n, 0)
     );
     expect(result).to.eql(24);
   });
@@ -139,9 +140,9 @@ describe("compose", () => {
 
   test("async", async () => {
     const sumOfDoubledEvens = compose(
-      asyncFilter(async (/** @type number */ n) => n % 2 === 0),
-      asyncMap((/** @type number */ n) => n * 2),
-      asyncReduce((acc, /** @type number */ n) => acc + n, 0)
+      Async.filter(async (/** @type number */ n) => n % 2 === 0),
+      Async.map((/** @type number */ n) => n * 2),
+      Async.reduce((acc, /** @type number */ n) => acc + n, 0)
     );
     expect(await sumOfDoubledEvens([1, 2, 3, 4])).to.equal(12);
   });

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import * as Pact from "./index.js";
+import * as Async from "./async.js";
 import { closable, asyncClosable } from "./test-utils.js";
 
 // Anything that stops reading a source before it's done closes it (see
@@ -56,45 +57,45 @@ const callbackThrows = [
 
 /** @type [string, (source: any) => Promise<any>][] */
 const asyncStopsEarly = [
-  ["asyncTake", (source) => toArray(Pact.asyncTake(2)(source))],
-  ["asyncTakeWhile", (source) => toArray(Pact.asyncTakeWhile((n) => n < 3)(source))],
-  ["asyncHead", (source) => Pact.asyncHead(source)],
-  ["asyncFind", (source) => Pact.asyncFind((n) => n > 1)(source)],
-  ["asyncSome", (source) => Pact.asyncSome((n) => n > 1)(source)],
-  ["asyncEvery", (source) => Pact.asyncEvery((n) => n < 2)(source)],
-  ["asyncZip (first)", (source) => toArray(Pact.asyncZip(source, [1]))],
-  ["asyncZip (second)", (source) => toArray(Pact.asyncZip([1], source))],
-  ["pipe", (source) => Pact.pipe(source, Pact.asyncTake(1), Pact.asyncCollectArray)]
+  ["Async.take", (source) => toArray(Async.take(2)(source))],
+  ["Async.takeWhile", (source) => toArray(Async.takeWhile((n) => n < 3)(source))],
+  ["Async.head", (source) => Async.head(source)],
+  ["Async.find", (source) => Async.find((n) => n > 1)(source)],
+  ["Async.some", (source) => Async.some((n) => n > 1)(source)],
+  ["Async.every", (source) => Async.every((n) => n < 2)(source)],
+  ["Async.zip (first)", (source) => toArray(Async.zip(source, [1]))],
+  ["Async.zip (second)", (source) => toArray(Async.zip([1], source))],
+  ["pipe", (source) => Pact.pipe(source, Async.take(1), Async.collectArray)]
 ];
 
 /** @type [string, (source: any) => AsyncIterator<any>][] */
 const asyncSteps = [
-  ["asyncMap", (source) => Pact.asyncMap((n) => n)(source)],
-  ["asyncTap", (source) => Pact.asyncTap(() => {})(source)],
-  ["asyncFilter", (source) => Pact.asyncFilter(() => true)(source)],
-  ["asyncScan", (source) => Pact.asyncScan((a, n) => a + n, 0)(source)],
-  ["asyncFlatten", (source) => Pact.asyncFlatten()(source)],
-  ["asyncDrop", (source) => Pact.asyncDrop(1)(source)],
-  ["asyncDropWhile", (source) => Pact.asyncDropWhile((n) => n < 2)(source)],
-  ["asyncTake", (source) => Pact.asyncTake(4)(source)],
-  ["asyncTakeWhile", (source) => Pact.asyncTakeWhile(() => true)(source)],
-  ["asyncZip (first)", (source) => Pact.asyncZip(source, items)],
-  ["asyncZip (second)", (source) => Pact.asyncZip(items, source)],
-  ["asyncConcat", (source) => Pact.asyncConcat(source, items)]
+  ["Async.map", (source) => Async.map((n) => n)(source)],
+  ["Async.tap", (source) => Async.tap(() => {})(source)],
+  ["Async.filter", (source) => Async.filter(() => true)(source)],
+  ["Async.scan", (source) => Async.scan((a, n) => a + n, 0)(source)],
+  ["Async.flatten", (source) => Async.flatten()(source)],
+  ["Async.drop", (source) => Async.drop(1)(source)],
+  ["Async.dropWhile", (source) => Async.dropWhile((n) => n < 2)(source)],
+  ["Async.take", (source) => Async.take(4)(source)],
+  ["Async.takeWhile", (source) => Async.takeWhile(() => true)(source)],
+  ["Async.zip (first)", (source) => Async.zip(source, items)],
+  ["Async.zip (second)", (source) => Async.zip(items, source)],
+  ["Async.concat", (source) => Async.concat(source, items)]
 ];
 
 /** @type [string, (source: any) => Promise<any>][] */
 const asyncCallbackThrows = [
-  ["asyncMap", (source) => toArray(Pact.asyncMap(boom)(source))],
-  ["asyncTap", (source) => toArray(Pact.asyncTap(boom)(source))],
-  ["asyncFilter", (source) => toArray(Pact.asyncFilter(boom)(source))],
-  ["asyncScan", (source) => toArray(Pact.asyncScan(boom, 0)(source))],
-  ["asyncDropWhile", (source) => toArray(Pact.asyncDropWhile(boom)(source))],
-  ["asyncTakeWhile", (source) => toArray(Pact.asyncTakeWhile(boom)(source))],
-  ["asyncReduce", (source) => Pact.asyncReduce(boom, 0)(source)],
-  ["asyncEvery", (source) => Pact.asyncEvery(boom)(source)],
-  ["asyncSome", (source) => Pact.asyncSome(boom)(source)],
-  ["asyncFind", (source) => Pact.asyncFind(boom)(source)]
+  ["Async.map", (source) => toArray(Async.map(boom)(source))],
+  ["Async.tap", (source) => toArray(Async.tap(boom)(source))],
+  ["Async.filter", (source) => toArray(Async.filter(boom)(source))],
+  ["Async.scan", (source) => toArray(Async.scan(boom, 0)(source))],
+  ["Async.dropWhile", (source) => toArray(Async.dropWhile(boom)(source))],
+  ["Async.takeWhile", (source) => toArray(Async.takeWhile(boom)(source))],
+  ["Async.reduce", (source) => Async.reduce(boom, 0)(source)],
+  ["Async.every", (source) => Async.every(boom)(source)],
+  ["Async.some", (source) => Async.some(boom)(source)],
+  ["Async.find", (source) => Async.find(boom)(source)]
 ];
 
 describe("stopping early closes the source", () => {

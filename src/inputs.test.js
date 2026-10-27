@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import * as Pact from "./index.js";
+import * as Async from "./async.js";
 
 // Every function, with each kind of input. An array or a Set can be
 // iterated more than once, which a generator can't, and an empty input
@@ -52,30 +53,30 @@ const syncCases = [
 
 /** @type Case[] */
 const asyncCases = [
-  { name: "asyncMap", items: numbers, run: (iter) => toArray(Pact.asyncMap(double)(iter)), expected: [2, 4, 6, 8], expectedEmpty: [] },
-  { name: "asyncTap", items: numbers, run: (iter) => toArray(Pact.asyncTap(() => {})(iter)), expected: [1, 2, 3, 4], expectedEmpty: [] },
-  { name: "asyncFilter", items: numbers, run: (iter) => toArray(Pact.asyncFilter(isEven)(iter)), expected: [2, 4], expectedEmpty: [] },
-  { name: "asyncScan", items: numbers, run: (iter) => toArray(Pact.asyncScan(add, 0)(iter)), expected: [1, 3, 6, 10], expectedEmpty: [] },
-  { name: "asyncFlatten", items: [[1, 2], [3], 4], run: (iter) => toArray(Pact.asyncFlatten()(iter)), expected: [1, 2, 3, 4], expectedEmpty: [] },
-  { name: "asyncDrop", items: numbers, run: (iter) => toArray(Pact.asyncDrop(2)(iter)), expected: [3, 4], expectedEmpty: [] },
-  { name: "asyncDropWhile", items: numbers, run: (iter) => toArray(Pact.asyncDropWhile((n) => n < 3)(iter)), expected: [3, 4], expectedEmpty: [] },
-  { name: "asyncTake", items: numbers, run: (iter) => toArray(Pact.asyncTake(2)(iter)), expected: [1, 2], expectedEmpty: [] },
-  { name: "asyncTakeWhile", items: numbers, run: (iter) => toArray(Pact.asyncTakeWhile((n) => n < 3)(iter)), expected: [1, 2], expectedEmpty: [] },
-  { name: "asyncHead", items: numbers, run: (iter) => Pact.asyncHead(iter), expected: 1, expectedEmpty: undefined },
-  { name: "asyncZip (first)", items: numbers, run: (iter) => toArray(Pact.asyncZip(iter, strings)), expected: [[1, "a"], [2, "b"], [3, "c"], [4, undefined]], expectedEmpty: [] },
-  { name: "asyncZip (second)", items: numbers, run: (iter) => toArray(Pact.asyncZip(strings, iter)), expected: [["a", 1], ["b", 2], ["c", 3]], expectedEmpty: [["a", undefined], ["b", undefined], ["c", undefined]] },
-  { name: "asyncConcat", items: numbers, run: (iter) => toArray(Pact.asyncConcat([0], iter, [5])), expected: [0, 1, 2, 3, 4, 5], expectedEmpty: [0, 5] },
-  { name: "asyncReduce", items: numbers, run: (iter) => Pact.asyncReduce(add, 0)(iter), expected: 10, expectedEmpty: 0 },
-  { name: "asyncEvery", items: numbers, run: (iter) => Pact.asyncEvery((n) => n > 0)(iter), expected: true, expectedEmpty: true },
-  { name: "asyncSome", items: numbers, run: (iter) => Pact.asyncSome((n) => n > 3)(iter), expected: true, expectedEmpty: false },
-  { name: "asyncFind", items: numbers, run: (iter) => Pact.asyncFind((n) => n > 2)(iter), expected: 3, expectedEmpty: undefined },
-  { name: "asyncCount", items: numbers, run: (iter) => Pact.asyncCount(iter), expected: 4, expectedEmpty: 0 },
-  { name: "asyncCollectArray", items: numbers, run: (iter) => Pact.asyncCollectArray(iter), expected: [1, 2, 3, 4], expectedEmpty: [] },
-  { name: "asyncCollectSet", items: numbers, run: (iter) => Pact.asyncCollectSet(iter), expected: new Set(numbers), expectedEmpty: new Set() },
-  { name: "asyncCollectMap", items: pairs, run: (iter) => Pact.asyncCollectMap(iter), expected: new Map([["a", 1], ["b", 2]]), expectedEmpty: new Map() },
-  { name: "asyncCollectObject", items: pairs, run: (iter) => Pact.asyncCollectObject(iter), expected: { a: 1, b: 2 }, expectedEmpty: {} },
-  { name: "asyncJoin", items: strings, run: (iter) => Pact.asyncJoin(",")(iter), expected: "a,b,c", expectedEmpty: "" },
-  { name: "pipe", items: numbers, run: (iter) => Pact.pipe(iter, Pact.asyncFilter(isEven), Pact.asyncMap(double), Pact.asyncCollectArray), expected: [4, 8], expectedEmpty: [] }
+  { name: "Async.map", items: numbers, run: (iter) => toArray(Async.map(double)(iter)), expected: [2, 4, 6, 8], expectedEmpty: [] },
+  { name: "Async.tap", items: numbers, run: (iter) => toArray(Async.tap(() => {})(iter)), expected: [1, 2, 3, 4], expectedEmpty: [] },
+  { name: "Async.filter", items: numbers, run: (iter) => toArray(Async.filter(isEven)(iter)), expected: [2, 4], expectedEmpty: [] },
+  { name: "Async.scan", items: numbers, run: (iter) => toArray(Async.scan(add, 0)(iter)), expected: [1, 3, 6, 10], expectedEmpty: [] },
+  { name: "Async.flatten", items: [[1, 2], [3], 4], run: (iter) => toArray(Async.flatten()(iter)), expected: [1, 2, 3, 4], expectedEmpty: [] },
+  { name: "Async.drop", items: numbers, run: (iter) => toArray(Async.drop(2)(iter)), expected: [3, 4], expectedEmpty: [] },
+  { name: "Async.dropWhile", items: numbers, run: (iter) => toArray(Async.dropWhile((n) => n < 3)(iter)), expected: [3, 4], expectedEmpty: [] },
+  { name: "Async.take", items: numbers, run: (iter) => toArray(Async.take(2)(iter)), expected: [1, 2], expectedEmpty: [] },
+  { name: "Async.takeWhile", items: numbers, run: (iter) => toArray(Async.takeWhile((n) => n < 3)(iter)), expected: [1, 2], expectedEmpty: [] },
+  { name: "Async.head", items: numbers, run: (iter) => Async.head(iter), expected: 1, expectedEmpty: undefined },
+  { name: "Async.zip (first)", items: numbers, run: (iter) => toArray(Async.zip(iter, strings)), expected: [[1, "a"], [2, "b"], [3, "c"], [4, undefined]], expectedEmpty: [] },
+  { name: "Async.zip (second)", items: numbers, run: (iter) => toArray(Async.zip(strings, iter)), expected: [["a", 1], ["b", 2], ["c", 3]], expectedEmpty: [["a", undefined], ["b", undefined], ["c", undefined]] },
+  { name: "Async.concat", items: numbers, run: (iter) => toArray(Async.concat([0], iter, [5])), expected: [0, 1, 2, 3, 4, 5], expectedEmpty: [0, 5] },
+  { name: "Async.reduce", items: numbers, run: (iter) => Async.reduce(add, 0)(iter), expected: 10, expectedEmpty: 0 },
+  { name: "Async.every", items: numbers, run: (iter) => Async.every((n) => n > 0)(iter), expected: true, expectedEmpty: true },
+  { name: "Async.some", items: numbers, run: (iter) => Async.some((n) => n > 3)(iter), expected: true, expectedEmpty: false },
+  { name: "Async.find", items: numbers, run: (iter) => Async.find((n) => n > 2)(iter), expected: 3, expectedEmpty: undefined },
+  { name: "Async.count", items: numbers, run: (iter) => Async.count(iter), expected: 4, expectedEmpty: 0 },
+  { name: "Async.collectArray", items: numbers, run: (iter) => Async.collectArray(iter), expected: [1, 2, 3, 4], expectedEmpty: [] },
+  { name: "Async.collectSet", items: numbers, run: (iter) => Async.collectSet(iter), expected: new Set(numbers), expectedEmpty: new Set() },
+  { name: "Async.collectMap", items: pairs, run: (iter) => Async.collectMap(iter), expected: new Map([["a", 1], ["b", 2]]), expectedEmpty: new Map() },
+  { name: "Async.collectObject", items: pairs, run: (iter) => Async.collectObject(iter), expected: { a: 1, b: 2 }, expectedEmpty: {} },
+  { name: "Async.join", items: strings, run: (iter) => Async.join(",")(iter), expected: "a,b,c", expectedEmpty: "" },
+  { name: "pipe", items: numbers, run: (iter) => Pact.pipe(iter, Async.filter(isEven), Async.map(double), Async.collectArray), expected: [4, 8], expectedEmpty: [] }
 ];
 
 /** @type Record<string, (items: any[]) => Iterable<any>> */
