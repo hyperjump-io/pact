@@ -15,6 +15,7 @@ import {
   zip, asyncZip,
   concat, asyncConcat
 } from "./index.js";
+import { closable, asyncClosable } from "./test-utils.js";
 /** @import { NestedIterable, NestedAsyncIterable } from "./index.js" */
 
 describe("map", () => {
@@ -1108,38 +1109,3 @@ describe("asyncConcat", () => {
     expect((await result.next()).done).to.equal(true);
   });
 });
-
-/**
- * An iterable over `items` that records whether its iterator was closed
- * with `return()`.
- *
- * @type <A>(items: A[]) => Iterable<A> & { closed: boolean }
- */
-const closable = (items) => {
-  const iterable = {
-    closed: false,
-    * [Symbol.iterator]() {
-      try {
-        yield* items;
-      } finally {
-        iterable.closed = true;
-      }
-    }
-  };
-  return iterable;
-};
-
-/** @type <A>(items: A[]) => AsyncIterable<A> & { closed: boolean } */
-const asyncClosable = (items) => {
-  const iterable = {
-    closed: false,
-    async* [Symbol.asyncIterator]() {
-      try {
-        yield* items;
-      } finally {
-        iterable.closed = true;
-      }
-    }
-  };
-  return iterable;
-};
