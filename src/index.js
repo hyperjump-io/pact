@@ -9,7 +9,6 @@ import { curry } from "./curry.js";
  * @import * as API from "./index.d.ts"
  */
 
-
 /** @type API.map */
 export const map = curry((fn) => function* (iter) {
   for (const n of iter) {
@@ -58,26 +57,22 @@ export const asyncFilter = curry((fn) => async function* (iter) {
   }
 });
 
-
 export const scan = /** @type API.scan */ (curry(
-  // eslint-disable-next-line @stylistic/no-extra-parens
-  /** @type API.scan */ ((fn, acc) => function* (iter) {
+  (/** @type API.Reducer<any, any> */ fn, /** @type any */ acc) => function* (/** @type Iterable<any> */ iter) {
     for (const item of iter) {
       acc = fn(acc, /** @type any */ (item));
       yield acc;
     }
-  })
+  }
 ));
 
-
 export const asyncScan = /** @type API.asyncScan */ (curry(
-  // eslint-disable-next-line @stylistic/no-extra-parens
-  /** @type API.asyncScan */ ((fn, acc) => async function* (iter) {
+  (/** @type API.AsyncReducer<any, any> */ fn, /** @type any */ acc) => async function* (/** @type Iterable<any> | AsyncIterable<any> */ iter) {
     for await (const item of iter) {
       acc = await fn(acc, /** @type any */ (item));
       yield acc;
     }
-  })
+  }
 ));
 
 /** @type API.flatten */
@@ -256,26 +251,23 @@ export const asyncConcat = async function* (...iters) {
 };
 
 export const reduce = /** @type API.reduce */ (curry(
-  // eslint-disable-next-line @stylistic/no-extra-parens
-  /** @type API.reduce */ ((fn, acc) => (iter) => {
+  (/** @type API.Reducer<any, any> */ fn, /** @type any */ acc) => (/** @type Iterable<any> */ iter) => {
     for (const item of iter) {
       acc = fn(acc, /** @type any */ (item));
     }
 
     return acc;
-  })
+  }
 ));
 
-
 export const asyncReduce = /** @type API.asyncReduce */ (curry(
-  // eslint-disable-next-line @stylistic/no-extra-parens
-  /** @type API.asyncReduce */ ((fn, acc) => async (iter) => {
+  (/** @type API.AsyncReducer<any, any> */ fn, /** @type any */ acc) => async (/** @type Iterable<any> | AsyncIterable<any> */ iter) => {
     for await (const item of iter) {
       acc = await fn(acc, /** @type any */ (item));
     }
 
     return acc;
-  })
+  }
 ));
 
 /** @type API.every */
@@ -414,7 +406,7 @@ export const collectObject = (iter) => {
   /** @typedef {IterableItem<typeof iter>[1]} V */
 
   /** @type Record<string, V> */
-  const result = Object.create(null); // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+  const result = Object.create(null);
   for (const [key, value] of iter) {
     result[key] = value;
   }
@@ -427,7 +419,7 @@ export const asyncCollectObject = async (iter) => {
   /** @typedef {AsyncIterableItem<typeof iter>[1]} V */
 
   /** @type Record<string, V> */
-  const result = Object.create(null); // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+  const result = Object.create(null);
   for await (const [key, value] of iter) {
     result[key] = value;
   }
@@ -478,10 +470,6 @@ const getAsyncIterator = (iter) => {
 };
 
 /** @type API.pipe */
-// eslint-disable-next-line @stylistic/no-extra-parens
-export const pipe = /** @type (acc: any, ...fns: ((a: any) => any)[]) => any */ (
-  (acc, ...fns) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return reduce((acc, fn) => fn(acc), acc, fns);
-  }
-);
+export const pipe = (/** @type any */ acc, /** @type ((a: any) => any)[] */ ...fns) => {
+  return reduce((acc, fn) => fn(acc), acc, fns);
+};

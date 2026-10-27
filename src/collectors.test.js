@@ -8,9 +8,9 @@ import {
   empty, asyncEmpty
 } from "./index.js";
 
-
 describe("collectArray", () => {
-  let subject: Iterable<number>;
+  /** @type Iterable<number> */
+  let subject;
 
   beforeEach(() => {
     subject = (function* () {
@@ -27,10 +27,10 @@ describe("collectArray", () => {
 });
 
 describe("asyncCollectArray", () => {
-  let subject: AsyncGenerator<number>;
+  /** @type AsyncGenerator<number> */
+  let subject;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     subject = (async function* () {
       yield 1;
       yield 2;
@@ -45,7 +45,8 @@ describe("asyncCollectArray", () => {
 });
 
 describe("collectSet", () => {
-  let subject: Iterable<number>;
+  /** @type Iterable<number> */
+  let subject;
 
   beforeEach(() => {
     subject = (function* () {
@@ -62,10 +63,10 @@ describe("collectSet", () => {
 });
 
 describe("asyncCollectSet", () => {
-  let subject: AsyncGenerator<number>;
+  /** @type AsyncGenerator<number> */
+  let subject;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     subject = (async function* () {
       yield 1;
       yield 2;
@@ -80,7 +81,8 @@ describe("asyncCollectSet", () => {
 });
 
 describe("collectMap", () => {
-  let subject: Iterable<[string, number]>;
+  /** @type Iterable<[string, number]> */
+  let subject;
 
   beforeEach(() => {
     subject = (function* () {
@@ -97,15 +99,15 @@ describe("collectMap", () => {
 });
 
 describe("asyncCollectMap", () => {
-  let subject: AsyncGenerator<[string, number]>;
+  /** @type AsyncGenerator<[string, number]> */
+  let subject;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/require-await
-    subject = (async function* () {
+    subject = /** @type AsyncGenerator<[string, number]> */ ((async function* () {
       yield ["foo", 1];
       yield ["bar", 2];
       yield ["baz", 3];
-    }()) as AsyncGenerator<[string, number]>;
+    }()));
   });
 
   test("collect", async () => {
@@ -115,7 +117,8 @@ describe("asyncCollectMap", () => {
 });
 
 describe("collectObject", () => {
-  let subject: Iterable<[string, number]>;
+  /** @type Iterable<[string, number]> */
+  let subject;
 
   beforeEach(() => {
     subject = (function* () {
@@ -132,15 +135,15 @@ describe("collectObject", () => {
 });
 
 describe("asyncCollectObject", () => {
-  let subject: AsyncGenerator<[string, number]>;
+  /** @type AsyncGenerator<[string, number]> */
+  let subject;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/require-await
-    subject = (async function* () {
+    subject = /** @type AsyncGenerator<[string, number]> */ ((async function* () {
       yield ["foo", 1];
       yield ["bar", 2];
       yield ["baz", 3];
-    }()) as AsyncGenerator<[string, number]>;
+    }()));
   });
 
   test("collect", async () => {
@@ -183,7 +186,6 @@ describe("asyncJoin", () => {
   });
 
   test("one item", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const subject = (async function* () {
       yield "foo";
     }());
@@ -193,7 +195,6 @@ describe("asyncJoin", () => {
   });
 
   test("multiple items", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const subject = (async function* () {
       yield "foo";
       yield "bar";

@@ -15,12 +15,13 @@ import {
   zip, asyncZip,
   concat, asyncConcat
 } from "./index.js";
-import type { NestedIterable, NestedAsyncIterable } from "./index.js";
-
+/** @import { NestedIterable, NestedAsyncIterable } from "./index.js" */
 
 describe("map", () => {
-  let generator: Generator<number>;
-  let array: number[];
+  /** @type Generator<number> */
+  let generator;
+  /** @type number[] */
+  let array;
 
   beforeEach(() => {
     generator = (function* () {
@@ -38,7 +39,7 @@ describe("map", () => {
   });
 
   test("generator curried", () => {
-    const double = map((n: number) => n * 2);
+    const double = map((/** @type number */ n) => n * 2);
     const result = double(generator);
     expect([...result]).to.eql([2, 4, 6]);
   });
@@ -50,9 +51,12 @@ describe("map", () => {
 });
 
 describe("asyncMap", () => {
-  let generator: Generator<number>;
-  let asyncGenerator: AsyncGenerator<number>;
-  let array: number[];
+  /** @type Generator<number> */
+  let generator;
+  /** @type AsyncGenerator<number> */
+  let asyncGenerator;
+  /** @type number[] */
+  let array;
 
   beforeEach(() => {
     generator = (function* () {
@@ -61,7 +65,6 @@ describe("asyncMap", () => {
       yield 3;
     }());
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     asyncGenerator = (async function* () {
       yield 1;
       yield 2;
@@ -72,7 +75,6 @@ describe("asyncMap", () => {
   });
 
   test("generator with async mapper", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const result = asyncMap(async (n) => n * 2, generator);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(4);
@@ -89,7 +91,7 @@ describe("asyncMap", () => {
   });
 
   test("async-generator with sync mapper curried", async () => {
-    const double = asyncMap((n: number) => n * 2);
+    const double = asyncMap((/** @type number */ n) => n * 2);
     const result = double(asyncGenerator);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(4);
@@ -98,7 +100,6 @@ describe("asyncMap", () => {
   });
 
   test("array with async mapper", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const result = asyncMap(async (n) => n * 2, array);
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(4);
@@ -108,8 +109,10 @@ describe("asyncMap", () => {
 });
 
 describe("tap", () => {
-  let generator: Generator<number>;
-  let array: number[];
+  /** @type Generator<number> */
+  let generator;
+  /** @type number[] */
+  let array;
 
   beforeEach(() => {
     generator = (function* () {
@@ -151,10 +154,10 @@ describe("tap", () => {
 });
 
 describe("asyncTap", () => {
-  let asyncGenerator: AsyncGenerator<number>;
+  /** @type AsyncGenerator<number> */
+  let asyncGenerator;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     asyncGenerator = (async function* () {
       yield 1;
       yield 2;
@@ -191,8 +194,10 @@ describe("asyncTap", () => {
 });
 
 describe("filter", () => {
-  let generator: Generator<number>;
-  let array: number[];
+  /** @type Generator<number> */
+  let generator;
+  /** @type number[] */
+  let array;
 
   beforeEach(() => {
     generator = (function* () {
@@ -210,7 +215,7 @@ describe("filter", () => {
   });
 
   test("generator curried", () => {
-    const greaterThanTwo = filter((n: number) => n > 2);
+    const greaterThanTwo = filter((/** @type number */ n) => n > 2);
     const result = greaterThanTwo(generator);
     expect([...result]).to.eql([3]);
   });
@@ -222,9 +227,12 @@ describe("filter", () => {
 });
 
 describe("asyncFilter", () => {
-  let generator: Generator<number>;
-  let asyncGenerator: AsyncGenerator<number>;
-  let array: number[];
+  /** @type Generator<number> */
+  let generator;
+  /** @type AsyncGenerator<number> */
+  let asyncGenerator;
+  /** @type number[] */
+  let array;
 
   beforeEach(() => {
     generator = (function* () {
@@ -233,7 +241,6 @@ describe("asyncFilter", () => {
       yield 3;
     }());
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     asyncGenerator = (async function* () {
       yield 1;
       yield 2;
@@ -250,28 +257,25 @@ describe("asyncFilter", () => {
   });
 
   test("async-generator with sync predicate curried", async () => {
-    const greaterThanTwo = asyncFilter((n: number) => n > 2);
+    const greaterThanTwo = asyncFilter((/** @type number */ n) => n > 2);
     const result = greaterThanTwo(asyncGenerator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 
   test("generator with async predicate", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const result = asyncFilter(async (n) => n > 2, generator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 
   test("async-generator with async predicate", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const result = asyncFilter(async (n) => n > 2, asyncGenerator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 
   test("array with async predicate", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const result = asyncFilter(async (n) => n > 2, array);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
@@ -279,8 +283,10 @@ describe("asyncFilter", () => {
 });
 
 describe("scan", () => {
-  let generator: Generator<number>;
-  let array: number[];
+  /** @type Generator<number> */
+  let generator;
+  /** @type number[] */
+  let array;
 
   beforeEach(() => {
     generator = (function* () {
@@ -298,7 +304,7 @@ describe("scan", () => {
   });
 
   test("generator curried", () => {
-    const sum = scan((acc, n: number) => acc + n, 0);
+    const sum = scan((acc, /** @type number */ n) => acc + n, 0);
     const result = sum(generator);
     expect([...result]).to.eql([1, 3, 6]);
   });
@@ -310,9 +316,12 @@ describe("scan", () => {
 });
 
 describe("asyncScan", () => {
-  let generator: Generator<number>;
-  let asyncGenerator: AsyncGenerator<number>;
-  let array: number[];
+  /** @type Generator<number> */
+  let generator;
+  /** @type AsyncGenerator<number> */
+  let asyncGenerator;
+  /** @type number[] */
+  let array;
 
   beforeEach(() => {
     generator = (function* () {
@@ -321,7 +330,6 @@ describe("asyncScan", () => {
       yield 3;
     }());
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     asyncGenerator = (async function* () {
       yield 1;
       yield 2;
@@ -340,7 +348,7 @@ describe("asyncScan", () => {
   });
 
   test("async-generator with sync reducer curried", async () => {
-    const sum = asyncScan((acc, n: number) => acc + n, 0);
+    const sum = asyncScan((acc, /** @type number */ n) => acc + n, 0);
     const result = sum(asyncGenerator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
@@ -349,7 +357,6 @@ describe("asyncScan", () => {
   });
 
   test("generator with async reducer", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const result = asyncScan(async (acc, n) => acc + n, 0, generator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
@@ -358,7 +365,6 @@ describe("asyncScan", () => {
   });
 
   test("async-generator with async reducer", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const result = asyncScan(async (acc, n) => acc + n, 0, asyncGenerator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
@@ -367,7 +373,6 @@ describe("asyncScan", () => {
   });
 
   test("array with async reducer", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const result = asyncScan(async (acc, n) => acc + n, 0, array);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(3);
@@ -377,8 +382,10 @@ describe("asyncScan", () => {
 });
 
 describe("flatten", () => {
-  let subject: NestedIterable<number | string | boolean | null>;
-  let deeplyNested: NestedIterable<number | string | boolean | null>;
+  /** @type NestedIterable<number | string | boolean | null> */
+  let subject;
+  /** @type NestedIterable<number | string | boolean | null> */
+  let deeplyNested;
 
   beforeEach(() => {
     deeplyNested = [3, 4];
@@ -418,20 +425,19 @@ describe("flatten", () => {
 });
 
 describe("asyncFlatten", () => {
-  let subject: NestedAsyncIterable<number | string | boolean | null>;
-  let deeplyNested: NestedAsyncIterable<number | string | boolean | null>;
+  /** @type NestedAsyncIterable<number | string | boolean | null> */
+  let subject;
+  /** @type NestedAsyncIterable<number | string | boolean | null> */
+  let deeplyNested;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     deeplyNested = (async function* () {
       yield 3;
       yield 4;
     }());
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     subject = (async function* () {
       yield 1;
-      // eslint-disable-next-line @typescript-eslint/require-await
       yield (async function* () {
         yield 2;
         yield deeplyNested;
@@ -500,8 +506,10 @@ describe("asyncFlatten", () => {
 });
 
 describe("drop", () => {
-  let generator: Generator<number>;
-  let array: number[];
+  /** @type Generator<number> */
+  let generator;
+  /** @type number[] */
+  let array;
 
   beforeEach(() => {
     generator = (function* () {
@@ -531,10 +539,10 @@ describe("drop", () => {
 });
 
 describe("asyncDrop", () => {
-  let asyncGenerator: AsyncGenerator<number>;
+  /** @type AsyncGenerator<number> */
+  let asyncGenerator;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     asyncGenerator = (async function* () {
       yield 1;
       yield 2;
@@ -557,8 +565,10 @@ describe("asyncDrop", () => {
 });
 
 describe("dropWhile", () => {
-  let generator: Generator<number>;
-  let array: number[];
+  /** @type Generator<number> */
+  let generator;
+  /** @type number[] */
+  let array;
 
   beforeEach(() => {
     generator = (function* () {
@@ -576,7 +586,7 @@ describe("dropWhile", () => {
   });
 
   test("generator curried", () => {
-    const dropTwo = dropWhile((n: number) => n < 3);
+    const dropTwo = dropWhile((/** @type number */ n) => n < 3);
     const result = dropTwo(generator);
     expect([...result]).to.eql([3]);
   });
@@ -593,10 +603,10 @@ describe("dropWhile", () => {
 });
 
 describe("asyncDropWhile", () => {
-  let asyncGenerator: AsyncGenerator<number>;
+  /** @type AsyncGenerator<number> */
+  let asyncGenerator;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     asyncGenerator = (async function* () {
       yield 1;
       yield 2;
@@ -605,30 +615,29 @@ describe("asyncDropWhile", () => {
   });
 
   test("async-generator", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const result = asyncDropWhile(async (n) => n < 3, asyncGenerator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 
   test("async-generator curried", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
-    const dropTwo = asyncDropWhile(async (n: number) => n < 3);
+    const dropTwo = asyncDropWhile(async (/** @type number */ n) => n < 3);
     const result = dropTwo(asyncGenerator);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
   });
 
   test("drop more than is available", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const result = asyncDropWhile(async (n) => n < 10, asyncGenerator);
     expect((await result.next()).done).to.equal(true);
   });
 });
 
 describe("take", () => {
-  let generator: Generator<number>;
-  let array: number[];
+  /** @type Generator<number> */
+  let generator;
+  /** @type number[] */
+  let array;
 
   beforeEach(() => {
     generator = (function* () {
@@ -663,10 +672,10 @@ describe("take", () => {
 });
 
 describe("asyncTake", () => {
-  let asyncGenerator: AsyncGenerator<number>;
+  /** @type AsyncGenerator<number> */
+  let asyncGenerator;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     asyncGenerator = (async function* () {
       yield 1;
       yield 2;
@@ -701,8 +710,10 @@ describe("asyncTake", () => {
 });
 
 describe("takeWhile", () => {
-  let generator: Generator<number>;
-  let array: number[];
+  /** @type Generator<number> */
+  let generator;
+  /** @type number[] */
+  let array;
 
   beforeEach(() => {
     generator = (function* () {
@@ -720,7 +731,7 @@ describe("takeWhile", () => {
   });
 
   test("generator curried", () => {
-    const takeTwo = takeWhile((n: number) => n < 3);
+    const takeTwo = takeWhile((/** @type number */ n) => n < 3);
     const result = takeTwo(generator);
     expect([...result]).to.eql([1, 2]);
   });
@@ -737,10 +748,10 @@ describe("takeWhile", () => {
 });
 
 describe("asyncTakeWhile", () => {
-  let asyncGenerator: AsyncGenerator<number>;
+  /** @type AsyncGenerator<number> */
+  let asyncGenerator;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     asyncGenerator = (async function* () {
       yield 1;
       yield 2;
@@ -749,7 +760,6 @@ describe("asyncTakeWhile", () => {
   });
 
   test("async-generator", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const result = asyncTakeWhile(async (n) => n < 3, asyncGenerator);
 
     expect((await result.next()).value).to.equal(1);
@@ -758,8 +768,7 @@ describe("asyncTakeWhile", () => {
   });
 
   test("async-generator curried", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
-    const takeTwo = asyncTakeWhile(async (n: number) => n < 3);
+    const takeTwo = asyncTakeWhile(async (/** @type number */ n) => n < 3);
     const result = takeTwo(asyncGenerator);
 
     expect((await result.next()).value).to.equal(1);
@@ -768,7 +777,6 @@ describe("asyncTakeWhile", () => {
   });
 
   test("take more than is available", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const result = asyncTakeWhile(async (n) => n < 10, asyncGenerator);
     expect((await result.next()).value).to.equal(1);
     expect((await result.next()).value).to.equal(2);
@@ -778,8 +786,10 @@ describe("asyncTakeWhile", () => {
 });
 
 describe("head", () => {
-  let generator: Generator<number>;
-  let array: number[];
+  /** @type Generator<number> */
+  let generator;
+  /** @type number[] */
+  let array;
 
   beforeEach(() => {
     generator = (function* () {
@@ -806,10 +816,10 @@ describe("head", () => {
 });
 
 describe("asyncHead", () => {
-  let subject: AsyncGenerator<number>;
+  /** @type AsyncGenerator<number> */
+  let subject;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     subject = (async function* () {
       yield 1;
       yield 2;
@@ -902,13 +912,11 @@ describe("zip", () => {
 
 describe("asyncZip", () => {
   test("same number of items", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const iter1 = (async function* () {
       yield 1;
       yield 2;
     }());
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     const iter2 = (async function* () {
       yield "a";
       yield "b";
@@ -920,14 +928,12 @@ describe("asyncZip", () => {
   });
 
   test("iter1 has more items", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const iter1 = (async function* () {
       yield 1;
       yield 2;
       yield 3;
     }());
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     const iter2 = (async function* () {
       yield "a";
       yield "b";
@@ -940,13 +946,11 @@ describe("asyncZip", () => {
   });
 
   test("iter2 has more items", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const iter1 = (async function* () {
       yield 1;
       yield 2;
     }());
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     const iter2 = (async function* () {
       yield "a";
       yield "b";
@@ -978,13 +982,11 @@ describe("concat", () => {
 
 describe("asyncConcat", () => {
   test("two iterators", async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     const iter1 = (async function* () {
       yield 1;
       yield 2;
     }());
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     const iter2 = (async function* () {
       yield 3;
       yield 4;
@@ -1004,7 +1006,6 @@ describe("asyncConcat", () => {
       yield 2;
     }());
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     const iter2 = (async function* () {
       yield 3;
       yield 4;
