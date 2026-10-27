@@ -429,10 +429,12 @@ export const asyncCollectObject = async (iter) => {
 
 /** @type API.join */
 export const join = curry((separator) => (iter) => {
-  let result = head(iter) ?? "";
+  let result = "";
+  let prefix = "";
 
   for (const n of iter) {
-    result += separator + n;
+    result += prefix + n;
+    prefix = separator;
   }
 
   return result;
@@ -440,10 +442,12 @@ export const join = curry((separator) => (iter) => {
 
 /** @type API.asyncJoin */
 export const asyncJoin = curry((separator) => async (iter) => {
-  let result = await asyncHead(iter) ?? "";
+  let result = "";
+  let prefix = "";
 
   for await (const n of iter) {
-    result += separator + n;
+    result += prefix + n;
+    prefix = separator;
   }
 
   return result;

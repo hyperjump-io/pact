@@ -357,9 +357,9 @@ export const join: (
  * Same as `join`, but works with AsyncIterables.
  */
 export const asyncJoin: (
-  (separator: string, iterator: AsyncIterable<string>) => Promise<string>
+  (separator: string, iterator: Iterable<string> | AsyncIterable<string>) => Promise<string>
 ) & (
-  (separator: string) => (iterator: AsyncIterable<string>) => Promise<string>
+  (separator: string) => (iterator: Iterable<string> | AsyncIterable<string>) => Promise<string>
 );
 
 /**
