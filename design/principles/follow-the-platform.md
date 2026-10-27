@@ -10,7 +10,9 @@ that becomes faster without changing what anything means.
 Where it shows up:
 
 - [Names](../components/names.md): `toArray`, `flatMap`, `forEach`,
-  `reduce` without an initial value, `concat` like `Iterator.concat`, and
-  `zip` like the Joint Iteration proposal's `Iterator.zip`.
+  `reduce` without an initial value, the index passed to callbacks,
+  `range` with a step like `Iterator.range`, `concat` like
+  `Iterator.concat`, and `zip` like the Joint Iteration proposal's
+  `Iterator.zip`.
 - [Iterators](../components/iterators.md): what pact returns extends
   `Iterator.prototype`, so the native helpers work on it.

@@ -3,8 +3,12 @@
  */
 
 /** @type API.range */
-export const range = function* (from, to) {
-  for (let n = from; to === undefined || n < to; n++) {
+export const range = function* (from, to, step = 1) {
+  if (step === 0) {
+    throw RangeError("`step` can't be 0");
+  }
+
+  for (let n = from; to === undefined || (step > 0 ? n < to : n > to); n += step) {
     yield n;
   }
 };

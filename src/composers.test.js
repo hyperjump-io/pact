@@ -3,7 +3,7 @@ import {
   map,
   filter,
   reduce,
-  collectArray,
+  toArray,
   pipe, compose
 } from "./index.js";
 import * as Async from "./async.js";
@@ -123,7 +123,7 @@ describe("compose", () => {
     const doubledEvens = compose(
       filter((/** @type number */ n) => n % 2 === 0),
       map((/** @type number */ n) => n * 2),
-      collectArray
+      toArray
     );
     expect(doubledEvens([1, 2, 3, 4])).to.eql([4, 8]);
     expect(doubledEvens([5, 6])).to.eql([12]);
@@ -134,7 +134,7 @@ describe("compose", () => {
       filter((/** @type number */ n) => n % 2 === 0),
       map((/** @type number */ n) => n * 2)
     );
-    const result = pipe([1, 2, 3, 4], doubledEvens, collectArray);
+    const result = pipe([1, 2, 3, 4], doubledEvens, toArray);
     expect(result).to.eql([4, 8]);
   });
 

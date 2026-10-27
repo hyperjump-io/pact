@@ -11,23 +11,26 @@ export { pipe, compose, range } from "./common.js";
 
 /** @type API.map */
 export const map = (fn) => function* (iter) {
+  let index = 0;
   for (const n of iter) {
-    yield fn(n);
+    yield fn(n, index++);
   }
 };
 
 /** @type API.tap */
 export const tap = (fn) => function* (iter) {
+  let index = 0;
   for (const n of iter) {
-    fn(n);
+    fn(n, index++);
     yield n;
   }
 };
 
 /** @type API.filter */
 export const filter = (fn) => function* (iter) {
+  let index = 0;
   for (const n of iter) {
-    if (fn(n)) {
+    if (fn(n, index++)) {
       yield n;
     }
   }
@@ -36,8 +39,9 @@ export const filter = (fn) => function* (iter) {
 /** @type API.scan */
 export const scan = (fn, initial) => function* (iter) {
   let acc = initial;
+  let index = 0;
   for (const item of iter) {
-    acc = fn(acc, item);
+    acc = fn(acc, item, index++);
     yield acc;
   }
 };
@@ -50,6 +54,14 @@ export const flatten = (depth = 1) => function* (iter) {
     } else {
       yield n;
     }
+  }
+};
+
+/** @type API.flatMap */
+export const flatMap = (fn) => function* (iter) {
+  let index = 0;
+  for (const n of iter) {
+    yield* getFlattenable(fn(n, index++));
   }
 };
 
@@ -66,9 +78,10 @@ export const drop = (count) => function* (iter) {
 /** @type API.dropWhile */
 export const dropWhile = (fn) => function* (iter) {
   let dropping = true;
+  let index = 0;
   for (const n of iter) {
     if (dropping) {
-      if (fn(n)) {
+      if (fn(n, index++)) {
         continue;
       } else {
         dropping = false;
@@ -96,8 +109,9 @@ export const take = (count) => function* (iter) {
 
 /** @type API.takeWhile */
 export const takeWhile = (fn) => function* (iter) {
+  let index = 0;
   for (const n of iter) {
-    if (fn(n)) {
+    if (fn(n, index++)) {
       yield n;
     } else {
       break;
@@ -137,10 +151,22 @@ export const concat = function* (...iters) {
 };
 
 /** @type API.reduce */
-export const reduce = (fn, initial) => (iter) => {
-  let acc = initial;
+export const reduce = (/** @type API.Reducer<any, any> */ fn, /** @type any[] */ ...initial) => (/** @type Iterable<any> */ iter) => {
+  let hasAcc = initial.length > 0;
+  let acc = initial[0];
+  let index = 0;
   for (const item of iter) {
-    acc = fn(acc, item);
+    if (hasAcc) {
+      acc = fn(acc, item, index);
+    } else {
+      acc = item;
+      hasAcc = true;
+    }
+    index++;
+  }
+
+  if (!hasAcc) {
+    throw TypeError("Reduce of an empty iterator with no initial value");
   }
 
   return acc;
@@ -148,8 +174,9 @@ export const reduce = (fn, initial) => (iter) => {
 
 /** @type API.every */
 export const every = (fn) => (iter) => {
+  let index = 0;
   for (const item of iter) {
-    if (!fn(item)) {
+    if (!fn(item, index++)) {
       return false;
     }
   }
@@ -159,8 +186,9 @@ export const every = (fn) => (iter) => {
 
 /** @type API.some */
 export const some = (fn) => (iter) => {
+  let index = 0;
   for (const item of iter) {
-    if (fn(item)) {
+    if (fn(item, index++)) {
       return true;
     }
   }
@@ -170,21 +198,30 @@ export const some = (fn) => (iter) => {
 
 /** @type API.find */
 export const find = (fn) => (iter) => {
+  let index = 0;
   for (const item of iter) {
-    if (fn(item)) {
+    if (fn(item, index++)) {
       return item;
     }
+  }
+};
+
+/** @type API.forEach */
+export const forEach = (fn) => (iter) => {
+  let index = 0;
+  for (const n of iter) {
+    fn(n, index++);
   }
 };
 
 /** @type API.count */
 export const count = (iter) => reduce((count) => count + 1, 0)(iter);
 
-/** @type API.collectArray */
-export const collectArray = (iter) => [...iter];
+/** @type API.toArray */
+export const toArray = (iter) => [...iter];
 
-/** @type API.collectSet */
-export const collectSet = (iter) => {
+/** @type API.toSet */
+export const toSet = (iter) => {
   /** @type Set<IterableItem<typeof iter>> */
   const result = new Set();
   for (const item of iter) {
@@ -194,8 +231,8 @@ export const collectSet = (iter) => {
   return result;
 };
 
-/** @type API.collectMap */
-export const collectMap = (iter) => {
+/** @type API.toMap */
+export const toMap = (iter) => {
   /** @typedef {IterableItem<typeof iter>[0]} K */
   /** @typedef {IterableItem<typeof iter>[1]} V */
 
@@ -208,8 +245,8 @@ export const collectMap = (iter) => {
   return result;
 };
 
-/** @type API.collectObject */
-export const collectObject = (iter) => {
+/** @type API.toObject */
+export const toObject = (iter) => {
   /** @typedef {IterableItem<typeof iter>[1]} V */
 
   /** @type Record<string, V> */
@@ -241,4 +278,13 @@ const getIterator = (iter) => {
   } else {
     throw TypeError("`iter` is not iterable");
   }
+};
+
+/** @type <A>(value: Iterable<A> | Iterator<A>) => Iterable<A> */
+const getFlattenable = (value) => {
+  if (value === null || typeof value !== "object") {
+    throw TypeError("`fn` must return an iterable or an iterator");
+  }
+
+  return Symbol.iterator in value ? value : { [Symbol.iterator]: () => value };
 };

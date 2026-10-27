@@ -8,7 +8,7 @@ Why: the native Iterator helpers already cover calling a function on an
 iterator directly (`iterator.map(fn)`). What they don't do is compose: a
 pipeline can't be built before it has a source, steps can't be shared
 between pipelines, and functions the platform doesn't have, like `scan`
-or `collectMap`, can't be chained. That's what pact is for.
+or `toMap`, can't be chained. That's what pact is for.
 
 Where it shows up:
 

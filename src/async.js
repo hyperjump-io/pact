@@ -11,23 +11,26 @@ export { pipe, compose, range } from "./common.js";
 
 /** @type API.map */
 export const map = (fn) => async function* (iter) {
+  let index = 0;
   for await (const n of iter) {
-    yield fn(n);
+    yield await fn(n, index++);
   }
 };
 
 /** @type API.tap */
 export const tap = (fn) => async function* (iter) {
+  let index = 0;
   for await (const n of iter) {
-    await fn(n);
+    await fn(n, index++);
     yield n;
   }
 };
 
 /** @type API.filter */
 export const filter = (fn) => async function* (iter) {
+  let index = 0;
   for await (const n of iter) {
-    if (await fn(n)) {
+    if (await fn(n, index++)) {
       yield n;
     }
   }
@@ -36,8 +39,9 @@ export const filter = (fn) => async function* (iter) {
 /** @type API.scan */
 export const scan = (fn, initial) => async function* (iter) {
   let acc = initial;
+  let index = 0;
   for await (const item of iter) {
-    acc = await fn(acc, item);
+    acc = await fn(acc, item, index++);
     yield acc;
   }
 };
@@ -50,6 +54,14 @@ export const flatten = (depth = 1) => async function* (iter) {
     } else {
       yield n;
     }
+  }
+};
+
+/** @type API.flatMap */
+export const flatMap = (fn) => async function* (iter) {
+  let index = 0;
+  for await (const n of iter) {
+    yield* getFlattenable(await fn(n, index++));
   }
 };
 
@@ -66,9 +78,10 @@ export const drop = (count) => async function* (iter) {
 /** @type API.dropWhile */
 export const dropWhile = (fn) => async function* (iter) {
   let dropping = true;
+  let index = 0;
   for await (const n of iter) {
     if (dropping) {
-      if (await fn(n)) {
+      if (await fn(n, index++)) {
         continue;
       } else {
         dropping = false;
@@ -96,8 +109,9 @@ export const take = (count) => async function* (iter) {
 
 /** @type API.takeWhile */
 export const takeWhile = (fn) => async function* (iter) {
+  let index = 0;
   for await (const n of iter) {
-    if (await fn(n)) {
+    if (await fn(n, index++)) {
       yield n;
     } else {
       break;
@@ -137,10 +151,22 @@ export const concat = async function* (...iters) {
 };
 
 /** @type API.reduce */
-export const reduce = (fn, initial) => async (iter) => {
-  let acc = initial;
+export const reduce = (/** @type API.Reducer<any, any> */ fn, /** @type any[] */ ...initial) => async (/** @type Iterable<any> | AsyncIterable<any> */ iter) => {
+  let hasAcc = initial.length > 0;
+  let acc = initial[0];
+  let index = 0;
   for await (const item of iter) {
-    acc = await fn(acc, item);
+    if (hasAcc) {
+      acc = await fn(acc, item, index);
+    } else {
+      acc = item;
+      hasAcc = true;
+    }
+    index++;
+  }
+
+  if (!hasAcc) {
+    throw TypeError("Reduce of an empty iterator with no initial value");
   }
 
   return acc;
@@ -148,8 +174,9 @@ export const reduce = (fn, initial) => async (iter) => {
 
 /** @type API.every */
 export const every = (fn) => async (iter) => {
+  let index = 0;
   for await (const item of iter) {
-    if (!await fn(item)) {
+    if (!await fn(item, index++)) {
       return false;
     }
   }
@@ -159,8 +186,9 @@ export const every = (fn) => async (iter) => {
 
 /** @type API.some */
 export const some = (fn) => async (iter) => {
+  let index = 0;
   for await (const item of iter) {
-    if (await fn(item)) {
+    if (await fn(item, index++)) {
       return true;
     }
   }
@@ -170,18 +198,27 @@ export const some = (fn) => async (iter) => {
 
 /** @type API.find */
 export const find = (fn) => async (iter) => {
+  let index = 0;
   for await (const item of iter) {
-    if (await fn(item)) {
+    if (await fn(item, index++)) {
       return item;
     }
+  }
+};
+
+/** @type API.forEach */
+export const forEach = (fn) => async (iter) => {
+  let index = 0;
+  for await (const n of iter) {
+    await fn(n, index++);
   }
 };
 
 /** @type API.count */
 export const count = (iter) => reduce((count) => count + 1, 0)(iter);
 
-/** @type API.collectArray */
-export const collectArray = async (iter) => {
+/** @type API.toArray */
+export const toArray = async (iter) => {
   const result = [];
   for await (const item of iter) {
     result.push(item);
@@ -190,8 +227,8 @@ export const collectArray = async (iter) => {
   return result;
 };
 
-/** @type API.collectSet */
-export const collectSet = async (iter) => {
+/** @type API.toSet */
+export const toSet = async (iter) => {
   /** @type Set<AsyncIterableItem<typeof iter>> */
   const result = new Set();
   for await (const item of iter) {
@@ -201,8 +238,8 @@ export const collectSet = async (iter) => {
   return result;
 };
 
-/** @type API.collectMap */
-export const collectMap = async (iter) => {
+/** @type API.toMap */
+export const toMap = async (iter) => {
   /** @typedef {AsyncIterableItem<typeof iter>[0]} K */
   /** @typedef {AsyncIterableItem<typeof iter>[1]} V */
 
@@ -215,8 +252,8 @@ export const collectMap = async (iter) => {
   return result;
 };
 
-/** @type API.collectObject */
-export const collectObject = async (iter) => {
+/** @type API.toObject */
+export const toObject = async (iter) => {
   /** @typedef {AsyncIterableItem<typeof iter>[1]} V */
 
   /** @type Record<string, V> */
@@ -255,4 +292,15 @@ const getAsyncIterator = (iter) => {
 /** @type <A>(iter: Iterable<A>) => AsyncGenerator<A> */
 const fromSync = async function* (iter) {
   yield* iter;
+};
+
+/** @type <A>(value: Iterable<A> | AsyncIterable<A> | Iterator<A> | AsyncIterator<A>) => Iterable<A> | AsyncIterable<A> */
+const getFlattenable = (value) => {
+  if (value === null || typeof value !== "object") {
+    throw TypeError("`fn` must return an iterable or an iterator");
+  }
+
+  return Symbol.asyncIterator in value || Symbol.iterator in value
+    ? value
+    : { [Symbol.asyncIterator]: () => /** @type AsyncIterator<any> */ (value) };
 };

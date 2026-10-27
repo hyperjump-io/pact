@@ -7,6 +7,8 @@ import * as Async from "./async.js";
 // is where an off-by-one shows up.
 
 /**
+ * An `expectedEmpty` of `TypeError` means an empty input throws one.
+ *
  * @typedef {{
  *   name: string;
  *   items: any[];
@@ -30,6 +32,7 @@ const syncCases = [
   { name: "filter", items: numbers, run: (iter) => [...Pact.filter(isEven)(iter)], expected: [2, 4], expectedEmpty: [] },
   { name: "scan", items: numbers, run: (iter) => [...Pact.scan(add, 0)(iter)], expected: [1, 3, 6, 10], expectedEmpty: [] },
   { name: "flatten", items: [[1, 2], [3], 4], run: (iter) => [...Pact.flatten()(iter)], expected: [1, 2, 3, 4], expectedEmpty: [] },
+  { name: "flatMap", items: numbers, run: (iter) => [...Pact.flatMap((n) => [n, n])(iter)], expected: [1, 1, 2, 2, 3, 3, 4, 4], expectedEmpty: [] },
   { name: "drop", items: numbers, run: (iter) => [...Pact.drop(2)(iter)], expected: [3, 4], expectedEmpty: [] },
   { name: "dropWhile", items: numbers, run: (iter) => [...Pact.dropWhile((n) => n < 3)(iter)], expected: [3, 4], expectedEmpty: [] },
   { name: "take", items: numbers, run: (iter) => [...Pact.take(2)(iter)], expected: [1, 2], expectedEmpty: [] },
@@ -42,13 +45,15 @@ const syncCases = [
   { name: "every", items: numbers, run: (iter) => Pact.every((n) => n > 0)(iter), expected: true, expectedEmpty: true },
   { name: "some", items: numbers, run: (iter) => Pact.some((n) => n > 3)(iter), expected: true, expectedEmpty: false },
   { name: "find", items: numbers, run: (iter) => Pact.find((n) => n > 2)(iter), expected: 3, expectedEmpty: undefined },
+  { name: "forEach", items: numbers, run: (iter) => seen((fn) => Pact.forEach(fn)(iter)), expected: [1, 2, 3, 4], expectedEmpty: [] },
+  { name: "reduce without an initial value", items: numbers, run: (iter) => Pact.reduce(add)(iter), expected: 10, expectedEmpty: TypeError },
   { name: "count", items: numbers, run: (iter) => Pact.count(iter), expected: 4, expectedEmpty: 0 },
-  { name: "collectArray", items: numbers, run: (iter) => Pact.collectArray(iter), expected: [1, 2, 3, 4], expectedEmpty: [] },
-  { name: "collectSet", items: numbers, run: (iter) => Pact.collectSet(iter), expected: new Set(numbers), expectedEmpty: new Set() },
-  { name: "collectMap", items: pairs, run: (iter) => Pact.collectMap(iter), expected: new Map([["a", 1], ["b", 2]]), expectedEmpty: new Map() },
-  { name: "collectObject", items: pairs, run: (iter) => Pact.collectObject(iter), expected: { a: 1, b: 2 }, expectedEmpty: {} },
+  { name: "toArray", items: numbers, run: (iter) => Pact.toArray(iter), expected: [1, 2, 3, 4], expectedEmpty: [] },
+  { name: "toSet", items: numbers, run: (iter) => Pact.toSet(iter), expected: new Set(numbers), expectedEmpty: new Set() },
+  { name: "toMap", items: pairs, run: (iter) => Pact.toMap(iter), expected: new Map([["a", 1], ["b", 2]]), expectedEmpty: new Map() },
+  { name: "toObject", items: pairs, run: (iter) => Pact.toObject(iter), expected: { a: 1, b: 2 }, expectedEmpty: {} },
   { name: "join", items: strings, run: (iter) => Pact.join(",")(iter), expected: "a,b,c", expectedEmpty: "" },
-  { name: "pipe", items: numbers, run: (iter) => Pact.pipe(iter, Pact.filter(isEven), Pact.map(double), Pact.collectArray), expected: [4, 8], expectedEmpty: [] }
+  { name: "pipe", items: numbers, run: (iter) => Pact.pipe(iter, Pact.filter(isEven), Pact.map(double), Pact.toArray), expected: [4, 8], expectedEmpty: [] }
 ];
 
 /** @type Case[] */
@@ -58,6 +63,7 @@ const asyncCases = [
   { name: "Async.filter", items: numbers, run: (iter) => toArray(Async.filter(isEven)(iter)), expected: [2, 4], expectedEmpty: [] },
   { name: "Async.scan", items: numbers, run: (iter) => toArray(Async.scan(add, 0)(iter)), expected: [1, 3, 6, 10], expectedEmpty: [] },
   { name: "Async.flatten", items: [[1, 2], [3], 4], run: (iter) => toArray(Async.flatten()(iter)), expected: [1, 2, 3, 4], expectedEmpty: [] },
+  { name: "Async.flatMap", items: numbers, run: (iter) => toArray(Async.flatMap(async (n) => [n, n])(iter)), expected: [1, 1, 2, 2, 3, 3, 4, 4], expectedEmpty: [] },
   { name: "Async.drop", items: numbers, run: (iter) => toArray(Async.drop(2)(iter)), expected: [3, 4], expectedEmpty: [] },
   { name: "Async.dropWhile", items: numbers, run: (iter) => toArray(Async.dropWhile((n) => n < 3)(iter)), expected: [3, 4], expectedEmpty: [] },
   { name: "Async.take", items: numbers, run: (iter) => toArray(Async.take(2)(iter)), expected: [1, 2], expectedEmpty: [] },
@@ -70,13 +76,15 @@ const asyncCases = [
   { name: "Async.every", items: numbers, run: (iter) => Async.every((n) => n > 0)(iter), expected: true, expectedEmpty: true },
   { name: "Async.some", items: numbers, run: (iter) => Async.some((n) => n > 3)(iter), expected: true, expectedEmpty: false },
   { name: "Async.find", items: numbers, run: (iter) => Async.find((n) => n > 2)(iter), expected: 3, expectedEmpty: undefined },
+  { name: "Async.forEach", items: numbers, run: (iter) => asyncSeen((fn) => Async.forEach(fn)(iter)), expected: [1, 2, 3, 4], expectedEmpty: [] },
+  { name: "Async.reduce without an initial value", items: numbers, run: (iter) => Async.reduce(add)(iter), expected: 10, expectedEmpty: TypeError },
   { name: "Async.count", items: numbers, run: (iter) => Async.count(iter), expected: 4, expectedEmpty: 0 },
-  { name: "Async.collectArray", items: numbers, run: (iter) => Async.collectArray(iter), expected: [1, 2, 3, 4], expectedEmpty: [] },
-  { name: "Async.collectSet", items: numbers, run: (iter) => Async.collectSet(iter), expected: new Set(numbers), expectedEmpty: new Set() },
-  { name: "Async.collectMap", items: pairs, run: (iter) => Async.collectMap(iter), expected: new Map([["a", 1], ["b", 2]]), expectedEmpty: new Map() },
-  { name: "Async.collectObject", items: pairs, run: (iter) => Async.collectObject(iter), expected: { a: 1, b: 2 }, expectedEmpty: {} },
+  { name: "Async.toArray", items: numbers, run: (iter) => Async.toArray(iter), expected: [1, 2, 3, 4], expectedEmpty: [] },
+  { name: "Async.toSet", items: numbers, run: (iter) => Async.toSet(iter), expected: new Set(numbers), expectedEmpty: new Set() },
+  { name: "Async.toMap", items: pairs, run: (iter) => Async.toMap(iter), expected: new Map([["a", 1], ["b", 2]]), expectedEmpty: new Map() },
+  { name: "Async.toObject", items: pairs, run: (iter) => Async.toObject(iter), expected: { a: 1, b: 2 }, expectedEmpty: {} },
   { name: "Async.join", items: strings, run: (iter) => Async.join(",")(iter), expected: "a,b,c", expectedEmpty: "" },
-  { name: "pipe", items: numbers, run: (iter) => Pact.pipe(iter, Async.filter(isEven), Async.map(double), Async.collectArray), expected: [4, 8], expectedEmpty: [] }
+  { name: "pipe", items: numbers, run: (iter) => Pact.pipe(iter, Async.filter(isEven), Async.map(double), Async.toArray), expected: [4, 8], expectedEmpty: [] }
 ];
 
 /** @type Record<string, (items: any[]) => Iterable<any>> */
@@ -104,7 +112,11 @@ describe.each(syncCases)("$name", ({ items, run, expected, expectedEmpty }) => {
   });
 
   test.each(Object.entries(syncInputs))("empty %s", (_kind, input) => {
-    expect(run(input([]))).to.eql(expectedEmpty);
+    if (expectedEmpty === TypeError) {
+      expect(() => run(input([]))).to.throw(TypeError);
+    } else {
+      expect(run(input([]))).to.eql(expectedEmpty);
+    }
   });
 });
 
@@ -114,7 +126,11 @@ describe.each(asyncCases)("$name", ({ items, run, expected, expectedEmpty }) => 
   });
 
   test.each(Object.entries(asyncInputs))("empty %s", async (_kind, input) => {
-    expect(await run(input([]))).to.eql(expectedEmpty);
+    if (expectedEmpty === TypeError) {
+      await expect(run(input([]))).rejects.toThrow(TypeError);
+    } else {
+      expect(await run(input([]))).to.eql(expectedEmpty);
+    }
   });
 });
 
@@ -125,4 +141,28 @@ const toArray = async (iter) => {
     result.push(item);
   }
   return result;
+};
+
+/**
+ * Runs `use` with a callback, and returns the values it was called with.
+ *
+ * @type (use: (fn: (n: any) => void) => void) => any[]
+ */
+const seen = (use) => {
+  /** @type any[] */
+  const values = [];
+  use((n) => {
+    values.push(n);
+  });
+  return values;
+};
+
+/** @type (use: (fn: (n: any) => void) => Promise<void>) => Promise<any[]> */
+const asyncSeen = async (use) => {
+  /** @type any[] */
+  const values = [];
+  await use((n) => {
+    values.push(n);
+  });
+  return values;
 };

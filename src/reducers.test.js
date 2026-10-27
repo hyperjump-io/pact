@@ -4,6 +4,7 @@ import {
   every,
   some,
   find,
+  forEach,
   count
 } from "./index.js";
 import * as Async from "./async.js";
@@ -464,5 +465,40 @@ describe("Async.count", () => {
   test("async-generator", async () => {
     const result = await Async.count(asyncGenerator);
     expect(result).to.equal(3);
+  });
+});
+
+describe("reduce without an initial value", () => {
+  test("starts with the first value", () => {
+    const result = reduce((/** @type number */ a, /** @type number */ b) => a - b)([10, 1, 2]);
+    expect(result).to.equal(7);
+  });
+
+  test("one value", () => {
+    expect(reduce((/** @type number */ a, /** @type number */ b) => a + b)([5])).to.equal(5);
+  });
+
+  test("empty throws", () => {
+    expect(() => reduce((/** @type number */ a, /** @type number */ b) => a + b)([])).to.throw(TypeError);
+  });
+
+  test("async, empty throws", async () => {
+    await expect(Async.reduce((/** @type number */ a, /** @type number */ b) => a + b)([])).rejects.toThrow(TypeError);
+  });
+});
+
+describe("forEach", () => {
+  test("returns undefined", () => {
+    expect(forEach(() => {})([1, 2])).to.equal(undefined);
+  });
+
+  test("async waits for the callback", async () => {
+    /** @type number[] */
+    const values = [];
+    await Async.forEach(async (/** @type number */ n) => {
+      await Promise.resolve();
+      values.push(n);
+    })([1, 2]);
+    expect(values).to.eql([1, 2]);
   });
 });

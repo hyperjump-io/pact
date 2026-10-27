@@ -1,10 +1,11 @@
 import type { LastReturnType } from "./type-utils.d.ts";
 
 /**
- * Yields numbers starting from `from` until `to`. If `to` is not passed, the
- * iterator will be infinite.
+ * Yields numbers starting from `from` until `to`, counting by `step`, which
+ * is 1 by default. A negative `step` counts down, and a `step` of 0 throws a
+ * RangeError. If `to` is not passed, the iterator will be infinite.
  */
-export const range: (from: number, to?: number) => Generator<number>;
+export const range: (from: number, to?: number, step?: number) => Generator<number>;
 
 /**
  * Starting with an iterator, apply any number of functions to transform the

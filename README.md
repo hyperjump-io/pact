@@ -60,7 +60,7 @@ const result = await pipe(
   range(1, 10),
   filter((n) => n % 2 === 0),
   Async.map(async (n) => n * 2),
-  Async.collectArray
+  Async.toArray
 );
 console.log(result);
 ```

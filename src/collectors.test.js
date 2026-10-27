@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import {
-  collectArray,
-  collectSet,
-  collectMap,
-  collectObject,
+  toArray,
+  toSet,
+  toMap,
+  toObject,
   join,
   empty
 } from "./index.js";
 import * as Async from "./async.js";
 
-describe("collectArray", () => {
+describe("toArray", () => {
   /** @type Iterable<number> */
   let subject;
 
@@ -22,12 +22,12 @@ describe("collectArray", () => {
   });
 
   test("collect", () => {
-    const result = collectArray(subject);
+    const result = toArray(subject);
     expect(result).to.eql([1, 2, 3]);
   });
 });
 
-describe("Async.collectArray", () => {
+describe("Async.toArray", () => {
   /** @type AsyncGenerator<number> */
   let subject;
 
@@ -40,12 +40,12 @@ describe("Async.collectArray", () => {
   });
 
   test("collect", async () => {
-    const result = await Async.collectArray(subject);
+    const result = await Async.toArray(subject);
     expect(result).to.eql([1, 2, 3]);
   });
 });
 
-describe("collectSet", () => {
+describe("toSet", () => {
   /** @type Iterable<number> */
   let subject;
 
@@ -58,12 +58,12 @@ describe("collectSet", () => {
   });
 
   test("collect", () => {
-    const result = collectSet(subject);
+    const result = toSet(subject);
     expect(result).to.eql(new Set([1, 2, 3]));
   });
 });
 
-describe("Async.collectSet", () => {
+describe("Async.toSet", () => {
   /** @type AsyncGenerator<number> */
   let subject;
 
@@ -76,12 +76,12 @@ describe("Async.collectSet", () => {
   });
 
   test("collect", async () => {
-    const result = await Async.collectSet(subject);
+    const result = await Async.toSet(subject);
     expect(result).to.eql(new Set([1, 2, 3]));
   });
 });
 
-describe("collectMap", () => {
+describe("toMap", () => {
   /** @type Iterable<[string, number]> */
   let subject;
 
@@ -94,12 +94,12 @@ describe("collectMap", () => {
   });
 
   test("collect", () => {
-    const result = collectMap(subject);
+    const result = toMap(subject);
     expect(result).to.eql(new Map([["foo", 1], ["bar", 2], ["baz", 3]]));
   });
 });
 
-describe("Async.collectMap", () => {
+describe("Async.toMap", () => {
   /** @type AsyncGenerator<[string, number]> */
   let subject;
 
@@ -112,12 +112,12 @@ describe("Async.collectMap", () => {
   });
 
   test("collect", async () => {
-    const result = await Async.collectMap(subject);
+    const result = await Async.toMap(subject);
     expect(result).to.eql(new Map([["foo", 1], ["bar", 2], ["baz", 3]]));
   });
 });
 
-describe("collectObject", () => {
+describe("toObject", () => {
   /** @type Iterable<[string, number]> */
   let subject;
 
@@ -130,12 +130,12 @@ describe("collectObject", () => {
   });
 
   test("collect", () => {
-    const result = collectObject(subject);
+    const result = toObject(subject);
     expect(result).to.eql({ foo: 1, bar: 2, baz: 3 });
   });
 });
 
-describe("Async.collectObject", () => {
+describe("Async.toObject", () => {
   /** @type AsyncGenerator<[string, number]> */
   let subject;
 
@@ -148,7 +148,7 @@ describe("Async.collectObject", () => {
   });
 
   test("collect", async () => {
-    const result = await Async.collectObject(subject);
+    const result = await Async.toObject(subject);
     expect(result).to.eql({ foo: 1, bar: 2, baz: 3 });
   });
 });

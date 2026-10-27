@@ -5,6 +5,7 @@ import {
   filter,
   scan,
   flatten,
+  flatMap,
   drop,
   dropWhile,
   take,
@@ -441,6 +442,66 @@ describe("Async.flatten", () => {
   });
 });
 
+describe("flatMap", () => {
+  test("yields the values of each iterable", () => {
+    const result = flatMap((/** @type string */ s) => s.split(" "))(["a b", "c"]);
+    expect([...result]).to.eql(["a", "b", "c"]);
+  });
+
+  test("goes one level deep", () => {
+    const result = flatMap((/** @type number */ n) => [[n]])([1, 2]);
+    expect([...result]).to.eql([[1], [2]]);
+  });
+
+  test("accepts an iterator", () => {
+    const result = flatMap((/** @type number[] */ items) => items.values())([[1, 2], [3]]);
+    expect([...result]).to.eql([1, 2, 3]);
+  });
+
+  test("a string throws", () => {
+    const result = flatMap(() => /** @type any */ ("ab"))([1]);
+    expect(() => [...result]).to.throw(TypeError);
+  });
+
+  test("a value that isn't iterable throws", () => {
+    const result = flatMap((n) => /** @type any */ (n))([1]);
+    expect(() => [...result]).to.throw(TypeError);
+  });
+
+  test("closing it closes the iterable it's in", () => {
+    const inner = closable([1, 2, 3]);
+    const result = flatMap(() => inner)([1]);
+    result.next();
+    result.return(undefined);
+    expect(inner.closed).to.equal(true);
+  });
+});
+
+describe("Async.flatMap", () => {
+  test("yields the values of each async iterable", async () => {
+    const result = Async.flatMap(async (/** @type number */ n) => asyncClosable([n, n]))([1, 2]);
+    expect(await Async.toArray(result)).to.eql([1, 1, 2, 2]);
+  });
+
+  test("accepts an async iterator", async () => {
+    const result = Async.flatMap((/** @type number */ n) => asyncClosable([n])[Symbol.asyncIterator]())([1, 2]);
+    expect(await Async.toArray(result)).to.eql([1, 2]);
+  });
+
+  test("a string throws", async () => {
+    const result = Async.flatMap(() => /** @type any */ ("ab"))([1]);
+    await expect(Async.toArray(result)).rejects.toThrow(TypeError);
+  });
+
+  test("closing it closes the iterable it's in", async () => {
+    const inner = asyncClosable([1, 2, 3]);
+    const result = Async.flatMap(() => inner)([1]);
+    await result.next();
+    await result.return(undefined);
+    expect(inner.closed).to.equal(true);
+  });
+});
+
 describe("drop", () => {
   /** @type Generator<number> */
   let generator;
@@ -775,6 +836,30 @@ describe("range", () => {
   test("infinite", () => {
     const result = take(3)(range(3));
     expect([...result]).to.eql([3, 4, 5]);
+  });
+
+  test("step", () => {
+    const result = range(0, 10, 3);
+    expect([...result]).to.eql([0, 3, 6, 9]);
+  });
+
+  test("negative step", () => {
+    const result = range(10, 0, -3);
+    expect([...result]).to.eql([10, 7, 4, 1]);
+  });
+
+  test("infinite with a negative step", () => {
+    const result = take(3)(range(0, undefined, -1));
+    expect([...result]).to.eql([0, -1, -2]);
+  });
+
+  test("a step in the wrong direction is empty", () => {
+    const result = range(0, 10, -1);
+    expect([...result]).to.eql([]);
+  });
+
+  test("a step of 0 throws", () => {
+    expect(() => [...range(0, 10, 0)]).to.throw(RangeError);
   });
 });
 
