@@ -144,9 +144,9 @@ export const take: (
  * Same as `take`, but works with AsyncIterables.
  */
 export const asyncTake: (
-  <A>(count: number, iterator: AsyncIterable<A>) => AsyncGenerator<A>
+  <A>(count: number, iterator: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<A>
 ) & (
-  <A>(count: number) => (iterator: AsyncIterable<A>) => AsyncGenerator<A>
+  <A>(count: number) => (iterator: Iterable<A> | AsyncIterable<A>) => AsyncGenerator<A>
 );
 
 /**

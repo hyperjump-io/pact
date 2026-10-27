@@ -669,6 +669,21 @@ describe("take", () => {
     const result = take(10, generator);
     expect([...result]).to.eql([1, 2, 3]);
   });
+
+  test("the source is closed when it's done taking", () => {
+    const source = closable([1, 2, 3]);
+    const result = take(2, source);
+    expect([...result]).to.eql([1, 2]);
+    expect(source.closed).to.equal(true);
+  });
+
+  test("the source is closed when the result is closed early", () => {
+    const source = closable([1, 2, 3]);
+    const result = take(3, source);
+    result.next();
+    result.return(undefined);
+    expect(source.closed).to.equal(true);
+  });
 });
 
 describe("asyncTake", () => {
@@ -706,6 +721,32 @@ describe("asyncTake", () => {
     expect((await result.next()).value).to.equal(2);
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).done).to.equal(true);
+  });
+
+  test("the source is closed when it's done taking", async () => {
+    const source = asyncClosable([1, 2, 3]);
+    const result = asyncTake(2, source);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).done).to.equal(true);
+    expect(source.closed).to.equal(true);
+  });
+
+  test("a sync source is closed when it's done taking", async () => {
+    const source = closable([1, 2, 3]);
+    const result = asyncTake(2, source);
+    expect((await result.next()).value).to.equal(1);
+    expect((await result.next()).value).to.equal(2);
+    expect((await result.next()).done).to.equal(true);
+    expect(source.closed).to.equal(true);
+  });
+
+  test("the source is closed when the result is closed early", async () => {
+    const source = asyncClosable([1, 2, 3]);
+    const result = asyncTake(3, source);
+    await result.next();
+    await result.return(undefined);
+    expect(source.closed).to.equal(true);
   });
 });
 

@@ -155,10 +155,14 @@ export const asyncDropWhile = curry((fn) => async function* (iter) {
 export const take = curry((count) => function* (iter) {
   const iterator = getIterator(iter);
 
-  let remaining = count;
-  let current;
-  while (remaining-- > 0 && !(current = iterator.next())?.done) {
-    yield current.value;
+  try {
+    let remaining = count;
+    let current;
+    while (remaining-- > 0 && !(current = iterator.next())?.done) {
+      yield current.value;
+    }
+  } finally {
+    iterator.return?.();
   }
 });
 
@@ -166,10 +170,14 @@ export const take = curry((count) => function* (iter) {
 export const asyncTake = curry((count) => async function* (iter) {
   const iterator = getAsyncIterator(iter);
 
-  let remaining = count;
-  let current;
-  while (remaining-- > 0 && !(current = await iterator.next())?.done) {
-    yield current.value;
+  try {
+    let remaining = count;
+    let current;
+    while (remaining-- > 0 && !(current = await iterator.next())?.done) {
+      yield current.value;
+    }
+  } finally {
+    await iterator.return?.();
   }
 });
 
