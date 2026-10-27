@@ -23,5 +23,6 @@ export {
   asyncCollectMap as collectMap,
   asyncCollectObject as collectObject,
   asyncJoin as join,
-  pipe
+  pipe,
+  compose
 } from "./index.js";

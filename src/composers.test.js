@@ -3,7 +3,8 @@ import {
   map, asyncMap,
   filter, asyncFilter,
   reduce, asyncReduce,
-  pipe
+  collectArray,
+  pipe, compose
 } from "./index.js";
 
 describe("pipe", () => {
@@ -99,5 +100,49 @@ describe("async pipe", () => {
       asyncReduce((acc, /** @type number */ n) => acc + n, 0)
     );
     expect(result).to.eql(24);
+  });
+});
+
+describe("compose", () => {
+  test("one function", () => {
+    const double = compose(map((/** @type number */ n) => n * 2));
+    expect([...double([1, 2, 3])]).to.eql([2, 4, 6]);
+  });
+
+  test("three functions", () => {
+    const sumOfDoubledEvens = compose(
+      filter((/** @type number */ n) => n % 2 === 0),
+      map((/** @type number */ n) => n * 2),
+      reduce((acc, /** @type number */ n) => acc + n, 0)
+    );
+    expect(sumOfDoubledEvens([1, 2, 3, 4])).to.equal(12);
+  });
+
+  test("used more than once", () => {
+    const doubledEvens = compose(
+      filter((/** @type number */ n) => n % 2 === 0),
+      map((/** @type number */ n) => n * 2),
+      collectArray
+    );
+    expect(doubledEvens([1, 2, 3, 4])).to.eql([4, 8]);
+    expect(doubledEvens([5, 6])).to.eql([12]);
+  });
+
+  test("as a step in pipe", () => {
+    const doubledEvens = compose(
+      filter((/** @type number */ n) => n % 2 === 0),
+      map((/** @type number */ n) => n * 2)
+    );
+    const result = pipe([1, 2, 3, 4], doubledEvens, collectArray);
+    expect(result).to.eql([4, 8]);
+  });
+
+  test("async", async () => {
+    const sumOfDoubledEvens = compose(
+      asyncFilter(async (/** @type number */ n) => n % 2 === 0),
+      asyncMap((/** @type number */ n) => n * 2),
+      asyncReduce((acc, /** @type number */ n) => acc + n, 0)
+    );
+    expect(await sumOfDoubledEvens([1, 2, 3, 4])).to.equal(12);
   });
 });

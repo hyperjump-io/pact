@@ -336,3 +336,82 @@ export const pipe: (
     ...J
   ]) => LastReturnType<J>
 );
+
+/**
+ * Combine any number of steps into one step that applies them in order. It's
+ * `pipe` without a starting value, for building a pipeline before it has a
+ * source or reusing one with many sources.
+ */
+export const compose: (
+  <A, B>(...fns: [
+    (a: A) => B
+  ]) => (a: A) => B
+) & (
+  <A, B, C>(...fns: [
+    (a: A) => B,
+    (b: B) => C
+  ]) => (a: A) => C
+) & (
+  <A, B, C, D>(...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D
+  ]) => (a: A) => D
+) & (
+  <A, B, C, D, E>(...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E
+  ]) => (a: A) => E
+) & (
+  <A, B, C, D, E, F>(...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F
+  ]) => (a: A) => F
+) & (
+  <A, B, C, D, E, F, G>(...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G
+  ]) => (a: A) => G
+) & (
+  <A, B, C, D, E, F, G, H>(...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H
+  ]) => (a: A) => H
+) & (
+  <A, B, C, D, E, F, G, H, I>(...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I
+  ]) => (a: A) => I
+) & (
+  <A, B, C, D, E, F, G, H, I, J extends ((j: any) => any)[]>(...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    ...J
+  ]) => (a: A) => LastReturnType<J>
+);

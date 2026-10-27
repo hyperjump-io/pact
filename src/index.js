@@ -481,6 +481,16 @@ export const pipe = (/** @type any */ value, /** @type ((a: any) => any)[] */ ..
   return result;
 };
 
+/** @type API.compose */
+export const compose = (/** @type ((a: any) => any)[] */ ...fns) => (/** @type any */ value) => {
+  let result = value;
+  for (const fn of fns) {
+    result = fn(result);
+  }
+
+  return result;
+};
+
 /** @type <A>(iter: Iterable<A>) => Iterator<A> */
 const getIterator = (iter) => {
   if (typeof iter?.[Symbol.iterator] === "function") {
