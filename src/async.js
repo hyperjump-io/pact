@@ -15,6 +15,8 @@ export const map = (fn) => async function* (iter) {
   for await (const n of iter) {
     yield await fn(n, index++);
   }
+
+  return undefined;
 };
 
 /** @type API.tap */
@@ -24,6 +26,8 @@ export const tap = (fn) => async function* (iter) {
     await fn(n, index++);
     yield n;
   }
+
+  return undefined;
 };
 
 /** @type API.filter */
@@ -34,6 +38,8 @@ export const filter = (fn) => async function* (iter) {
       yield n;
     }
   }
+
+  return undefined;
 };
 
 /** @type API.scan */
@@ -44,6 +50,8 @@ export const scan = (fn, initial) => async function* (iter) {
     acc = await fn(acc, item, index++);
     yield acc;
   }
+
+  return undefined;
 };
 
 /** @type API.flatten */
@@ -55,6 +63,8 @@ export const flatten = (depth = 1) => async function* (iter) {
       yield n;
     }
   }
+
+  return undefined;
 };
 
 /** @type API.flatMap */
@@ -63,6 +73,8 @@ export const flatMap = (fn) => async function* (iter) {
   for await (const n of iter) {
     yield* getFlattenable(await fn(n, index++));
   }
+
+  return undefined;
 };
 
 /** @type API.drop */
@@ -73,6 +85,8 @@ export const drop = (count) => async function* (iter) {
       yield item;
     }
   }
+
+  return undefined;
 };
 
 /** @type API.dropWhile */
@@ -90,6 +104,8 @@ export const dropWhile = (fn) => async function* (iter) {
 
     yield n;
   }
+
+  return undefined;
 };
 
 /** @type API.take */
@@ -105,6 +121,8 @@ export const take = (count) => async function* (iter) {
   } finally {
     await iterator.return?.();
   }
+
+  return undefined;
 };
 
 /** @type API.takeWhile */
@@ -117,6 +135,8 @@ export const takeWhile = (fn) => async function* (iter) {
       break;
     }
   }
+
+  return undefined;
 };
 
 /** @type API.head */
@@ -129,7 +149,9 @@ export const head = async (iter) => {
 };
 
 /** @type API.empty */
-export const empty = async function* () {};
+export const empty = async function* () {
+  return undefined;
+};
 
 /** @type API.zip */
 export const zip = (iterables, options) => {
@@ -163,6 +185,8 @@ export const concat = async function* (...iters) {
   for (const iter of iters) {
     yield* iter;
   }
+
+  return undefined;
 };
 
 /** @type API.reduce */

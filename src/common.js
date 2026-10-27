@@ -11,6 +11,8 @@ export const range = function* (from, to, step = 1) {
   for (let n = from; to === undefined || (step > 0 ? n < to : n > to); n += step) {
     yield n;
   }
+
+  return undefined;
 };
 
 /** @type API.pipe */

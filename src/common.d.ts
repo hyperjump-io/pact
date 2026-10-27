@@ -5,7 +5,7 @@ import type { LastReturnType } from "./type-utils.d.ts";
  * is 1 by default. A negative `step` counts down, and a `step` of 0 throws a
  * RangeError. If `to` is not passed, the iterator will be infinite.
  */
-export const range: (from: number, to?: number, step?: number) => Generator<number>;
+export const range: (from: number, to?: number, step?: number) => IteratorObject<number, undefined, unknown>;
 
 /**
  * Starting with an iterator, apply any number of functions to transform the

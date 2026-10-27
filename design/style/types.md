@@ -11,5 +11,12 @@
   `@type` above it instead, and its parameters are annotated where
   contextual typing doesn't reach.
 - Return types say what a value can do, not how it's made:
-  `IteratorObject<T>` and `AsyncIteratorObject<T>`, not `Generator<T>`
-  (see [Iterators](../components/iterators.md)).
+  `IteratorObject<T, undefined, unknown>` and
+  `AsyncIteratorObject<T, undefined, unknown>`, not `Generator<T>` (see
+  [Iterators](../components/iterators.md)). The `undefined` and `unknown`
+  are what the native helpers declare. `IteratorObject` is where
+  TypeScript declares the native helper methods, so they're typed on what
+  pact returns. It needs TypeScript 5.6 or later.
+- While the functions are still generators, each exported one ends with
+  `return undefined;`. Without it, a generator's return type is `void`,
+  which isn't assignable to `undefined`. The rewrite removes them.

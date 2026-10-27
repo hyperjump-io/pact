@@ -127,7 +127,7 @@ describe("closing a step closes its source", () => {
     const nested = closable(items);
     const result = Pact.flatten()([nested]);
     result.next();
-    result.return(undefined);
+    result.return?.(undefined);
     expect(nested.closed).to.equal(true);
   });
 
@@ -135,7 +135,7 @@ describe("closing a step closes its source", () => {
     const second = closable(items);
     const result = Pact.concat(items, second);
     result.next();
-    result.return(undefined);
+    result.return?.(undefined);
     expect(second.closed).to.equal(false);
   });
 });

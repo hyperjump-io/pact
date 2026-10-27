@@ -68,7 +68,7 @@ describe("async pipe", () => {
   });
 
   test("one function", async () => {
-    /** @type AsyncGenerator<number> */
+    /** @type AsyncIteratorObject<number> */
     const result = pipe(
       subject,
       Async.filter((/** @type number */ n) => n > 2)
@@ -80,7 +80,7 @@ describe("async pipe", () => {
   });
 
   test("two functions", async () => {
-    /** @type AsyncGenerator<number> */
+    /** @type AsyncIteratorObject<number> */
     const result = pipe(
       subject,
       Async.filter((/** @type number */ n) => n > 2),

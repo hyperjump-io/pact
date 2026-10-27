@@ -11,32 +11,32 @@ export { pipe, compose, range } from "./common.js";
  * Apply a function to every value in the iterator. Like the native Iterator
  * helpers, functions that take a callback pass it each value and its index.
  */
-export const map: <A, B>(fn: Mapper<A, B>) => (iterator: Iterable<A>) => Generator<B>;
+export const map: <A, B>(fn: Mapper<A, B>) => (iterator: Iterable<A>) => IteratorObject<B, undefined, unknown>;
 export type Mapper<A, B> = (item: A, index: number) => B;
 
 /**
  * Apply a function to every value in the iterator, but yield the original
  * value, not the result of the function.
  */
-export const tap: <A>(fn: Tapper<A>) => (iterator: Iterable<A>) => Generator<A>;
+export const tap: <A>(fn: Tapper<A>) => (iterator: Iterable<A>) => IteratorObject<A, undefined, unknown>;
 export type Tapper<A> = (item: A, index: number) => void;
 
 /**
  * Yields only the values in the iterator that pass the predicate function.
  */
-export const filter: <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => Generator<A>;
+export const filter: <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => IteratorObject<A, undefined, unknown>;
 export type Predicate<A> = (item: A, index: number) => boolean;
 
 /**
  * Same as `reduce` except it emits the accumulated value after each update
  */
-export const scan: <A, B>(fn: Reducer<A, B>, initial: B) => (iter: Iterable<A>) => Generator<B>;
+export const scan: <A, B>(fn: Reducer<A, B>, initial: B) => (iter: Iterable<A>) => IteratorObject<B, undefined, unknown>;
 
 /**
  * Yields values from the iterator with all sub-iterator elements concatenated
  * into it recursively up to the specified depth. The default depth is 1.
  */
-export const flatten: (depth?: number) => <A>(iterator: NestedIterable<A>) => Generator<A | NestedIterable<A>>;
+export const flatten: (depth?: number) => <A>(iterator: NestedIterable<A>) => IteratorObject<A | NestedIterable<A>, undefined, unknown>;
 export type NestedIterable<A> = Iterable<A | NestedIterable<A>>;
 
 /**
@@ -45,30 +45,30 @@ export type NestedIterable<A> = Iterable<A | NestedIterable<A>>;
  * deep, and `fn` has to return an iterable or an iterator, not a string or
  * other value.
  */
-export const flatMap: <A, B>(fn: FlatMapper<A, B>) => (iterator: Iterable<A>) => Generator<B>;
+export const flatMap: <A, B>(fn: FlatMapper<A, B>) => (iterator: Iterable<A>) => IteratorObject<B, undefined, unknown>;
 export type FlatMapper<A, B> = (item: A, index: number) => Iterable<B> | Iterator<B>;
 
 /**
  * Yields all the values in the iterator except for the first `n` values.
  */
-export const drop: <A>(count: number) => (iterator: Iterable<A>) => Generator<A>;
+export const drop: <A>(count: number) => (iterator: Iterable<A>) => IteratorObject<A, undefined, unknown>;
 
 /**
  * Same as `drop` but instead of dropping a specific number of values, it drops
  * values until the `fn(value)` is `false` and then yields the remaining values.
  */
-export const dropWhile: <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => Generator<A>;
+export const dropWhile: <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => IteratorObject<A, undefined, unknown>;
 
 /**
  * Yields the first `n` values in the iterator.
  */
-export const take: <A>(count: number) => (iterator: Iterable<A>) => Generator<A>;
+export const take: <A>(count: number) => (iterator: Iterable<A>) => IteratorObject<A, undefined, unknown>;
 
 /**
  * Same as `take` but instead of yielding a specific number of values, it yields
  * values as long as the `fn(value)` returns `true` and drops the rest.
  */
-export const takeWhile: <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => Generator<A>;
+export const takeWhile: <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => IteratorObject<A, undefined, unknown>;
 
 /**
  * Returns the first value in the iterator. The iterator is closed after
@@ -79,7 +79,7 @@ export const head: <A>(iterator: Iterable<A>) => A | undefined;
 /**
  * Yields nothing.
  */
-export const empty: () => Generator<never>;
+export const empty: () => IteratorObject<never, undefined, unknown>;
 
 /**
  * Yields tuples with the next value of each iterable, like `Iterator.zip` from
@@ -95,9 +95,9 @@ export const empty: () => Generator<never>;
  * When it stops, it closes the iterables that aren't done.
  */
 export const zip: (
-  <T extends readonly unknown[]>(iterables: readonly [...{ [K in keyof T]: Iterable<T[K]> | Iterator<T[K]> }], options?: ZipOptions) => Generator<T>
+  <T extends readonly unknown[]>(iterables: readonly [...{ [K in keyof T]: Iterable<T[K]> | Iterator<T[K]> }], options?: ZipOptions) => IteratorObject<T, undefined, unknown>
 ) & (
-  <T extends readonly unknown[]>(iterables: readonly [...{ [K in keyof T]: Iterable<T[K]> | Iterator<T[K]> }], options: ZipLongestOptions<Iterable<unknown>>) => Generator<{ [K in keyof T]: T[K] | undefined }>
+  <T extends readonly unknown[]>(iterables: readonly [...{ [K in keyof T]: Iterable<T[K]> | Iterator<T[K]> }], options: ZipLongestOptions<Iterable<unknown>>) => IteratorObject<{ [K in keyof T]: T[K] | undefined }, undefined, unknown>
 );
 export type ZipOptions = {
   mode?: "shortest" | "strict";
@@ -114,15 +114,15 @@ export type ZipLongestOptions<P> = {
  * object with a value for each key.
  */
 export const zipKeyed: (
-  <T extends Record<PropertyKey, unknown>>(iterables: { [K in keyof T]: Iterable<T[K]> | Iterator<T[K]> }, options?: ZipOptions) => Generator<T>
+  <T extends Record<PropertyKey, unknown>>(iterables: { [K in keyof T]: Iterable<T[K]> | Iterator<T[K]> }, options?: ZipOptions) => IteratorObject<T, undefined, unknown>
 ) & (
-  <T extends Record<PropertyKey, unknown>>(iterables: { [K in keyof T]: Iterable<T[K]> | Iterator<T[K]> }, options: ZipLongestOptions<Partial<NoInfer<T>>>) => Generator<{ [K in keyof T]: T[K] | undefined }>
+  <T extends Record<PropertyKey, unknown>>(iterables: { [K in keyof T]: Iterable<T[K]> | Iterator<T[K]> }, options: ZipLongestOptions<Partial<NoInfer<T>>>) => IteratorObject<{ [K in keyof T]: T[K] | undefined }, undefined, unknown>
 );
 
 /**
  * Yields values from each iterator in order.
  */
-export const concat: <A>(...iters: Iterable<A>[]) => Generator<A>;
+export const concat: <A>(...iters: Iterable<A>[]) => IteratorObject<A, undefined, unknown>;
 
 /**
  * Reduce an iterator to a single value. Without an initial value, the first

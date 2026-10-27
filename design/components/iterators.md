@@ -9,9 +9,11 @@ helpers work on what pact returns, and it implements `next()` and
 - `return()` closes the source and anything else the iterator opened (see
   [Close what you open](../principles/close-what-you-open.md)). A done
   iterator doesn't read its source again.
-- The declared return types are `IteratorObject<T>` and
-  `AsyncIteratorObject<T>`. They don't promise `throw()`, which generators
-  have and these don't.
+- The declared return types are `IteratorObject<T, undefined, unknown>`
+  and `AsyncIteratorObject<T, undefined, unknown>` (see
+  [Types](../style/types.md)). They don't promise `throw()`, which
+  generators have and these don't, and `return()` is optional, so code
+  can't depend on either.
 - `AsyncIterator.prototype` isn't a global. It's found from an async
   generator function's prototype chain when the module loads.
 

@@ -473,7 +473,7 @@ describe("flatMap", () => {
     const inner = closable([1, 2, 3]);
     const result = flatMap(() => inner)([1]);
     result.next();
-    result.return(undefined);
+    result.return?.(undefined);
     expect(inner.closed).to.equal(true);
   });
 });
@@ -498,7 +498,7 @@ describe("Async.flatMap", () => {
     const inner = asyncClosable([1, 2, 3]);
     const result = Async.flatMap(() => inner)([1]);
     await result.next();
-    await result.return(undefined);
+    await result.return?.(undefined);
     expect(inner.closed).to.equal(true);
   });
 });
@@ -647,7 +647,7 @@ describe("take", () => {
     const source = closable([1, 2, 3]);
     const result = take(3)(source);
     result.next();
-    result.return(undefined);
+    result.return?.(undefined);
     expect(source.closed).to.equal(true);
   });
 });
@@ -702,7 +702,7 @@ describe("Async.take", () => {
     const source = asyncClosable([1, 2, 3]);
     const result = Async.take(3)(source);
     await result.next();
-    await result.return(undefined);
+    await result.return?.(undefined);
     expect(source.closed).to.equal(true);
   });
 });
@@ -1008,7 +1008,7 @@ describe("zipKeyed", () => {
     const s = closable(["a", "b"]);
     const result = zipKeyed({ n, s });
     result.next();
-    result.return(undefined);
+    result.return?.(undefined);
     expect(n.closed).to.equal(true);
     expect(s.closed).to.equal(true);
   });
@@ -1133,5 +1133,17 @@ describe("Async.concat", () => {
     expect((await result.next()).value).to.eql(3);
     expect((await result.next()).value).to.eql(4);
     expect((await result.next()).done).to.equal(true);
+  });
+});
+
+describe("native Iterator helpers", () => {
+  test("work on what a step returns", () => {
+    const evens = filter((/** @type number */ n) => n % 2 === 0)([1, 2, 3, 4]);
+    expect(evens.map((n) => n * 2).toArray()).to.eql([4, 8]);
+  });
+
+  test("work on what a source returns", () => {
+    expect(range(0, 3).toArray()).to.eql([0, 1, 2]);
+    expect(zip([[1], ["a"]]).toArray()).to.eql([[1, "a"]]);
   });
 });
