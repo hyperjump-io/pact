@@ -849,7 +849,11 @@ describe("head", () => {
 
   test("generator", () => {
     expect(head(generator)).to.eql(1);
-    expect([...generator]).to.eql([2, 3]);
+  });
+
+  test("the generator is closed", () => {
+    head(generator);
+    expect([...generator]).to.eql([]);
   });
 
   test("array", () => {
@@ -875,8 +879,10 @@ describe("asyncHead", () => {
 
   test("non-empty async-generator", async () => {
     expect(await asyncHead(subject)).to.eql(1);
-    expect((await subject.next()).value).to.equal(2);
-    expect((await subject.next()).value).to.equal(3);
+  });
+
+  test("the async-generator is closed", async () => {
+    await asyncHead(subject);
     expect((await subject.next()).done).to.equal(true);
   });
 });

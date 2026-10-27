@@ -207,6 +207,7 @@ export const asyncTakeWhile = curry((fn) => async function* (iter) {
 export const head = (iter) => {
   const iterator = getIterator(iter);
   const result = iterator.next();
+  iterator.return?.();
 
   return result.done ? undefined : result.value;
 };
@@ -215,6 +216,7 @@ export const head = (iter) => {
 export const asyncHead = async (iter) => {
   const iterator = getAsyncIterator(iter);
   const result = await iterator.next();
+  await iterator.return?.();
 
   return result.done ? undefined : result.value;
 };

@@ -169,7 +169,8 @@ export const asyncTakeWhile: (
 );
 
 /**
- * Returns the first value in the iterator.
+ * Returns the first value in the iterator. The iterator is closed after
+ * the first value is read, so the rest can't be read from it.
  */
 export const head: <A>(iterator: Iterable<A>) => A | undefined;
 

@@ -12,6 +12,7 @@ Each applies to the sync and async versions.
 | `zip(a, b)` | `zip(iterables, options?)` | Like the Joint Iteration proposal's `Iterator.zip` |
 | `concat(...iterables)` | `concat(...iterables)` | Same signature, behaves like `Iterator.concat` |
 | `range(from, to?)` | `range(from, to?, step?)` | |
+| `head(iterable)` | `head(iterable)` | Closes the iterator after reading the first value, so the rest can't be read from it (see [Close what you open](../principles/close-what-you-open.md)) |
 | `asyncX` exports | `x` from `/async` | See [Entry points](entry-points.md) |
 
 `zip` stops at the shortest input by default. Its `mode` option is
