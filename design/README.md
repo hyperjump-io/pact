@@ -22,8 +22,7 @@ documents say where it's going.
   what it was reading.
 - Dependents (`json-schema-errors`, `better-json-schema-errors`,
   `json-schema-language-tools`) don't need to keep working unchanged.
-  They'll be migrated. Almost all of their calls already go through
-  `pipe`.
+  They'll be migrated. Between them they call pact about eight times.
 
 ## How it's organized
 

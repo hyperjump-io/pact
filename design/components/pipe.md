@@ -23,8 +23,9 @@ v1's setup cost per pipeline was about 6 times the native helpers' (see
 every call goes through to decide whether it got the iterable, and `pipe`,
 which ran its steps with the curried `reduce` instead of a loop.
 
-Dependents almost always use `pipe`. `json-schema-language-tools` has 22
-`pipe` calls and about two direct calls (as of 2026-10-27).
+Dropping the direct form costs dependents little. Between them they have
+three `pipe` calls and five direct calls (`drop`, `some`, and `reduce`),
+as of 2026-10-27.
 
 ## Rejected
 
