@@ -1,73 +1,37 @@
-# Hyperjump Pact
+# Hyperjump - Pact
 
-Hyperjump Pact is a utility library that provides higher order functions for
-working with iterators and async iterators.
+Higher order functions for iterators and async iterators. Each function is
+a step you put in a `pipe`, and a pipeline does its work one value at a
+time, only as values are asked for.
 
-## Installation
-Designed for node.js (ES Modules, TypeScript) and browsers.
+**Status:** v2 is in progress and unpublished. See
+[the design docs](design/README.md) for the decisions made so far, and
+[Migrating from v1](website/migrating.md) for what changed.
+
+## Install
 
 ```bash
-npm install @hyperjump/pact --save
+npm install @hyperjump/pact
 ```
 
 ## Usage
 
 ```javascript
-import { pipe, range, map, filter, reduce } from "@hyperjump/pact";
+import { pipe, range, filter, map, reduce } from "@hyperjump/pact";
 
-
-const result = pipe(
+pipe(
   range(1, 10),
   filter((n) => n % 2 === 0),
   map((n) => n * 2),
   reduce((sum, n) => sum + n, 0)
-);
-console.log(result);
+); // 40
 ```
 
-The async versions are in `@hyperjump/pact/async`, with the same names. They
-accept Iterables and AsyncIterables, and their callbacks can return promises.
+## Documentation
 
-```javascript
-import { pipe, map, filter, reduce } from "@hyperjump/pact/async";
-
-
-const asyncSequence = async function* () {
-  yield 1;
-  yield 2;
-  yield 3;
-  yield 4;
-  yield 5;
-};
-
-const result = await pipe(
-  asyncSequence(),
-  filter((n) => n % 2 === 0),
-  map(async (n) => n * 2),
-  reduce((sum, n) => sum + n, 0)
-);
-console.log(result);
-```
-
-To use both in one module, import one of them as a namespace.
-
-```javascript
-import { pipe, range, filter } from "@hyperjump/pact";
-import * as Async from "@hyperjump/pact/async";
-
-
-const result = await pipe(
-  range(1, 10),
-  filter((n) => n % 2 === 0),
-  Async.map(async (n) => n * 2),
-  Async.toArray
-);
-console.log(result);
-```
-
-## API
-
-https://pact.hyperjump.io
+The documentation is in [`website/`](website/README.md), and on
+[hyperjump.io](https://hyperjump.io/pact/). Start with
+[Pipelines](website/pipelines.md).
 
 ## Contributing
 
@@ -90,6 +54,12 @@ Lint and type-check
 ```bash
 npm run lint
 npm run type-check
+```
+
+Check that the examples in `website/` give what they say they do
+
+```bash
+npm run check-website
 ```
 
 The design docs, principles, and style guide are in

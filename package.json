@@ -34,7 +34,8 @@
     "lint": "oxlint",
     "test": "vitest run",
     "type-check": "tsc --noEmit",
-    "docs": "typedoc --excludeExternals src/index.d.ts src/async.d.ts"
+    "check-website": "node scripts/check-website.js",
+    "version": "node scripts/version-docs.js && git add website"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "*",
@@ -42,7 +43,6 @@
     "@vitest/coverage-v8": "*",
     "oxlint": "*",
     "oxlint-tsgolint": "*",
-    "typedoc": "*",
     "typescript": "*",
     "vitest": "*"
   }

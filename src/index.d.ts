@@ -1,8 +1,6 @@
 /**
  * Higher order functions for iterators. The async versions are in
  * `@hyperjump/pact/async`.
- *
- * @module @hyperjump/pact
  */
 
 export { pipe, compose, range } from "./common.js";

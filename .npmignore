@@ -4,10 +4,11 @@ oxlint.config.ts
 **/*.test.js
 src/test-utils.js
 coverage/
-docs/
 tsconfig.json
 scratch/
 benchmark/
 TODO*
 design/
+website/
+scripts/
 CLAUDE.md

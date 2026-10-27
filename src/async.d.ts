@@ -1,8 +1,6 @@
 /**
  * The async versions of the functions in `@hyperjump/pact`. Each one accepts
  * Iterables and AsyncIterables, and its callbacks can return promises.
- *
- * @module @hyperjump/pact/async
  */
 
 export { pipe, compose, range } from "./common.js";
