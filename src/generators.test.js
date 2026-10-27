@@ -14,6 +14,7 @@ import {
   range,
   empty,
   zip,
+  zipKeyed,
   concat
 } from "./index.js";
 import * as Async from "./async.js";
@@ -878,148 +879,203 @@ describe("Async.empty", () => {
 
 describe("zip", () => {
   test("same number of items", () => {
-    const iter1 = (function* () {
-      yield 1;
-      yield 2;
-    }());
-
-    const iter2 = (function* () {
-      yield "a";
-      yield "b";
-    }());
-    const result = zip(iter1, iter2);
+    const result = zip([[1, 2], ["a", "b"]]);
     expect([...result]).to.eql([[1, "a"], [2, "b"]]);
   });
 
-  test("iter1 has more items", () => {
-    const iter1 = (function* () {
-      yield 1;
-      yield 2;
-      yield 3;
-    }());
-
-    const iter2 = (function* () {
-      yield "a";
-      yield "b";
-    }());
-    const result = zip(iter1, iter2);
-    expect([...result]).to.eql([[1, "a"], [2, "b"], [3, undefined]]);
+  test("more than two", () => {
+    const result = zip([[1, 2], ["a", "b"], [true, false]]);
+    expect([...result]).to.eql([[1, "a", true], [2, "b", false]]);
   });
 
-  test("iter2 has more items", () => {
-    const iter1 = (function* () {
-      yield 1;
-      yield 2;
-    }());
+  test("none", () => {
+    expect([...zip([])]).to.eql([]);
+  });
 
-    const iter2 = (function* () {
-      yield "a";
-      yield "b";
-      yield "c";
-    }());
-    const result = zip(iter1, iter2);
+  test("shortest is the default", () => {
+    expect([...zip([[1, 2, 3], ["a", "b"]])]).to.eql([[1, "a"], [2, "b"]]);
+    expect([...zip([[1, 2], ["a", "b", "c"]])]).to.eql([[1, "a"], [2, "b"]]);
+  });
+
+  test("shortest closes the others", () => {
+    const longer = closable([1, 2, 3]);
+    expect([...zip([longer, ["a"]], { mode: "shortest" })]).to.eql([[1, "a"]]);
+    expect(longer.closed).to.equal(true);
+  });
+
+  test("longest", () => {
+    const result = zip([[1, 2, 3], ["a"]], { mode: "longest" });
+    expect([...result]).to.eql([[1, "a"], [2, undefined], [3, undefined]]);
+  });
+
+  test("longest with padding", () => {
+    const result = zip([[1], ["a", "b", "c"]], { mode: "longest", padding: [0, "?"] });
+    expect([...result]).to.eql([[1, "a"], [0, "b"], [0, "c"]]);
+  });
+
+  test("longest with less padding than iterables", () => {
+    const result = zip([[1], ["a", "b"]], { mode: "longest", padding: [0] });
+    expect([...result]).to.eql([[1, "a"], [0, "b"]]);
+  });
+
+  test("strict with the same lengths", () => {
+    const result = zip([[1, 2], ["a", "b"]], { mode: "strict" });
     expect([...result]).to.eql([[1, "a"], [2, "b"]]);
   });
 
-  test("iter2 is closed when iter1 runs out", () => {
-    const iter2 = closable(["a", "b", "c"]);
-    const result = zip([1, 2], iter2);
-    expect([...result]).to.eql([[1, "a"], [2, "b"]]);
-    expect(iter2.closed).to.equal(true);
+  test("strict throws when the first is shorter", () => {
+    const longer = closable(["a", "b"]);
+    const result = zip([[1], longer], { mode: "strict" });
+    expect(result.next().value).to.eql([1, "a"]);
+    expect(() => result.next()).to.throw(TypeError);
+    expect(longer.closed).to.equal(true);
   });
 
-  test("both are closed when the result is closed early", () => {
-    const iter1 = closable([1, 2, 3]);
-    const iter2 = closable(["a", "b", "c"]);
-    const result = zip(iter1, iter2);
+  test("strict throws when the first is longer", () => {
+    const longer = closable([1, 2]);
+    const result = zip([longer, ["a"]], { mode: "strict" });
+    expect(result.next().value).to.eql([1, "a"]);
+    expect(() => result.next()).to.throw(TypeError);
+    expect(longer.closed).to.equal(true);
+  });
+
+  test("an unknown mode throws", () => {
+    expect(() => zip([[1]], /** @type any */ ({ mode: "widest" }))).to.throw(TypeError);
+  });
+
+  test("a string throws", () => {
+    expect(() => zip([[1], /** @type any */ ("ab")])).to.throw(TypeError);
+  });
+
+  test("a string throws and closes the iterables before it", () => {
+    // A generator that hasn't started doesn't run its finally when it's
+    // closed, so this records return() itself
+    let closed = false;
+    const first = {
+      [Symbol.iterator]: () => ({
+        next: () => ({ done: false, value: 1 }),
+        return: () => {
+          closed = true;
+          return { done: true, value: undefined };
+        }
+      })
+    };
+    expect(() => zip([first, /** @type any */ ("ab")])).to.throw(TypeError);
+    expect(closed).to.equal(true);
+  });
+
+  test("accepts an iterator", () => {
+    const result = zip([[1, 2].values(), ["a", "b"]]);
+    expect([...result]).to.eql([[1, "a"], [2, "b"]]);
+  });
+
+  test("an iterable that throws closes the others", () => {
+    const other = closable([1, 2]);
+    const throwing = (function* () {
+      yield "a";
+      throw Error("boom");
+    }());
+    const result = zip([other, throwing]);
+    result.next();
+    expect(() => result.next()).to.throw("boom");
+    expect(other.closed).to.equal(true);
+  });
+});
+
+describe("zipKeyed", () => {
+  test("yields objects with the same keys", () => {
+    const result = zipKeyed({ n: [1, 2], s: ["a", "b"] });
+    expect([...result]).to.eql([{ n: 1, s: "a" }, { n: 2, s: "b" }]);
+  });
+
+  test("leaves out undefined values", () => {
+    const result = zipKeyed(/** @type any */ ({ n: [1], s: undefined }));
+    expect([...result]).to.eql([{ n: 1 }]);
+  });
+
+  test("longest with padding", () => {
+    const result = zipKeyed({ n: [1], s: ["a", "b"] }, { mode: "longest", padding: { n: 0 } });
+    expect([...result]).to.eql([{ n: 1, s: "a" }, { n: 0, s: "b" }]);
+  });
+
+  test("strict throws for different lengths", () => {
+    const result = zipKeyed({ n: [1], s: ["a", "b"] }, { mode: "strict" });
+    expect(() => [...result]).to.throw(TypeError);
+  });
+
+  test("closing it closes the iterables", () => {
+    const n = closable([1, 2]);
+    const s = closable(["a", "b"]);
+    const result = zipKeyed({ n, s });
     result.next();
     result.return(undefined);
-    expect(iter1.closed).to.equal(true);
-    expect(iter2.closed).to.equal(true);
-  });
-
-  test("arrays", () => {
-    const result = zip([1, 2], ["a", "b"]);
-    expect([...result]).to.eql([[1, "a"], [2, "b"]]);
+    expect(n.closed).to.equal(true);
+    expect(s.closed).to.equal(true);
   });
 });
 
 describe("Async.zip", () => {
-  test("same number of items", async () => {
-    const iter1 = (async function* () {
-      yield 1;
-      yield 2;
-    }());
+  test("sync and async iterables", async () => {
+    const result = Async.zip([[1, 2], asyncClosable(["a", "b"])]);
+    expect(await Async.toArray(result)).to.eql([[1, "a"], [2, "b"]]);
+  });
 
-    const iter2 = (async function* () {
+  test("shortest is the default", async () => {
+    const longer = asyncClosable([1, 2, 3]);
+    expect(await Async.toArray(Async.zip([longer, ["a"]]))).to.eql([[1, "a"]]);
+    expect(longer.closed).to.equal(true);
+  });
+
+  test("longest with padding", async () => {
+    const result = Async.zip([[1], asyncClosable(["a", "b"])], { mode: "longest", padding: [0] });
+    expect(await Async.toArray(result)).to.eql([[1, "a"], [0, "b"]]);
+  });
+
+  test("strict throws for different lengths", async () => {
+    const longer = asyncClosable(["a", "b", "c"]);
+    const result = Async.zip([[1], longer], { mode: "strict" });
+    await expect(Async.toArray(result)).rejects.toThrow(TypeError);
+    expect(longer.closed).to.equal(true);
+  });
+
+  test("a string throws", () => {
+    expect(() => Async.zip([[1], /** @type any */ ("ab")])).to.throw(TypeError);
+  });
+
+  test("reads the iterables at the same time", async () => {
+    /** @type string[] */
+    const events = [];
+    /** @type (name: string) => AsyncIterable<string> */
+    const slow = (name) => ({
+      async* [Symbol.asyncIterator]() {
+        events.push(`${name} start`);
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        events.push(`${name} end`);
+        yield name;
+      }
+    });
+
+    await Async.toArray(Async.zip([slow("a"), slow("b")]));
+    expect(events.slice(0, 2)).to.eql(["a start", "b start"]);
+  });
+
+  test("an iterable that throws closes the others", async () => {
+    const other = asyncClosable([1, 2]);
+    const throwing = (async function* () {
       yield "a";
-      yield "b";
+      throw Error("boom");
     }());
-    const result = Async.zip(iter1, iter2);
-    expect((await result.next()).value).to.eql([1, "a"]);
-    expect((await result.next()).value).to.eql([2, "b"]);
-    expect((await result.next()).done).to.equal(true);
-  });
-
-  test("iter1 has more items", async () => {
-    const iter1 = (async function* () {
-      yield 1;
-      yield 2;
-      yield 3;
-    }());
-
-    const iter2 = (async function* () {
-      yield "a";
-      yield "b";
-    }());
-    const result = Async.zip(iter1, iter2);
-    expect((await result.next()).value).to.eql([1, "a"]);
-    expect((await result.next()).value).to.eql([2, "b"]);
-    expect((await result.next()).value).to.eql([3, undefined]);
-    expect((await result.next()).done).to.equal(true);
-  });
-
-  test("iter2 has more items", async () => {
-    const iter1 = (async function* () {
-      yield 1;
-      yield 2;
-    }());
-
-    const iter2 = (async function* () {
-      yield "a";
-      yield "b";
-      yield "c";
-    }());
-    const result = Async.zip(iter1, iter2);
-    expect((await result.next()).value).to.eql([1, "a"]);
-    expect((await result.next()).value).to.eql([2, "b"]);
-    expect((await result.next()).done).to.equal(true);
-  });
-
-  test("iter2 is closed when iter1 runs out", async () => {
-    const iter2 = asyncClosable(["a", "b", "c"]);
-    const result = Async.zip(asyncClosable([1, 2]), iter2);
-    expect((await result.next()).value).to.eql([1, "a"]);
-    expect((await result.next()).value).to.eql([2, "b"]);
-    expect((await result.next()).done).to.equal(true);
-    expect(iter2.closed).to.equal(true);
-  });
-
-  test("both are closed when the result is closed early", async () => {
-    const iter1 = asyncClosable([1, 2, 3]);
-    const iter2 = asyncClosable(["a", "b", "c"]);
-    const result = Async.zip(iter1, iter2);
+    const result = Async.zip([other, throwing]);
     await result.next();
-    await result.return(undefined);
-    expect(iter1.closed).to.equal(true);
-    expect(iter2.closed).to.equal(true);
+    await expect(result.next()).rejects.toThrow("boom");
+    expect(other.closed).to.equal(true);
   });
+});
 
-  test("arrays", async () => {
-    const result = Async.zip([1, 2], ["a", "b"]);
-    expect((await result.next()).value).to.eql([1, "a"]);
-    expect((await result.next()).value).to.eql([2, "b"]);
-    expect((await result.next()).done).to.equal(true);
+describe("Async.zipKeyed", () => {
+  test("yields objects with the same keys", async () => {
+    const result = Async.zipKeyed({ n: [1, 2], s: asyncClosable(["a", "b"]) });
+    expect(await Async.toArray(result)).to.eql([{ n: 1, s: "a" }, { n: 2, s: "b" }]);
   });
 });
 

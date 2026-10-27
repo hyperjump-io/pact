@@ -12,7 +12,7 @@ Where it shows up:
 - [Names](../components/names.md): `toArray`, `flatMap`, `forEach`,
   `reduce` without an initial value, the index passed to callbacks,
   `range` with a step like `Iterator.range`, `concat` like
-  `Iterator.concat`, and `zip` like the Joint Iteration proposal's
-  `Iterator.zip`.
+  `Iterator.concat`, and `zip` and `zipKeyed` like the Joint Iteration
+  proposal's `Iterator.zip` and `Iterator.zipKeyed`.
 - [Iterators](../components/iterators.md): what pact returns extends
   `Iterator.prototype`, so the native helpers work on it.

@@ -132,15 +132,30 @@ export const head = (iter) => {
 export const empty = function* () {};
 
 /** @type API.zip */
-export const zip = function* (a, b) {
-  const bIter = getIterator(b);
-  try {
-    for (const item1 of a) {
-      yield [item1, bIter.next().value];
-    }
-  } finally {
-    bIter.return?.();
-  }
+export const zip = (iterables, options) => {
+  const { mode, padding } = zipOptions(options);
+  const iterators = openAll([...iterables]);
+  return zipIterators(iterators, mode, mode === "longest" ? readPadding(padding, iterators.length) : []);
+};
+
+/** @type API.zipKeyed */
+export const zipKeyed = (iterables, options) => {
+  const { mode, padding } = zipOptions(options);
+  const keys = Reflect.ownKeys(iterables).filter((key) => {
+    return Object.prototype.propertyIsEnumerable.call(iterables, key) && iterables[/** @type any */ (key)] !== undefined;
+  });
+  const iterators = openAll(keys.map((key) => iterables[/** @type any */ (key)]));
+  const paddingValues = mode === "longest" && padding !== undefined
+    ? keys.map((key) => /** @type any */ (padding)[key])
+    : [];
+
+  return map((/** @type any[] */ values) => {
+    const result = Object.create(null);
+    keys.forEach((key, index) => {
+      result[key] = values[index];
+    });
+    return result;
+  })(zipIterators(iterators, mode, paddingValues));
 };
 
 /** @type API.concat */
@@ -283,8 +298,144 @@ const getIterator = (iter) => {
 /** @type <A>(value: Iterable<A> | Iterator<A>) => Iterable<A> */
 const getFlattenable = (value) => {
   if (value === null || typeof value !== "object") {
-    throw TypeError("`fn` must return an iterable or an iterator");
+    throw TypeError("Expected an iterable or an iterator");
   }
 
   return Symbol.iterator in value ? value : { [Symbol.iterator]: () => value };
+};
+
+/**
+ * @typedef {"shortest" | "longest" | "strict"} ZipMode
+ */
+
+/** @type (options: API.ZipOptions | API.ZipLongestOptions<any> | undefined) => { mode: ZipMode, padding: any } */
+const zipOptions = (options) => {
+  if (options !== undefined && (options === null || typeof options !== "object")) {
+    throw TypeError("`options` must be an object");
+  }
+
+  const mode = options?.mode ?? "shortest";
+  if (mode !== "shortest" && mode !== "longest" && mode !== "strict") {
+    throw TypeError("`mode` must be \"shortest\", \"longest\", or \"strict\"");
+  }
+
+  const padding = mode === "longest" ? /** @type API.ZipLongestOptions<any> */ (options)?.padding : undefined;
+  if (padding !== undefined && (padding === null || typeof padding !== "object")) {
+    throw TypeError("`padding` must be an object");
+  }
+
+  return { mode, padding };
+};
+
+/**
+ * Gets an iterator from each value, closing the ones it already got if one
+ * of them isn't iterable.
+ *
+ * @type (values: any[]) => Iterator<any>[]
+ */
+const openAll = (values) => {
+  /** @type Iterator<any>[] */
+  const iterators = [];
+  try {
+    for (const value of values) {
+      iterators.push(getIterator(getFlattenable(value)));
+    }
+  } catch (error) {
+    for (const iterator of iterators) {
+      iterator.return?.();
+    }
+    throw error;
+  }
+
+  return iterators;
+};
+
+/** @type (padding: Iterable<any> | undefined, length: number) => any[] */
+const readPadding = (padding, length) => {
+  /** @type any[] */
+  const values = [];
+  if (padding !== undefined && length > 0) {
+    for (const value of padding) {
+      values.push(value);
+      if (values.length === length) {
+        break;
+      }
+    }
+  }
+
+  return values;
+};
+
+/**
+ * Yields an array of the next value of each iterator, until `mode` says to
+ * stop. Every iterator that isn't done is closed when it stops, except one
+ * that threw.
+ *
+ * @type (iterators: Iterator<any>[], mode: ZipMode, padding: any[]) => Generator<any>
+ */
+const zipIterators = function* (iterators, mode, padding) {
+  const done = iterators.map(() => false);
+  let remaining = iterators.length;
+
+  try {
+    while (remaining > 0) {
+      const values = [];
+      for (let index = 0; index < iterators.length; index++) {
+        if (done[index]) {
+          values.push(padding[index]);
+          continue;
+        }
+
+        let result;
+        try {
+          result = iterators[index].next();
+        } catch (error) {
+          done[index] = true;
+          throw error;
+        }
+
+        if (!result.done) {
+          values.push(result.value);
+          continue;
+        }
+
+        done[index] = true;
+        remaining--;
+
+        if (mode === "shortest") {
+          return;
+        } else if (mode === "strict") {
+          if (index > 0) {
+            throw TypeError("The iterables passed to zip in strict mode have different lengths");
+          }
+          for (let other = 1; other < iterators.length; other++) {
+            let otherResult;
+            try {
+              otherResult = iterators[other].next();
+            } catch (error) {
+              done[other] = true;
+              throw error;
+            }
+            if (!otherResult.done) {
+              throw TypeError("The iterables passed to zip in strict mode have different lengths");
+            }
+            done[other] = true;
+          }
+          return;
+        }
+
+        values.push(padding[index]);
+      }
+
+      if (remaining > 0) {
+        yield values;
+      }
+    }
+  } finally {
+    iterators.forEach((iterator, index) => {
+      if (!done[index]) {
+        iterator.return?.();
+      }
+    });
+  }
 };

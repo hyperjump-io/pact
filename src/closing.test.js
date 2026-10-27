@@ -21,8 +21,8 @@ const stopsEarly = [
   ["find", (source) => Pact.find((n) => n > 1)(source)],
   ["some", (source) => Pact.some((n) => n > 1)(source)],
   ["every", (source) => Pact.every((n) => n < 2)(source)],
-  ["zip (first)", (source) => [...Pact.zip(source, [1])]],
-  ["zip (second)", (source) => [...Pact.zip([1], source)]],
+  ["zip (first)", (source) => [...Pact.zip([source, [1]])]],
+  ["zip (second)", (source) => [...Pact.zip([[1], source])]],
   ["pipe", (source) => Pact.pipe(source, Pact.take(1), Pact.toArray)]
 ];
 
@@ -38,8 +38,8 @@ const steps = [
   ["dropWhile", (source) => Pact.dropWhile((n) => n < 2)(source)],
   ["take", (source) => Pact.take(4)(source)],
   ["takeWhile", (source) => Pact.takeWhile(() => true)(source)],
-  ["zip (first)", (source) => Pact.zip(source, items)],
-  ["zip (second)", (source) => Pact.zip(items, source)],
+  ["zip (first)", (source) => Pact.zip([source, items])],
+  ["zip (second)", (source) => Pact.zip([items, source])],
   ["concat", (source) => Pact.concat(source, items)]
 ];
 
@@ -68,8 +68,8 @@ const asyncStopsEarly = [
   ["Async.find", (source) => Async.find((n) => n > 1)(source)],
   ["Async.some", (source) => Async.some((n) => n > 1)(source)],
   ["Async.every", (source) => Async.every((n) => n < 2)(source)],
-  ["Async.zip (first)", (source) => toArray(Async.zip(source, [1]))],
-  ["Async.zip (second)", (source) => toArray(Async.zip([1], source))],
+  ["Async.zip (first)", (source) => toArray(Async.zip([source, [1]]))],
+  ["Async.zip (second)", (source) => toArray(Async.zip([[1], source]))],
   ["pipe", (source) => Pact.pipe(source, Async.take(1), Async.toArray)]
 ];
 
@@ -85,8 +85,8 @@ const asyncSteps = [
   ["Async.dropWhile", (source) => Async.dropWhile((n) => n < 2)(source)],
   ["Async.take", (source) => Async.take(4)(source)],
   ["Async.takeWhile", (source) => Async.takeWhile(() => true)(source)],
-  ["Async.zip (first)", (source) => Async.zip(source, items)],
-  ["Async.zip (second)", (source) => Async.zip(items, source)],
+  ["Async.zip (first)", (source) => Async.zip([source, items])],
+  ["Async.zip (second)", (source) => Async.zip([items, source])],
   ["Async.concat", (source) => Async.concat(source, items)]
 ];
 

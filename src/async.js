@@ -132,15 +132,30 @@ export const head = async (iter) => {
 export const empty = async function* () {};
 
 /** @type API.zip */
-export const zip = async function* (a, b) {
-  const bIter = getAsyncIterator(b);
-  try {
-    for await (const item1 of a) {
-      yield [item1, (await bIter.next()).value];
-    }
-  } finally {
-    await bIter.return?.();
-  }
+export const zip = (iterables, options) => {
+  const { mode, padding } = zipOptions(options);
+  const iterators = openAll([...iterables]);
+  return zipIterators(iterators, mode, mode === "longest" ? readPadding(padding, iterators.length) : []);
+};
+
+/** @type API.zipKeyed */
+export const zipKeyed = (iterables, options) => {
+  const { mode, padding } = zipOptions(options);
+  const keys = Reflect.ownKeys(iterables).filter((key) => {
+    return Object.prototype.propertyIsEnumerable.call(iterables, key) && iterables[/** @type any */ (key)] !== undefined;
+  });
+  const iterators = openAll(keys.map((key) => iterables[/** @type any */ (key)]));
+  const paddingValues = mode === "longest" && padding !== undefined
+    ? keys.map((key) => /** @type any */ (padding)[key])
+    : [];
+
+  return map((/** @type any[] */ values) => {
+    const result = Object.create(null);
+    keys.forEach((key, index) => {
+      result[key] = values[index];
+    });
+    return result;
+  })(zipIterators(iterators, mode, paddingValues));
 };
 
 /** @type API.concat */
@@ -297,10 +312,144 @@ const fromSync = async function* (iter) {
 /** @type <A>(value: Iterable<A> | AsyncIterable<A> | Iterator<A> | AsyncIterator<A>) => Iterable<A> | AsyncIterable<A> */
 const getFlattenable = (value) => {
   if (value === null || typeof value !== "object") {
-    throw TypeError("`fn` must return an iterable or an iterator");
+    throw TypeError("Expected an iterable or an iterator");
   }
 
   return Symbol.asyncIterator in value || Symbol.iterator in value
     ? value
     : { [Symbol.asyncIterator]: () => /** @type AsyncIterator<any> */ (value) };
+};
+
+/**
+ * @typedef {"shortest" | "longest" | "strict"} ZipMode
+ */
+
+/** @type (options: API.ZipOptions | API.ZipLongestOptions<any> | undefined) => { mode: ZipMode, padding: any } */
+const zipOptions = (options) => {
+  if (options !== undefined && (options === null || typeof options !== "object")) {
+    throw TypeError("`options` must be an object");
+  }
+
+  const mode = options?.mode ?? "shortest";
+  if (mode !== "shortest" && mode !== "longest" && mode !== "strict") {
+    throw TypeError("`mode` must be \"shortest\", \"longest\", or \"strict\"");
+  }
+
+  const padding = mode === "longest" ? /** @type API.ZipLongestOptions<any> */ (options)?.padding : undefined;
+  if (padding !== undefined && (padding === null || typeof padding !== "object")) {
+    throw TypeError("`padding` must be an object");
+  }
+
+  return { mode, padding };
+};
+
+/**
+ * Gets an iterator from each value, closing the ones it already got if one
+ * of them isn't iterable. Closing is started but not waited for, because
+ * this throws before anything is read.
+ *
+ * @type (values: any[]) => AsyncIterator<any>[]
+ */
+const openAll = (values) => {
+  /** @type AsyncIterator<any>[] */
+  const iterators = [];
+  try {
+    for (const value of values) {
+      iterators.push(getAsyncIterator(getFlattenable(value)));
+    }
+  } catch (error) {
+    for (const iterator of iterators) {
+      void iterator.return?.();
+    }
+    throw error;
+  }
+
+  return iterators;
+};
+
+/** @type (padding: Iterable<any> | undefined, length: number) => any[] */
+const readPadding = (padding, length) => {
+  /** @type any[] */
+  const values = [];
+  if (padding !== undefined && length > 0) {
+    for (const value of padding) {
+      values.push(value);
+      if (values.length === length) {
+        break;
+      }
+    }
+  }
+
+  return values;
+};
+
+/**
+ * Yields an array of the next value of each iterator, until `mode` says to
+ * stop. The iterators that aren't done are read at the same time for each
+ * array. Every iterator that isn't done is closed when it stops, except one
+ * that threw.
+ *
+ * @type (iterators: AsyncIterator<any>[], mode: ZipMode, padding: any[]) => AsyncGenerator<any>
+ */
+const zipIterators = async function* (iterators, mode, padding) {
+  const done = iterators.map(() => false);
+  let remaining = iterators.length;
+
+  try {
+    while (remaining > 0) {
+      const results = await Promise.allSettled(iterators.map((iterator, index) => {
+        return done[index] ? undefined : iterator.next();
+      }));
+
+      const rejected = results.findIndex((result) => result.status === "rejected");
+      if (rejected !== -1) {
+        results.forEach((result, index) => {
+          if (result.status === "rejected" || (result.status === "fulfilled" && result.value?.done)) {
+            done[index] = true;
+          }
+        });
+        throw /** @type PromiseRejectedResult */ (results[rejected]).reason;
+      }
+
+      const values = [];
+      let finished = 0;
+      let continuing = 0;
+      for (let index = 0; index < iterators.length; index++) {
+        if (done[index]) {
+          values.push(padding[index]);
+          continue;
+        }
+
+        const result = /** @type PromiseFulfilledResult<IteratorResult<any>> */ (results[index]).value;
+        if (result.done) {
+          done[index] = true;
+          remaining--;
+          finished++;
+          values.push(padding[index]);
+        } else {
+          continuing++;
+          values.push(result.value);
+        }
+      }
+
+      if (finished > 0) {
+        if (mode === "shortest") {
+          return;
+        } else if (mode === "strict") {
+          if (continuing > 0) {
+            throw TypeError("The iterables passed to zip in strict mode have different lengths");
+          }
+          return;
+        }
+      }
+
+      if (remaining > 0) {
+        yield values;
+      }
+    }
+  } finally {
+    await Promise.all(iterators.map((iterator, index) => {
+      return done[index] ? undefined : iterator.return?.();
+    }));
+  }
 };

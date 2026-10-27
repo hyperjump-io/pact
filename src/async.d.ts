@@ -83,12 +83,44 @@ export const head: <A>(iterator: Iterable<A> | AsyncIterable<A>) => Promise<A | 
 export const empty: () => AsyncGenerator<never>;
 
 /**
- * Yields tuples containing a value from each iterator. The iterator will have
- * the same length as `iter1`. If `iter1` is longer than `iter2`, the second
- * value of the tuple will be undefined. If `iter2` is longer than `iter1`, the
- * remaining values in `iter2` will be ignored.
+ * Yields tuples with the next value of each iterable, like `Iterator.zip` from
+ * the Joint Iteration proposal. A string isn't accepted as an iterable.
+ *
+ * - `mode: "shortest"` (the default) stops when any of them is done.
+ * - `mode: "longest"` stops when all of them are done, and uses the value at
+ *   the same position in `padding` for the ones that are done, or
+ *   `undefined`.
+ * - `mode: "strict"` throws a TypeError if they aren't all done at the same
+ *   time.
+ *
+ * When it stops, it closes the iterables that aren't done.
+ *
+ * The iterables that aren't done are read at the same time for each tuple.
  */
-export const zip: <A, B>(iter1: Iterable<A> | AsyncIterable<A>, iter2: Iterable<B> | AsyncIterable<B>) => AsyncGenerator<[A, B]>;
+export const zip: (
+  <T extends readonly unknown[]>(iterables: readonly [...{ [K in keyof T]: Iterable<T[K]> | AsyncIterable<T[K]> | Iterator<T[K]> | AsyncIterator<T[K]> }], options?: ZipOptions) => AsyncGenerator<T>
+) & (
+  <T extends readonly unknown[]>(iterables: readonly [...{ [K in keyof T]: Iterable<T[K]> | AsyncIterable<T[K]> | Iterator<T[K]> | AsyncIterator<T[K]> }], options: ZipLongestOptions<Iterable<unknown>>) => AsyncGenerator<{ [K in keyof T]: T[K] | undefined }>
+);
+export type ZipOptions = {
+  mode?: "shortest" | "strict";
+};
+export type ZipLongestOptions<P> = {
+  mode: "longest";
+  padding?: P;
+};
+
+/**
+ * Same as `zip`, but takes an object of iterables, and yields objects with the
+ * same keys, like `Iterator.zipKeyed` from the Joint Iteration proposal. Keys
+ * whose value is `undefined` are left out. In `longest` mode, `padding` is an
+ * object with a value for each key.
+ */
+export const zipKeyed: (
+  <T extends Record<PropertyKey, unknown>>(iterables: { [K in keyof T]: Iterable<T[K]> | AsyncIterable<T[K]> | Iterator<T[K]> | AsyncIterator<T[K]> }, options?: ZipOptions) => AsyncGenerator<T>
+) & (
+  <T extends Record<PropertyKey, unknown>>(iterables: { [K in keyof T]: Iterable<T[K]> | AsyncIterable<T[K]> | Iterator<T[K]> | AsyncIterator<T[K]> }, options: ZipLongestOptions<Partial<NoInfer<T>>>) => AsyncGenerator<{ [K in keyof T]: T[K] | undefined }>
+);
 
 /**
  * Yields values from each iterator in order.

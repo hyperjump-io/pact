@@ -16,11 +16,30 @@ Each applies to the sync and async versions.
 | `head(iterable)` | `head(iterable)` | Closes the iterator after reading the first value, so the rest can't be read from it (see [Close what you open](../principles/close-what-you-open.md)) |
 | `asyncX` exports | `x` from `/async` | See [Entry points](entry-points.md) |
 
-`zip` stops at the shortest input by default. Its `mode` option is
-`"shortest"`, `"longest"` (with `padding`), or `"strict"` (throws if the
-lengths differ), as in the proposal. It closes the inputs that aren't done
-when it stops. v1 gave `undefined` for a shorter second input and never
-closed it.
+`zip` takes an array of any number of iterables and stops at the shortest
+by default. Its `mode` option is `"shortest"`, `"longest"` (with
+`padding`, an iterable with a value for each position), or `"strict"`
+(throws a `TypeError` if they aren't all done at the same time), as in the
+proposal. It closes the inputs that aren't done when it stops, including
+when one of them throws, and a string isn't accepted as an input, as in
+`flatMap`. v1 took two iterables, padded a shorter second one with
+`undefined`, ignored the rest of a longer second one, and never closed it.
+
+```javascript
+zip([[1, 2, 3], ["a", "b"]]);                       // [1, "a"], [2, "b"]
+zip([[1, 2, 3], ["a"]], { mode: "longest", padding: [0, "?"] });
+                                                    // [1, "a"], [2, "?"], [3, "?"]
+zipKeyed({ name: names, age: ages });               // { name, age }, ...
+```
+
+`zip` is a source, like `concat`, because it needs all of its iterables
+before it starts.
+
+The async `zip` reads the iterables that aren't done at the same time for
+each tuple, so a tuple takes as long as the slowest iterable instead of
+all of them together. The proposal has no async version. Reading them one
+at a time was rejected: it's slower, and its only advantage is a
+guaranteed order for iterables whose reads have side effects.
 
 ## Callbacks get the index
 
@@ -47,6 +66,10 @@ step behave differently from the method of the same name.
 - `forEach(fn)`, as natively: a collector that calls `fn` with each value
   and returns `undefined`. It's for side effects at the end of a pipeline.
   `tap` is for looking at values in the middle of one.
+- `zipKeyed(iterables, options?)`, like `Iterator.zipKeyed` from the same
+  proposal: it takes an object of iterables and yields objects with the
+  same keys. Keys whose value is `undefined` are left out, and `padding`
+  is an object.
 - `compose` (see [Pipe](pipe.md)).
 
 ## Kept
