@@ -2,21 +2,24 @@
 
 Async functions accept sync iterables as well as async ones, as in v1.
 
-- A sync source is adapted to the async protocol by a small iterator, not
-  an async generator. Until the [rewrite](iterators.md), it's an async
-  generator that `yield*`s the source, which is as small as a generator
-  gets. v1 wrapped it with `asyncMap`, which added a whole
-  async generator to every pipeline that started from an array.
-- Functions that take a callback await what it returns, so a callback can
-  be sync or async.
+- A sync source is adapted to the async protocol by `FromSyncIterator`, a
+  small iterator class (see [Iterators](iterators.md)). It answers with a
+  resolved promise without waiting a turn unless the value is a promise,
+  which it waits for, and it closes the source if one rejects. v1 wrapped
+  it with `asyncMap`, which added a whole async generator to every
+  pipeline that started from an array.
+- A callback can be sync or async. What it returns is waited for if it's
+  a promise.
 
 ## Why
 
 Most of the cost of an async pipeline is being async: one promise per item
 per step. On the same data, sync was about 20 times faster than v1's async
-generators (see [Generators](../benchmarks/generators.md)). Hand-written
-async iterators help (about 1.7 times faster), but the bigger saving is not
-using the async functions on data that's sync. The docs say so.
+generators (see [Generators](../benchmarks/generators.md)). The iterator
+classes are about 1.5 times faster than v1's async generators (see
+[Pipelines](../benchmarks/pipelines.md#iterator-classes)), but the bigger
+saving is not using the async functions on data that's sync. The docs say
+so.
 
 ## Rejected
 

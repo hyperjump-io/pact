@@ -3,16 +3,12 @@
  */
 
 /** @type API.range */
-export const range = function* (from, to, step = 1) {
+export const range = (from, to, step = 1) => {
   if (step === 0) {
     throw RangeError("`step` can't be 0");
   }
 
-  for (let n = from; to === undefined || (step > 0 ? n < to : n > to); n += step) {
-    yield n;
-  }
-
-  return undefined;
+  return new RangeIterator(from, to, step);
 };
 
 /** @type API.pipe */
@@ -34,3 +30,47 @@ export const compose = (/** @type ((a: any) => any)[] */ ...fns) => (/** @type a
 
   return result;
 };
+
+/** @extends {Iterator<number, undefined, unknown>} */
+class RangeIterator extends Iterator {
+  /** @type number */
+  #next;
+  /** @type number | undefined */
+  #to;
+  /** @type number */
+  #step;
+  #done = false;
+
+  /**
+   * @param {number} from
+   * @param {number | undefined} to
+   * @param {number} step
+   */
+  constructor(from, to, step) {
+    super();
+    this.#next = from;
+    this.#to = to;
+    this.#step = step;
+  }
+
+  /** @type () => IteratorResult<number, undefined> */
+  next() {
+    if (this.#done) {
+      return { done: true, value: undefined };
+    }
+
+    const value = this.#next;
+    if (this.#to !== undefined && (this.#step > 0 ? value >= this.#to : value <= this.#to)) {
+      return this.return();
+    }
+
+    this.#next += this.#step;
+    return { done: false, value };
+  }
+
+  /** @type () => IteratorReturnResult<undefined> */
+  return() {
+    this.#done = true;
+    return { done: true, value: undefined };
+  }
+}

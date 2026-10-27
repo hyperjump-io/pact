@@ -51,3 +51,29 @@ v2 has to beat.
 - The others are the same as v1 within noise.
 - Most of a short pipeline's setup is creating a generator for each step,
   not `curry`. That's what [Iterators](../components/iterators.md) is for.
+
+## Iterator classes
+
+2026-10-27, after every function that returns an iterator became a class
+(see [Iterators](../components/iterators.md)). Mean time per run, Node
+22.22.1.
+
+| Benchmark | `next` | `branch` (v1) | Baselines |
+| --- | --- | --- | --- |
+| Sync, 100,000 items: `filter`, `map`, `reduce` | 0.97 ms | 2.18 ms | native helpers 2.46 ms, array methods 1.68 ms, `for` loop 0.12 ms |
+| Sync, 10 items: `map`, `take(5)`, `reduce` | 0.2 µs | 3.0 µs | native helpers 0.3 µs, array methods 0.1 µs |
+| Async, 10,000 items from an array: `filter`, `map`, `reduce` | 2.00 ms | 2.93 ms | `for await` loop 0.85 ms |
+| json-schema v1 `properties`: `map`, `toObject` (10 entries) | 4.5 µs | 6.1 µs | `for` loop 1.4 µs |
+| json-schema v1 `additionalProperties`: `map`, `concat`, `join` (12 items) | 0.5 µs | 2.6 µs | array methods 0.5 µs |
+
+- Sync is 2.2 times faster than v1 for a long pipeline, and 15 times
+  faster for a short one. It's faster than array methods for a long
+  pipeline, and 1.5 times faster than the native helpers for a short one.
+- Async is 1.35 to 1.5 times faster than v1. It was 1.6 times slower
+  with every call queued on a promise chain. Starting a call right away
+  when nothing is in progress, not waiting for values that aren't
+  promises in the sync-to-async adapter, and not waiting for callback
+  results that aren't promises each made a difference
+  (`benchmark/claude/async-queue.js`).
+- `additionalProperties` is as fast as array methods. Setting up a short
+  pipeline isn't what it costs anymore.

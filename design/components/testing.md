@@ -24,6 +24,10 @@ so a function can't be missed and an API change updates one row:
   both times. v1's `take`, `scan`, and `reduce` kept their state in the
   step, so `take(2)` gave nothing the second time and `reduce(add, 0)`
   carried its total over.
+- `iterators.test.js`: every iterator pact returns is an `Iterator` (or
+  has `AsyncIterator.prototype`), stays done, and has no `throw()`, and
+  async calls that overlap are answered in order (see
+  [Iterators](iterators.md)).
 - `callbacks.test.js`: every callback gets the index (see
   [Names](names.md#callbacks-get-the-index)).
 - `async.test.js`: both entry points have the same functions (see

@@ -17,6 +17,3 @@
   are what the native helpers declare. `IteratorObject` is where
   TypeScript declares the native helper methods, so they're typed on what
   pact returns. It needs TypeScript 5.6 or later.
-- While the functions are still generators, each exported one ends with
-  `return undefined;`. Without it, a generator's return type is `void`,
-  which isn't assignable to `undefined`. The rewrite removes them.

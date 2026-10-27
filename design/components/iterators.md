@@ -1,28 +1,67 @@
 # Iterators
 
 Each function that returns an iterator returns an instance of a small
-class written for it, not a generator. The class extends
-`Iterator.prototype` (`AsyncIterator.prototype` for async), so the native
-helpers work on what pact returns, and it implements `next()` and
-`return()`.
+class written for it, not a generator: `MapIterator`, `FilterIterator`,
+`ZipIterator`, and so on, in `index.js` and `async.js`, and
+`RangeIterator` in `common.js`. A sync class extends `Iterator`, and an
+async one extends `AsyncStep`, which has `AsyncIterator.prototype` in its
+prototype chain, so the native helpers work on what pact returns. Fields
+are `#private`.
 
-- `return()` closes the source and anything else the iterator opened (see
-  [Close what you open](../principles/close-what-you-open.md)). A done
-  iterator doesn't read its source again.
-- The declared return types are `IteratorObject<T, undefined, unknown>`
-  and `AsyncIteratorObject<T, undefined, unknown>` (see
-  [Types](../style/types.md)). They don't promise `throw()`, which
-  generators have and these don't, and `return()` is optional, so code
-  can't depend on either.
-- `AsyncIterator.prototype` isn't a global. It's found from an async
-  generator function's prototype chain when the module loads.
+Every class follows the same rules, which are the native helpers' and
+which `iterators.test.js`, `closing.test.js`, and the other table tests
+check for every function:
+
+- Once it's done, it stays done. `next()` returns
+  `{ done: true, value: undefined }` and doesn't read its source again.
+- `return()` closes the source and anything else the iterator opened, once
+  (see [Close what you open](../principles/close-what-you-open.md)).
+  `flatten` and `flatMap` close the iterable they're in, and `concat`
+  closes the one it's reading.
+- A callback that throws closes the source before the error is passed on.
+- An error from the source is passed on without closing it, as a
+  generator's `for...of` does.
+- It has no `throw()` method.
+- A step opens its source when it's called, not when it's first read, as
+  the native helpers do, so a step called with something that isn't
+  iterable throws right away. `concat` checks its iterables when it's
+  called and opens each one when it gets to it, as `Iterator.concat` does,
+  so a string throws.
+
+The declared return types are `IteratorObject<T, undefined, unknown>` and
+`AsyncIteratorObject<T, undefined, unknown>` (see
+[Types](../style/types.md)).
+
+## Async
+
+`AsyncIterator.prototype` isn't a global. It's found from an async
+generator function's prototype chain when the module loads, and `AsyncStep`
+is given it as its prototype's prototype.
+
+- **Calls are queued.** A call to `next()` or `return()` that's made while
+  another one is in progress waits for it, as with an async generator, so
+  `next()` calls that overlap get their values in order, even through
+  `filter`, whose calls read a different number of values from the
+  source. A call made when nothing is in progress starts right away,
+  without waiting a turn. Each class implements `[pull]()` and `[close]()`,
+  which `AsyncStep` calls one at a time. A step that closes itself, because
+  a callback threw or it's done early, calls `[close]()` directly, because
+  `return()` would wait for the call it's in.
+- **A callback's result is only waited for if it's a promise.** Waiting
+  for a value that isn't one still takes a turn, and most callbacks are
+  sync.
+- **`[Symbol.asyncDispose]()`** calls `return()`, as the spec defines it on
+  `AsyncIterator.prototype`, which doesn't have it in every engine yet.
+  TypeScript's `AsyncIteratorObject` requires it.
 
 ## Why
 
-Plain iterator objects are about 2.2 times faster than generators for a
-`filter`, `map`, `reduce` pipeline over a million items, and faster than
-array methods (see [Generators](../benchmarks/generators.md)). Async
-iterators are about 1.7 times faster than async generators.
+A class that extends `Iterator` is as fast as a plain object for a long
+pipeline, and faster for a short one, because a class's methods are on its
+prototype instead of being created for each object
+(`benchmark/claude/iterator-prototype.js`, 2026-10-27). Compared to v1,
+sync pipelines are 2.2 to 15 times faster and async ones 1.35 to 1.5
+times faster (see [Pipelines](../benchmarks/pipelines.md#iterator-classes)).
 
 ## Rejected
 
@@ -30,16 +69,26 @@ iterators are about 1.7 times faster than async generators.
   pact. Their one advantage is that `for...of` and `yield*` close sources
   for free, and tests cover that instead.
 - **Delegating to the native Iterator helpers.** On Node 22 they're no
-  faster than generators for long pipelines. They are faster to set up for
-  short pipelines, but most of v1's setup cost was currying and `pipe` (see
-  [Pipe](pipe.md)). There are no native async helpers yet.
-- **Plain objects that don't extend `Iterator.prototype`.** They'd work, but
-  the native helpers wouldn't be available on them, and a user would have
-  to wrap them with `Iterator.from`.
+  faster than generators for long pipelines, and the classes are faster
+  than them for short ones. There are no native async helpers yet.
+- **Plain objects that don't extend `Iterator.prototype`.** The native
+  helpers wouldn't be available on them, and they were slower for short
+  pipelines.
+- **Not queuing async calls**, and documenting that each `next()` has to
+  be waited for. Most code does wait, but `filter`, `take`, `scan`, and
+  others would give wrong results if it doesn't. The queue with a fast
+  path costs nothing measurable.
+- **Queuing every call on a promise chain**, without the fast path. It
+  made async pipelines 1.6 times slower than v1, because every call waited
+  a turn before it started (`benchmark/claude/async-queue.js`).
+- **Checking for a call to `next()` from inside its own callback**, which
+  a generator throws a TypeError for. It costs something on every call,
+  and the native helpers don't all do it.
 
 ## Open questions
 
-- Whether extending `Iterator.prototype` with a class costs anything
-  compared to a plain object. It hasn't been measured.
 - v2 needs a global `Iterator` (Node 22, and browsers from 2025). Is that
   acceptable as the minimum, or does it need a fallback?
+- Sync classes don't implement `[Symbol.dispose]()`. TypeScript's
+  `IteratorObject` type has it from `Iterator.prototype`, which has it in
+  engines that support explicit resource management, but not in Node 22.
