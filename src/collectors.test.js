@@ -177,6 +177,16 @@ describe("join", () => {
     const result = join(",", subject);
     expect(result).to.equal("foo,bar,baz");
   });
+
+  test("array", () => {
+    const result = join(",", ["foo", "bar", "baz"]);
+    expect(result).to.equal("foo,bar,baz");
+  });
+
+  test("set", () => {
+    const result = join(",", new Set(["foo", "bar", "baz"]));
+    expect(result).to.equal("foo,bar,baz");
+  });
 });
 
 describe("asyncJoin", () => {
@@ -202,6 +212,16 @@ describe("asyncJoin", () => {
     }());
 
     const result = await asyncJoin(",", subject);
+    expect(result).to.equal("foo,bar,baz");
+  });
+
+  test("array", async () => {
+    const result = await asyncJoin(",", ["foo", "bar", "baz"]);
+    expect(result).to.equal("foo,bar,baz");
+  });
+
+  test("set", async () => {
+    const result = await asyncJoin(",", new Set(["foo", "bar", "baz"]));
     expect(result).to.equal("foo,bar,baz");
   });
 });
