@@ -205,7 +205,7 @@ export const zip: <A, B>(iter1: Iterable<A>, iter2: Iterable<B>) => Generator<[A
 /**
  * Same as `zip` but works with AsyncIterables.
  */
-export const asyncZip: <A, B>(iter1: AsyncIterable<A>, iter2: AsyncIterable<B>) => AsyncGenerator<[A, B]>;
+export const asyncZip: <A, B>(iter1: Iterable<A> | AsyncIterable<A>, iter2: Iterable<B> | AsyncIterable<B>) => AsyncGenerator<[A, B]>;
 
 /**
  * Yields values from each iterator in order.

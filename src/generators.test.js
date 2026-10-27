@@ -908,6 +908,28 @@ describe("zip", () => {
     const result = zip(iter1, iter2);
     expect([...result]).to.eql([[1, "a"], [2, "b"]]);
   });
+
+  test("iter2 is closed when iter1 runs out", () => {
+    const iter2 = closable(["a", "b", "c"]);
+    const result = zip([1, 2], iter2);
+    expect([...result]).to.eql([[1, "a"], [2, "b"]]);
+    expect(iter2.closed).to.equal(true);
+  });
+
+  test("both are closed when the result is closed early", () => {
+    const iter1 = closable([1, 2, 3]);
+    const iter2 = closable(["a", "b", "c"]);
+    const result = zip(iter1, iter2);
+    result.next();
+    result.return(undefined);
+    expect(iter1.closed).to.equal(true);
+    expect(iter2.closed).to.equal(true);
+  });
+
+  test("arrays", () => {
+    const result = zip([1, 2], ["a", "b"]);
+    expect([...result]).to.eql([[1, "a"], [2, "b"]]);
+  });
 });
 
 describe("asyncZip", () => {
@@ -957,6 +979,32 @@ describe("asyncZip", () => {
       yield "c";
     }());
     const result = asyncZip(iter1, iter2);
+    expect((await result.next()).value).to.eql([1, "a"]);
+    expect((await result.next()).value).to.eql([2, "b"]);
+    expect((await result.next()).done).to.equal(true);
+  });
+
+  test("iter2 is closed when iter1 runs out", async () => {
+    const iter2 = asyncClosable(["a", "b", "c"]);
+    const result = asyncZip(asyncClosable([1, 2]), iter2);
+    expect((await result.next()).value).to.eql([1, "a"]);
+    expect((await result.next()).value).to.eql([2, "b"]);
+    expect((await result.next()).done).to.equal(true);
+    expect(iter2.closed).to.equal(true);
+  });
+
+  test("both are closed when the result is closed early", async () => {
+    const iter1 = asyncClosable([1, 2, 3]);
+    const iter2 = asyncClosable(["a", "b", "c"]);
+    const result = asyncZip(iter1, iter2);
+    await result.next();
+    await result.return(undefined);
+    expect(iter1.closed).to.equal(true);
+    expect(iter2.closed).to.equal(true);
+  });
+
+  test("arrays", async () => {
+    const result = asyncZip([1, 2], ["a", "b"]);
     expect((await result.next()).value).to.eql([1, "a"]);
     expect((await result.next()).value).to.eql([2, "b"]);
     expect((await result.next()).done).to.equal(true);
@@ -1019,3 +1067,38 @@ describe("asyncConcat", () => {
     expect((await result.next()).done).to.equal(true);
   });
 });
+
+/**
+ * An iterable over `items` that records whether its iterator was closed
+ * with `return()`.
+ *
+ * @type <A>(items: A[]) => Iterable<A> & { closed: boolean }
+ */
+const closable = (items) => {
+  const iterable = {
+    closed: false,
+    * [Symbol.iterator]() {
+      try {
+        yield* items;
+      } finally {
+        iterable.closed = true;
+      }
+    }
+  };
+  return iterable;
+};
+
+/** @type <A>(items: A[]) => AsyncIterable<A> & { closed: boolean } */
+const asyncClosable = (items) => {
+  const iterable = {
+    closed: false,
+    async* [Symbol.asyncIterator]() {
+      try {
+        yield* items;
+      } finally {
+        iterable.closed = true;
+      }
+    }
+  };
+  return iterable;
+};

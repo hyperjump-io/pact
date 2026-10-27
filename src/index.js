@@ -223,16 +223,24 @@ export const asyncEmpty = async function* () {};
 /** @type API.zip */
 export const zip = function* (a, b) {
   const bIter = getIterator(b);
-  for (const item1 of a) {
-    yield [item1, bIter.next().value];
+  try {
+    for (const item1 of a) {
+      yield [item1, bIter.next().value];
+    }
+  } finally {
+    bIter.return?.();
   }
 };
 
 /** @type API.asyncZip */
 export const asyncZip = async function* (a, b) {
   const bIter = getAsyncIterator(b);
-  for await (const item1 of a) {
-    yield [item1, (await bIter.next()).value];
+  try {
+    for await (const item1 of a) {
+      yield [item1, (await bIter.next()).value];
+    }
+  } finally {
+    await bIter.return?.();
   }
 };
 
