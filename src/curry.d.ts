@@ -5,7 +5,7 @@ export const curry: (
     (a: A) => (iterable: I) => R
   )
 ) & (
-  <A, I, R>(curriedFn: (a: A, b: B) => (iterable: I) => R) => (
+  <A, B, I, R>(curriedFn: (a: A, b: B) => (iterable: I) => R) => (
     (a: A, b: B, iterable: I) => R
   ) & (
     (a: A, b: B) => (iterable: I) => R

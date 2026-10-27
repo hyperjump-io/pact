@@ -1,6 +1,12 @@
 .github/
-tsconfig.json
-eslint.config.js
-**/*.test.ts
-scratch/
+.gitattributes
+oxlint.config.ts
+**/*.test.js
+coverage/
 docs/
+tsconfig.json
+scratch/
+benchmark/
+TODO*
+design/
+CLAUDE.md

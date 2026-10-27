@@ -2,19 +2,6 @@
   "name": "@hyperjump/pact",
   "version": "1.4.0",
   "description": "Higher order functions for iterators and async iterators",
-  "type": "module",
-  "main": "./src/index.js",
-  "exports": {
-    ".": "./src/index.js",
-    "./async": "./src/async.js"
-  },
-  "scripts": {
-    "lint": "eslint src",
-    "test": "vitest --watch=false",
-    "type-check": "tsc --noEmit",
-    "docs": "typedoc --excludeExternals"
-  },
-  "repository": "github:hyperjump-io/pact",
   "keywords": [
     "Hyperjump",
     "Promise",
@@ -27,17 +14,36 @@
   ],
   "author": "Jason Desrosiers <jdesrosi@gmail.com>",
   "license": "MIT",
+  "repository": "github:hyperjump-io/pact",
   "funding": {
     "type": "github",
-    "url": "https://github.com/sponsors/hyperump-io"
+    "url": "https://github.com/sponsors/hyperjump-io"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./async": {
+      "types": "./src/async.d.ts",
+      "default": "./src/async.js"
+    }
+  },
+  "scripts": {
+    "lint": "oxlint",
+    "test": "vitest run",
+    "type-check": "tsc --noEmit",
+    "docs": "typedoc --excludeExternals"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "*",
     "@types/node": "*",
-    "eslint-import-resolver-typescript": "*",
-    "eslint-plugin-import": "*",
+    "@vitest/coverage-v8": "*",
+    "oxlint": "*",
+    "oxlint-tsgolint": "*",
     "typedoc": "*",
-    "typescript-eslint": "*",
+    "typescript": "*",
     "vitest": "*"
   }
 }

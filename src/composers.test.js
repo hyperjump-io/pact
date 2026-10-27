@@ -6,9 +6,9 @@ import {
   pipe
 } from "./index.js";
 
-
 describe("pipe", () => {
-  let subject: Iterable<number>;
+  /** @type Iterable<number> */
+  let subject;
 
   beforeEach(() => {
     subject = (function* () {
@@ -21,38 +21,41 @@ describe("pipe", () => {
   });
 
   test("one function", () => {
-    const result: Iterable<number> = pipe(
+    /** @type Iterable<number> */
+    const result = pipe(
       subject,
-      filter((n: number) => n > 2)
+      filter((/** @type number */ n) => n > 2)
     );
     expect([...result]).to.eql([3, 4, 5]);
   });
 
   test("two functions", () => {
-    const result: Iterable<number> = pipe(
+    /** @type Iterable<number> */
+    const result = pipe(
       subject,
-      filter((n: number) => n > 2),
-      map((n: number) => n * 2)
+      filter((/** @type number */ n) => n > 2),
+      map((/** @type number */ n) => n * 2)
     );
     expect([...result]).to.eql([6, 8, 10]);
   });
 
   test("three functions", () => {
-    const result: number = pipe(
+    /** @type number */
+    const result = pipe(
       subject,
-      filter((n: number) => n > 2),
-      map((n: number) => n * 2),
-      reduce((acc, n: number) => acc + n, 0)
+      filter((/** @type number */ n) => n > 2),
+      map((/** @type number */ n) => n * 2),
+      reduce((acc, /** @type number */ n) => acc + n, 0)
     );
     expect(result).to.eql(24);
   });
 });
 
 describe("async pipe", () => {
-  let subject: AsyncGenerator<number>;
+  /** @type AsyncGenerator<number> */
+  let subject;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/require-await
     subject = (async function* () {
       yield 1;
       yield 2;
@@ -63,9 +66,10 @@ describe("async pipe", () => {
   });
 
   test("one function", async () => {
-    const result: AsyncGenerator<number> = pipe(
+    /** @type AsyncGenerator<number> */
+    const result = pipe(
       subject,
-      asyncFilter((n: number) => n > 2)
+      asyncFilter((/** @type number */ n) => n > 2)
     );
     expect((await result.next()).value).to.equal(3);
     expect((await result.next()).value).to.equal(4);
@@ -74,10 +78,11 @@ describe("async pipe", () => {
   });
 
   test("two functions", async () => {
-    const result: AsyncGenerator<number> = pipe(
+    /** @type AsyncGenerator<number> */
+    const result = pipe(
       subject,
-      asyncFilter((n: number) => n > 2),
-      asyncMap((n: number) => n * 2)
+      asyncFilter((/** @type number */ n) => n > 2),
+      asyncMap((/** @type number */ n) => n * 2)
     );
     expect((await result.next()).value).to.equal(6);
     expect((await result.next()).value).to.equal(8);
@@ -86,11 +91,12 @@ describe("async pipe", () => {
   });
 
   test("three functions", async () => {
-    const result: number = await pipe(
+    /** @type number */
+    const result = await pipe(
       subject,
-      asyncFilter((n: number) => n > 2),
-      asyncMap((n: number) => n * 2),
-      asyncReduce((acc, n: number) => acc + n, 0)
+      asyncFilter((/** @type number */ n) => n > 2),
+      asyncMap((/** @type number */ n) => n * 2),
+      asyncReduce((acc, /** @type number */ n) => acc + n, 0)
     );
     expect(result).to.eql(24);
   });

@@ -1,6 +1,5 @@
 import type { LastReturnType } from "./type-utils.d.ts";
 
-
 /**
  * Apply a function to every value in the iterator
  */
@@ -428,7 +427,6 @@ export const pipe: (
     (h: H) => I
   ]) => I
 ) & (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   <A, B, C, D, E, F, G, H, I, J extends ((j: any) => any)[]>(initialValue: A, ...fns: [
     (a: A) => B,
     (b: B) => C,

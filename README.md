@@ -72,5 +72,12 @@ Run the tests with a continuous test runner
 npm test -- --watch
 ```
 
-[hyperjump]: https://github.com/hyperjump-io/browser
-[jref]: https://github.com/hyperjump-io/browser/blob/master/src/json-reference/README.md
+Lint and type-check
+
+```bash
+npm run lint
+npm run type-check
+```
+
+The design docs, principles, and style guide are in
+[`design/`](design/README.md).
