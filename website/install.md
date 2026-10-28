@@ -24,6 +24,9 @@ import * as Async from "@hyperjump/pact/async";
 The package includes its type declarations, and needs TypeScript 5.6 or
 later. Each step's input is checked against the step before it, so a
 pipeline that passes numbers to a step that takes strings is a type error.
+A step that's made outside a pipeline, like one made for `compose`, has no
+step before it to get its input's type from, so give its callback's
+parameter a type.
 
 Every function that returns an iterator is declared to return an
 `IteratorObject` (`AsyncIteratorObject` from `@hyperjump/pact/async`).

@@ -15,8 +15,10 @@ import { pipe, toArray, toSet, toMap, toObject } from "@hyperjump/pact";
 
 pipe(new Set([1, 2]), toArray); // [1, 2]
 pipe([1, 1, 2], toSet); // new Set([1, 2])
-pipe([["a", 1], ["b", 2]], toMap); // new Map([["a", 1], ["b", 2]])
-pipe([["a", 1], ["b", 2]], toObject); // { a: 1, b: 2 }
+
+const pairs: [string, number][] = [["a", 1], ["b", 2]];
+pipe(pairs, toMap); // new Map([["a", 1], ["b", 2]])
+pipe(pairs, toObject); // { a: 1, b: 2 }
 ```
 
 ## reduce

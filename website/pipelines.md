@@ -35,7 +35,7 @@ that takes the iterable, so a step can be called without `pipe` too:
 ```typescript
 import { map } from "@hyperjump/pact";
 
-const double = map((n) => n * 2);
+const double = map((n: number) => n * 2);
 [...double([1, 2, 3])]; // [2, 4, 6]
 ```
 
@@ -72,7 +72,7 @@ itself, so it can go in another pipeline.
 import { pipe, compose, filter, map, toArray } from "@hyperjump/pact";
 
 const doubledEvens = compose(
-  filter((n) => n % 2 === 0),
+  filter((n: number) => n % 2 === 0),
   map((n) => n * 2)
 );
 
@@ -91,7 +91,7 @@ work on it, and you can mix them with pact's steps.
 ```typescript
 import { filter } from "@hyperjump/pact";
 
-const evens = filter((n) => n % 2 === 0)([1, 2, 3, 4]);
+const evens = filter((n: number) => n % 2 === 0)([1, 2, 3, 4]);
 evens.map((n) => n * 10).toArray(); // [20, 40]
 ```
 

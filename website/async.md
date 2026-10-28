@@ -7,7 +7,7 @@ and what a collector returns is a promise.
 ```typescript
 import { pipe, filter, map, toArray } from "@hyperjump/pact/async";
 
-const fetchUser = async (id) => ({ id, name: `User ${id}` });
+const fetchUser = async (id: number) => ({ id, name: `User ${id}` });
 
 await pipe(
   [1, 2, 3],
@@ -73,7 +73,7 @@ const lines = async function* () {
   }
 };
 
-const upper = map((line) => line.toUpperCase())(lines());
+const upper = map((line: string) => line.toUpperCase())(lines());
 await upper.next(); // { done: false, value: "A" }
 await upper[Symbol.asyncDispose]();
 ```

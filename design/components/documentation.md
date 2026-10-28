@@ -14,7 +14,8 @@ README has how to write them. pact is listed with the components there.
 - `npm run check-website` runs every example in `website/` against `src/`
   and checks each `// value` comment and printed `text` block
   (`scripts/check-website.js`), and CI runs it, so an example can't drift
-  from what the code does.
+  from what the code does. It type-checks every example, strictly, against
+  the `.d.ts` files too, so the examples are `typescript` blocks.
 - A feature that isn't released gets `*Coming soon*` on its own line under
   its heading. `npm version` replaces it with `*Added in vX.Y.Z*`
   (`scripts/version-docs.js`). v2's pages describe v2 as a whole, without
