@@ -37,7 +37,7 @@ numbers.filter(isEven).map(double).slice(0, 10);
 
 | pact | Array methods | Native helpers |
 | --- | --- | --- |
-| 0.53 µs | 1.35 ms | 0.68 µs |
+| **0.53 µs** | 1.35 ms | 0.68 µs |
 
 pact is 2,500 times faster than array methods. The pipeline reads 20 numbers. The array
 methods read 100,000, make an array of 50,000 and another of 50,000, and
@@ -64,7 +64,7 @@ numbers.map(double).find(isTarget); // 1998
 
 | pact | Array methods | Native helpers |
 | --- | --- | --- |
-| 12 µs | 0.77 ms | 21 µs |
+| **12 µs** | 0.77 ms | 21 µs |
 
 pact is 64 times faster than array methods. The pipeline maps the first 1,000 numbers, and
 the array methods map all 100,000 before `find` starts.
@@ -91,7 +91,7 @@ Pact.pipe(
 
 | pact | Array methods | Native helpers |
 | --- | --- | --- |
-| 1.95 ms | 2.01 ms | 2.34 ms |
+| **1.95 ms** | 2.01 ms | 2.34 ms |
 
 About the same. Array methods only work on arrays, so a `Set`, a `Map`,
 or a generator has to be spread into an array first, which is one more
@@ -120,7 +120,7 @@ numbers.filter(isEven).map(double).reduce(add, 0); // 4999900000
 
 | pact | Array methods | Native helpers |
 | --- | --- | --- |
-| 1.71 ms | 1.63 ms | 2.35 ms |
+| 1.71 ms | **1.63 ms** | 2.35 ms |
 
 About the same. The engine optimizes array methods separately for each
 place they're called, so it can put the callbacks' code inline. pact's
@@ -159,7 +159,7 @@ numbers
 
 | pact | Array methods | Native helpers |
 | --- | --- | --- |
-| 2.31 ms | 2.62 ms | 3.66 ms |
+| **2.31 ms** | 2.62 ms | 3.66 ms |
 
 pact is 1.1 times faster. Each step adds a function call for each value
 to the pipeline, and an array to the array methods.
@@ -190,7 +190,7 @@ numbers.filter(isEven).map(double); // [0, 4, 8, 12, 16]
 
 | pact | Array methods | Native helpers |
 | --- | --- | --- |
-| 0.32 µs | 0.05 µs | 0.33 µs |
+| 0.32 µs | **0.05 µs** | 0.33 µs |
 
 Array methods are 6 times faster. Each value costs a pipeline a call
 to each step's iterator and a new object to pass it in, and setting up
