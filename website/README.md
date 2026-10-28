@@ -28,6 +28,16 @@ pipe(
 - **Small and fast.** No dependencies, with TypeScript types, for Node.js
   and browsers.
 
+## Why not array methods?
+
+Each of an array's `filter`, `map`, and the rest makes a whole new array
+before the next one starts, and they only work on arrays. A pipeline makes
+no arrays in between. It passes each value through every step before it
+reads the next one, so it works on any iterable, like a `Set`, a `Map`, a
+generator, or one that never ends, and a step like `take` or a collector
+like `find` stops reading as soon as it has what it needs. Spreading an
+iterable into an array to use array methods reads all of it first.
+
 Using v1? [Migrating from v1](migrating.md) lists what changed.
 
 ## Contents
