@@ -56,7 +56,7 @@ class RangeIterator extends Iterator {
   /** @type () => IteratorResult<number, undefined> */
   next() {
     if (this.#done) {
-      return { done: true, value: undefined };
+      return { value: undefined, done: true };
     }
 
     const value = this.#next;
@@ -65,12 +65,12 @@ class RangeIterator extends Iterator {
     }
 
     this.#next += this.#step;
-    return { done: false, value };
+    return { value, done: false };
   }
 
   /** @type () => IteratorReturnResult<undefined> */
   return() {
     this.#done = true;
-    return { done: true, value: undefined };
+    return { value: undefined, done: true };
   }
 }

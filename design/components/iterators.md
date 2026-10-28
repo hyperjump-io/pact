@@ -47,6 +47,15 @@ helper, because V8 keeps type feedback for each call site in a function's
 code: a shared one would see every kind of source from every step, and
 stop being optimized (see [Array sources](../benchmarks/array-sources.md)).
 
+## Result objects
+
+Every result is written `{ value, done }`, in that order. The built-in
+iterators' results all have one hidden class, and an object literal only
+has the same one if its properties are in that order. With
+`{ done, value }`, code that reads `done` and `value`, in pact and in
+`for...of`, sees two, and is slower (see
+[Array sources](../benchmarks/array-sources.md#result-objects)).
+
 The declared return types are `IteratorObject<T, undefined, unknown>` and
 `AsyncIteratorObject<T, undefined, unknown>` (see
 [Types](../style/types.md)).
@@ -115,8 +124,6 @@ times faster (see [Pipelines](../benchmarks/pipelines.md#iterator-classes)).
 
 ## Open questions
 
-- Why are sources that aren't arrays 5 to 13% slower since steps read
-  arrays by index? They take the same path as before, with one more check.
 - v2 needs a global `Iterator` (Node 22, and browsers from 2025). Is that
   acceptable as the minimum, or does it need a fallback?
 - Sync classes don't implement `[Symbol.dispose]()`. TypeScript's

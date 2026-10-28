@@ -103,8 +103,9 @@ in a fresh process, with the variants taking turns. Median of 3, in µs:
 - Returning a result keeps `filter`, `take`, and the others passing their
   source's result on without making a new one, which is why other sources
   lose less with it. That's the one used.
-- Why other sources are slower at all isn't known. They take the same path
-  as before, with one more check.
+- Why other sources are slower is in
+  [Result objects](#result-objects). Most of it was fixed by writing
+  results in the same order as the built-in iterators.
 
 ## Async
 
@@ -127,6 +128,64 @@ callbacks and sources. Median of 3, in µs, Node 22.22:
 - Arrays are 1.5 to 1.7 times faster. A value from an array used to cost
   a call queued in `FromSyncIterator`, a promise, and a turn waiting for
   it, and now it's read with no promise at all.
-- Other sources are 2 to 5% slower, as with the sync steps.
+- Other sources are 2 to 5% slower, as with the sync steps (see
+  [Result objects](#result-objects)).
 - `take(10)` is too short to measure this way. Run again, three times
   each, it was 3.9 to 8.9 µs before and 2.8 to 3.3 µs after.
+
+## Result objects
+
+2026-10-28. Why other sources got slower when steps started reading
+arrays by index, with `array-sources.js` and `ROUNDS=7` (two runs of the
+same code differed by less than 2%). Each variant changes one thing.
+
+| Median µs | `Set` | Generator |
+| --- | --- | --- |
+| Before | 1731 | 2470 |
+| Before, with `#array` and `#position` fields that aren't used | 1727 | 2479 |
+| Before, reading the source through a `#read()` | 1771 | 2477 |
+| After, with `isPlainArray` always false | 1786 | 2563 |
+| After | 1921 | 2597 |
+
+The fields cost nothing, and the extra method and check cost 2 to 4%.
+Most of it came from arrays taking the new path at all: copying `#read()`
+into `next()`, or checking `#source` before `#array`, didn't help.
+
+The built-in iterators (an array's, a `Set`'s, a generator's, an async
+generator's, and the native helpers) all return results with the same
+hidden class, and an object literal only gets it if it's written
+`{ value, done }`, in that order. pact wrote `{ done, value }`. Before,
+most results came from an array iterator, and a step that passes its
+source's result on, like `filter`, passed those on, so code reading
+`done` and `value` mostly saw one hidden class. Results read from an array
+by index were pact's own, so it saw two. Writing every result
+`{ value, done }`:
+
+| Median µs | Before | Before, `{ value, done }` | After | After, `{ value, done }` |
+| --- | --- | --- | --- | --- |
+| `filter`, `map`, `reduce` | 2123 | 1955 | 1787 | 1735 |
+| Five steps | 3379 | 3248 | 2525 | 2329 |
+| `filter`, `map`, `take(10)` | 1.00 | 0.91 | 0.97 | 1.00 |
+| `map`, `find` | 20.1 | 20.0 | 12.6 | 12.4 |
+| `Set`: `filter`, `map`, `reduce` | 1785 | 1651 | 1898 | 1712 |
+| Generator: `filter`, `map`, `reduce` | 2548 | 2376 | 2591 | 2475 |
+| 10 items: `filter`, `map`, `toArray` | 0.55 | 0.56 | 0.47 | 0.42 |
+
+- With both, every pipeline is as fast as before steps read arrays by
+  index, or faster.
+- Other sources are still about 4% slower than they'd be with
+  `{ value, done }` and no array path. That's the check and the extra
+  method.
+
+Async, with `async-array-sources.js` and `ROUNDS=5`:
+
+| Median µs | Before arrays by index | After | After, `{ value, done }` |
+| --- | --- | --- | --- |
+| 10,000 items: `filter`, `map`, `reduce` | 2029 | 1190 | 1123 |
+| 10,000 items: async `map`, `reduce` | 2337 | 1528 | 1508 |
+| `Set`: `filter`, `map`, `reduce` | 1993 | 2035 | 1967 |
+| Async generator: `filter`, `map`, `reduce` | 2125 | 2179 | 2203 |
+| json-schema `properties` | 10.2 | 5.38 | 5.45 |
+
+Promises are most of an async step's cost, so the order matters less
+there. The async generator source is within noise of before.

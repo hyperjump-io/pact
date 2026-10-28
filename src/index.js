@@ -300,8 +300,12 @@ const readPadding = (padding, length) => {
   return values;
 };
 
+// Every result is written `{ value, done }`, in that order, so it has the
+// same hidden class as the results of the built-in iterators, and code
+// reading `done` and `value` only sees one (see
+// design/benchmarks/array-sources.md)
 /** @type () => IteratorReturnResult<undefined> */
-const finished = () => ({ done: true, value: undefined });
+const finished = () => ({ value: undefined, done: true });
 
 // Each step is a class that extends Iterator, so the native helpers work on
 // it. Once it's done, it stays done. Closing it closes its source, and so
@@ -361,7 +365,7 @@ class MapIterator extends Iterator {
     }
 
     try {
-      return { done: false, value: this.#fn(result.value, this.#index++) };
+      return { value: this.#fn(result.value, this.#index++), done: false };
     } catch (error) {
       this.return();
       throw error;
@@ -372,7 +376,7 @@ class MapIterator extends Iterator {
   #read() {
     if (this.#array) {
       return this.#position < this.#array.length
-        ? { done: false, value: this.#array[this.#position++] }
+        ? { value: this.#array[this.#position++], done: false }
         : finished();
     }
 
@@ -445,7 +449,7 @@ class TapIterator extends Iterator {
   #read() {
     if (this.#array) {
       return this.#position < this.#array.length
-        ? { done: false, value: this.#array[this.#position++] }
+        ? { value: this.#array[this.#position++], done: false }
         : finished();
     }
 
@@ -523,7 +527,7 @@ class FilterIterator extends Iterator {
   #read() {
     if (this.#array) {
       return this.#position < this.#array.length
-        ? { done: false, value: this.#array[this.#position++] }
+        ? { value: this.#array[this.#position++], done: false }
         : finished();
     }
 
@@ -593,14 +597,14 @@ class ScanIterator extends Iterator {
       throw error;
     }
 
-    return { done: false, value: this.#acc };
+    return { value: this.#acc, done: false };
   }
 
   /** @type () => IteratorResult<A, undefined> */
   #read() {
     if (this.#array) {
       return this.#position < this.#array.length
-        ? { done: false, value: this.#array[this.#position++] }
+        ? { value: this.#array[this.#position++], done: false }
         : finished();
     }
 
@@ -754,7 +758,7 @@ class FlatMapIterator extends Iterator {
   #read() {
     if (this.#array) {
       return this.#position < this.#array.length
-        ? { done: false, value: this.#array[this.#position++] }
+        ? { value: this.#array[this.#position++], done: false }
         : finished();
     }
 
@@ -826,7 +830,7 @@ class DropIterator extends Iterator {
   #read() {
     if (this.#array) {
       return this.#position < this.#array.length
-        ? { done: false, value: this.#array[this.#position++] }
+        ? { value: this.#array[this.#position++], done: false }
         : finished();
     }
 
@@ -906,7 +910,7 @@ class DropWhileIterator extends Iterator {
   #read() {
     if (this.#array) {
       return this.#position < this.#array.length
-        ? { done: false, value: this.#array[this.#position++] }
+        ? { value: this.#array[this.#position++], done: false }
         : finished();
     }
 
@@ -976,7 +980,7 @@ class TakeIterator extends Iterator {
   #read() {
     if (this.#array) {
       return this.#position < this.#array.length
-        ? { done: false, value: this.#array[this.#position++] }
+        ? { value: this.#array[this.#position++], done: false }
         : finished();
     }
 
@@ -1050,7 +1054,7 @@ class TakeWhileIterator extends Iterator {
   #read() {
     if (this.#array) {
       return this.#position < this.#array.length
-        ? { done: false, value: this.#array[this.#position++] }
+        ? { value: this.#array[this.#position++], done: false }
         : finished();
     }
 
@@ -1171,7 +1175,7 @@ class ZipIterator extends Iterator {
       if (values === undefined) {
         return this.return();
       }
-      return { done: false, value: values };
+      return { value: values, done: false };
     } catch (error) {
       this.return();
       throw error;

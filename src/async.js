@@ -327,8 +327,9 @@ const readPadding = (padding, length) => {
   return values;
 };
 
+// `{ value, done }`, in that order, as in index.js
 /** @type () => IteratorReturnResult<undefined> */
-const finished = () => ({ done: true, value: undefined });
+const finished = () => ({ value: undefined, done: true });
 
 // The method a step implements to read its next result, and the one it
 // implements to close. AsyncStep calls them one at a time.
@@ -461,13 +462,13 @@ class FromSyncIterator extends AsyncStep {
       return this.#settle(value);
     }
 
-    return Promise.resolve({ done: false, value });
+    return Promise.resolve({ value, done: false });
   }
 
   /** @type (value: PromiseLike<A>) => Promise<IteratorResult<A, undefined>> */
   async #settle(value) {
     try {
-      return { done: false, value: await value };
+      return { value: await value, done: false };
     } catch (error) {
       await this[close]();
       throw error;
@@ -511,7 +512,7 @@ const arrayIterator = Array.prototype[Symbol.iterator];
  */
 const settle = async (value, end) => {
   try {
-    return { done: false, value: await value };
+    return { value: await value, done: false };
   } catch (error) {
     end();
     throw error;
@@ -567,7 +568,7 @@ class MapIterator extends AsyncStep {
       if (isThenable(value)) {
         value = await value;
       }
-      return { done: false, value };
+      return { value, done: false };
     } catch (error) {
       await this[close]();
       throw error;
@@ -588,7 +589,7 @@ class MapIterator extends AsyncStep {
         });
       }
 
-      return { done: false, value };
+      return { value, done: false };
     }
 
     return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
@@ -676,7 +677,7 @@ class TapIterator extends AsyncStep {
         });
       }
 
-      return { done: false, value };
+      return { value, done: false };
     }
 
     return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
@@ -769,7 +770,7 @@ class FilterIterator extends AsyncStep {
         });
       }
 
-      return { done: false, value };
+      return { value, done: false };
     }
 
     return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
@@ -845,7 +846,7 @@ class ScanIterator extends AsyncStep {
       throw error;
     }
 
-    return { done: false, value: this.#acc };
+    return { value: this.#acc, done: false };
   }
 
   /** @type () => IteratorResult<A, undefined> | Promise<IteratorResult<A, undefined>> */
@@ -862,7 +863,7 @@ class ScanIterator extends AsyncStep {
         });
       }
 
-      return { done: false, value };
+      return { value, done: false };
     }
 
     return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
@@ -1032,7 +1033,7 @@ class FlatMapIterator extends AsyncStep {
         });
       }
 
-      return { done: false, value };
+      return { value, done: false };
     }
 
     return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
@@ -1116,7 +1117,7 @@ class DropIterator extends AsyncStep {
         });
       }
 
-      return { done: false, value };
+      return { value, done: false };
     }
 
     return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
@@ -1212,7 +1213,7 @@ class DropWhileIterator extends AsyncStep {
         });
       }
 
-      return { done: false, value };
+      return { value, done: false };
     }
 
     return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
@@ -1294,7 +1295,7 @@ class TakeIterator extends AsyncStep {
         });
       }
 
-      return { done: false, value };
+      return { value, done: false };
     }
 
     return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
@@ -1383,7 +1384,7 @@ class TakeWhileIterator extends AsyncStep {
         });
       }
 
-      return { done: false, value };
+      return { value, done: false };
     }
 
     return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
@@ -1504,7 +1505,7 @@ class ZipIterator extends AsyncStep {
       if (values === undefined) {
         return await this[close]();
       }
-      return { done: false, value: values };
+      return { value: values, done: false };
     } catch (error) {
       await this[close]();
       throw error;
