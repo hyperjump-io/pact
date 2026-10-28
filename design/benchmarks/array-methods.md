@@ -81,3 +81,23 @@ says otherwise:
   tried.
 - `pipelines.bench.ts` isn't warmed up, so its comparison of v1 and v2 is
   for one pipeline in a fresh process.
+
+## Array sources and native helpers
+
+2026-10-28, after steps started reading arrays by index (see
+[Array sources](array-sources.md)), with the native Iterator helpers added
+to each benchmark and to `warmUp`. Mean time per run, Node 22.22.2:
+
+| Benchmark | pact | Array methods | Native helpers |
+| --- | --- | --- | --- |
+| `filter`, `map`, `take(10)` | 0.53 µs | 1.35 ms | 0.68 µs |
+| `map`, `find` the 1,000th | 12 µs | 0.77 ms | 21 µs |
+| A `Set`: `filter`, `map`, `reduce` | 1.95 ms | 2.01 ms | 2.34 ms |
+| `filter`, `map`, `reduce` | 1.71 ms | 1.63 ms | 2.35 ms |
+| `map`, `filter`, `map`, `filter`, `reduce` | 2.31 ms | 2.62 ms | 3.66 ms |
+| 10 items: `filter`, `map`, `toArray` | 0.32 µs | 0.05 µs | 0.33 µs |
+
+- With every value used, pact is about as fast as array methods for three
+  steps, and 1.1 times faster for five.
+- The native helpers are the slowest for every pipeline that reads every
+  value, and slower than pact for the others.

@@ -89,11 +89,16 @@ const asyncCases = [
 
 /** @type Record<string, (items: any[]) => Iterable<any>> */
 const syncInputs = {
-  generator: (items) => (function* () {
+  "generator": (items) => (function* () {
     yield* items;
   }()),
-  array: (items) => [...items],
-  set: (items) => new Set(items)
+  "array": (items) => [...items],
+  "array with its own iterator": (items) => Object.assign([...items], {
+    * [Symbol.iterator]() {
+      yield* items;
+    }
+  }),
+  "set": (items) => new Set(items)
 };
 
 /** @type Record<string, (items: any[]) => Iterable<any> | AsyncIterable<any>> */
@@ -131,6 +136,47 @@ describe.each(asyncCases)("$name", ({ items, run, expected, expectedEmpty }) => 
     } else {
       expect(await run(input([]))).to.eql(expectedEmpty);
     }
+  });
+});
+
+// Steps read an array by index when it iterates with the built-in
+// iterator, so these check that it's read as its iterator would.
+describe("arrays", () => {
+  test("an array with its own iterator is read with it", () => {
+    const array = Object.assign([1, 2, 3], {
+      * [Symbol.iterator]() {
+        yield 3;
+        yield 2;
+      }
+    });
+    expect([...Pact.map(double)(array)]).to.eql([6, 4]);
+  });
+
+  test("a subclass's iterator is used", () => {
+    class Reversed extends Array {
+      [Symbol.iterator]() {
+        return this.slice()
+          .reverse()
+          .values();
+      }
+    }
+    expect([...Pact.map(double)(Reversed.from([1, 2, 3]))]).to.eql([6, 4, 2]);
+  });
+
+  test("values added while it's read are read", () => {
+    const array = [1, 2];
+    const result = [...Pact.tap((/** @type number */ n) => {
+      if (n < 4) {
+        array.push(n + 2);
+      }
+    })(array)];
+    expect(result).to.eql([1, 2, 3, 4, 5]);
+  });
+
+  test("a hole is undefined", () => {
+    const array = [1];
+    array[2] = 3;
+    expect([...Pact.map((n) => n)(array)]).to.eql([1, undefined, 3]);
   });
 });
 

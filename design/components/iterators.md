@@ -28,6 +28,22 @@ check for every function:
   called and opens each one when it gets to it, as `Iterator.concat` does,
   so a string throws.
 
+## Array sources
+
+A step that reads a source (`map`, `tap`, `filter`, `scan`, `flatMap`,
+`drop`, `dropWhile`, `take`, and `takeWhile`) reads an array by index
+instead of through its iterator, when the array's `[Symbol.iterator]` is
+`Array.prototype[Symbol.iterator]`. An array with its own iterator, or a
+subclass that overrides it, is read through it. Like the array iterator,
+it reads `length` each time, so values added while it's read are read,
+and a hole is `undefined`.
+
+Each class has its own private `#read()`, which returns the next result
+from the array or the source. It isn't shared, in a base class or a
+helper, because V8 keeps type feedback for each call site in a function's
+code: a shared one would see every kind of source from every step, and
+stop being optimized (see [Array sources](../benchmarks/array-sources.md)).
+
 The declared return types are `IteratorObject<T, undefined, unknown>` and
 `AsyncIteratorObject<T, undefined, unknown>` (see
 [Types](../style/types.md)).
@@ -68,9 +84,18 @@ times faster (see [Pipelines](../benchmarks/pipelines.md#iterator-classes)).
 - **Generators**, as in v1. They show up when profiling code that uses
   pact. Their one advantage is that `for...of` and `yield*` close sources
   for free, and tests cover that instead.
-- **Delegating to the native Iterator helpers.** On Node 22 they're no
-  faster than generators for long pipelines, and the classes are faster
-  than them for short ones. There are no native async helpers yet.
+- **Delegating to the native Iterator helpers.** Warmed up, they're as
+  fast as pact or slower for every pipeline measured, on Node 22 and 24,
+  and they can't read an array by index. There are no native async
+  helpers, `Iterator.concat`, or `Iterator.zip` yet (see
+  [Array sources](../benchmarks/array-sources.md#native-iterator-helpers)).
+- **Handing values from step to step without `next()`**, either through a
+  function from each step to the one before it, or by fusing the steps
+  into one loop in the collector. Warmed up, neither was faster, because
+  those calls are as megamorphic as `next()`
+  (see [Array sources](../benchmarks/array-sources.md#handing-values-from-step-to-step)).
+- **Reading sources through shared code**, a `Step` base class or reader
+  objects. A `Set` source got up to 1.6 times slower.
 - **Plain objects that don't extend `Iterator.prototype`.** The native
   helpers wouldn't be available on them, and they were slower for short
   pipelines.
@@ -87,6 +112,10 @@ times faster (see [Pipelines](../benchmarks/pipelines.md#iterator-classes)).
 
 ## Open questions
 
+- Why are sources that aren't arrays 5 to 13% slower since steps read
+  arrays by index? They take the same path as before, with one more check.
+- The async steps don't read arrays by index. An async pipeline from an
+  array goes through the sync-to-async adapter.
 - v2 needs a global `Iterator` (Node 22, and browsers from 2025). Is that
   acceptable as the minimum, or does it need a fallback?
 - Sync classes don't implement `[Symbol.dispose]()`. TypeScript's

@@ -13,3 +13,5 @@ benchmarks in `benchmark/benchmarks/` are kept up to date. The ones in
   methods, for the website
 - [toArray](to-array.md) (2026-10-28): spreading an iterator compared with a
   loop
+- [Array sources](array-sources.md) (2026-10-28): reading a source, handing
+  values between steps, and the native helpers

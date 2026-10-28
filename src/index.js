@@ -10,34 +10,34 @@ export { pipe, compose, range } from "./common.js";
  */
 
 /** @type API.map */
-export const map = (fn) => (iter) => new MapIterator(getIterator(iter), fn);
+export const map = (fn) => (iter) => new MapIterator(iter, fn);
 
 /** @type API.tap */
-export const tap = (fn) => (iter) => new TapIterator(getIterator(iter), fn);
+export const tap = (fn) => (iter) => new TapIterator(iter, fn);
 
 /** @type API.filter */
-export const filter = (fn) => (iter) => new FilterIterator(getIterator(iter), fn);
+export const filter = (fn) => (iter) => new FilterIterator(iter, fn);
 
 /** @type API.scan */
-export const scan = (fn, initial) => (iter) => new ScanIterator(getIterator(iter), fn, initial);
+export const scan = (fn, initial) => (iter) => new ScanIterator(iter, fn, initial);
 
 /** @type API.flatten */
 export const flatten = (depth = 1) => (iter) => new FlattenIterator(getIterator(iter), depth);
 
 /** @type API.flatMap */
-export const flatMap = (fn) => (iter) => new FlatMapIterator(getIterator(iter), fn);
+export const flatMap = (fn) => (iter) => new FlatMapIterator(iter, fn);
 
 /** @type API.drop */
-export const drop = (count) => (iter) => new DropIterator(getIterator(iter), count);
+export const drop = (count) => (iter) => new DropIterator(iter, count);
 
 /** @type API.dropWhile */
-export const dropWhile = (fn) => (iter) => new DropWhileIterator(getIterator(iter), fn);
+export const dropWhile = (fn) => (iter) => new DropWhileIterator(iter, fn);
 
 /** @type API.take */
-export const take = (count) => (iter) => new TakeIterator(getIterator(iter), count);
+export const take = (count) => (iter) => new TakeIterator(iter, count);
 
 /** @type API.takeWhile */
-export const takeWhile = (fn) => (iter) => new TakeWhileIterator(getIterator(iter), fn);
+export const takeWhile = (fn) => (iter) => new TakeWhileIterator(iter, fn);
 
 /** @type API.head */
 export const head = (iter) => {
@@ -309,25 +309,42 @@ const finished = () => ({ done: true, value: undefined });
 // without closing it, as a generator's for...of does.
 // (see design/components/iterators.md)
 
+// A step reads an array that iterates with the built-in iterator by index,
+// which is faster than calling its iterator's next() once that call has
+// seen other kinds of iterators. Each step has its own #read(), because a
+// shared one would see every kind of source, from every step, and V8 would
+// stop optimizing it (see design/benchmarks/array-sources.md).
+/** @type <A>(iter: Iterable<A>) => iter is A[] */
+const isPlainArray = (iter) => Array.isArray(iter) && iter[Symbol.iterator] === arrayIterator;
+
+const arrayIterator = Array.prototype[Symbol.iterator];
+
 /**
  * @template A, B
  * @extends {Iterator<B, undefined, unknown>}
  */
 class MapIterator extends Iterator {
-  /** @type Iterator<A> */
+  /** @type Iterator<A> | undefined */
   #source;
+  /** @type A[] | undefined */
+  #array;
+  #position = 0;
   /** @type API.Mapper<A, B> */
   #fn;
   #index = 0;
   #done = false;
 
   /**
-   * @param {Iterator<A>} source
+   * @param {Iterable<A>} iter
    * @param {API.Mapper<A, B>} fn
    */
-  constructor(source, fn) {
+  constructor(iter, fn) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getIterator(iter);
+    }
     this.#fn = fn;
   }
 
@@ -337,7 +354,7 @@ class MapIterator extends Iterator {
       return finished();
     }
 
-    const result = this.#source.next();
+    const result = this.#read();
     if (result.done) {
       this.#done = true;
       return finished();
@@ -351,11 +368,22 @@ class MapIterator extends Iterator {
     }
   }
 
+  /** @type () => IteratorResult<A, undefined> */
+  #read() {
+    if (this.#array) {
+      return this.#position < this.#array.length
+        ? { done: false, value: this.#array[this.#position++] }
+        : finished();
+    }
+
+    return /** @type Iterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => IteratorReturnResult<undefined> */
   return() {
     if (!this.#done) {
       this.#done = true;
-      this.#source.return?.();
+      this.#source?.return?.();
     }
 
     return finished();
@@ -367,20 +395,27 @@ class MapIterator extends Iterator {
  * @extends {Iterator<A, undefined, unknown>}
  */
 class TapIterator extends Iterator {
-  /** @type Iterator<A> */
+  /** @type Iterator<A> | undefined */
   #source;
+  /** @type A[] | undefined */
+  #array;
+  #position = 0;
   /** @type API.Tapper<A> */
   #fn;
   #index = 0;
   #done = false;
 
   /**
-   * @param {Iterator<A>} source
+   * @param {Iterable<A>} iter
    * @param {API.Tapper<A>} fn
    */
-  constructor(source, fn) {
+  constructor(iter, fn) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getIterator(iter);
+    }
     this.#fn = fn;
   }
 
@@ -390,7 +425,7 @@ class TapIterator extends Iterator {
       return finished();
     }
 
-    const result = this.#source.next();
+    const result = this.#read();
     if (result.done) {
       this.#done = true;
       return finished();
@@ -406,11 +441,22 @@ class TapIterator extends Iterator {
     return result;
   }
 
+  /** @type () => IteratorResult<A, undefined> */
+  #read() {
+    if (this.#array) {
+      return this.#position < this.#array.length
+        ? { done: false, value: this.#array[this.#position++] }
+        : finished();
+    }
+
+    return /** @type Iterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => IteratorReturnResult<undefined> */
   return() {
     if (!this.#done) {
       this.#done = true;
-      this.#source.return?.();
+      this.#source?.return?.();
     }
 
     return finished();
@@ -422,20 +468,27 @@ class TapIterator extends Iterator {
  * @extends {Iterator<A, undefined, unknown>}
  */
 class FilterIterator extends Iterator {
-  /** @type Iterator<A> */
+  /** @type Iterator<A> | undefined */
   #source;
+  /** @type A[] | undefined */
+  #array;
+  #position = 0;
   /** @type API.Predicate<A> */
   #fn;
   #index = 0;
   #done = false;
 
   /**
-   * @param {Iterator<A>} source
+   * @param {Iterable<A>} iter
    * @param {API.Predicate<A>} fn
    */
-  constructor(source, fn) {
+  constructor(iter, fn) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getIterator(iter);
+    }
     this.#fn = fn;
   }
 
@@ -446,7 +499,7 @@ class FilterIterator extends Iterator {
     }
 
     while (true) {
-      const result = this.#source.next();
+      const result = this.#read();
       if (result.done) {
         this.#done = true;
         return finished();
@@ -466,11 +519,22 @@ class FilterIterator extends Iterator {
     }
   }
 
+  /** @type () => IteratorResult<A, undefined> */
+  #read() {
+    if (this.#array) {
+      return this.#position < this.#array.length
+        ? { done: false, value: this.#array[this.#position++] }
+        : finished();
+    }
+
+    return /** @type Iterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => IteratorReturnResult<undefined> */
   return() {
     if (!this.#done) {
       this.#done = true;
-      this.#source.return?.();
+      this.#source?.return?.();
     }
 
     return finished();
@@ -482,8 +546,11 @@ class FilterIterator extends Iterator {
  * @extends {Iterator<B, undefined, unknown>}
  */
 class ScanIterator extends Iterator {
-  /** @type Iterator<A> */
+  /** @type Iterator<A> | undefined */
   #source;
+  /** @type A[] | undefined */
+  #array;
+  #position = 0;
   /** @type API.Reducer<A, B> */
   #fn;
   /** @type B */
@@ -492,13 +559,17 @@ class ScanIterator extends Iterator {
   #done = false;
 
   /**
-   * @param {Iterator<A>} source
+   * @param {Iterable<A>} iter
    * @param {API.Reducer<A, B>} fn
    * @param {B} initial
    */
-  constructor(source, fn, initial) {
+  constructor(iter, fn, initial) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getIterator(iter);
+    }
     this.#fn = fn;
     this.#acc = initial;
   }
@@ -509,7 +580,7 @@ class ScanIterator extends Iterator {
       return finished();
     }
 
-    const result = this.#source.next();
+    const result = this.#read();
     if (result.done) {
       this.#done = true;
       return finished();
@@ -525,11 +596,22 @@ class ScanIterator extends Iterator {
     return { done: false, value: this.#acc };
   }
 
+  /** @type () => IteratorResult<A, undefined> */
+  #read() {
+    if (this.#array) {
+      return this.#position < this.#array.length
+        ? { done: false, value: this.#array[this.#position++] }
+        : finished();
+    }
+
+    return /** @type Iterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => IteratorReturnResult<undefined> */
   return() {
     if (!this.#done) {
       this.#done = true;
-      this.#source.return?.();
+      this.#source?.return?.();
     }
 
     return finished();
@@ -604,8 +686,11 @@ class FlattenIterator extends Iterator {
  * @extends {Iterator<B, undefined, unknown>}
  */
 class FlatMapIterator extends Iterator {
-  /** @type Iterator<A> */
+  /** @type Iterator<A> | undefined */
   #source;
+  /** @type A[] | undefined */
+  #array;
+  #position = 0;
   /** @type API.FlatMapper<A, B> */
   #fn;
   /** @type Iterator<B> | undefined */
@@ -614,12 +699,16 @@ class FlatMapIterator extends Iterator {
   #done = false;
 
   /**
-   * @param {Iterator<A>} source
+   * @param {Iterable<A>} iter
    * @param {API.FlatMapper<A, B>} fn
    */
-  constructor(source, fn) {
+  constructor(iter, fn) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getIterator(iter);
+    }
     this.#fn = fn;
   }
 
@@ -646,7 +735,7 @@ class FlatMapIterator extends Iterator {
         this.#inner = undefined;
       }
 
-      const result = this.#source.next();
+      const result = this.#read();
       if (result.done) {
         this.#done = true;
         return finished();
@@ -661,12 +750,23 @@ class FlatMapIterator extends Iterator {
     }
   }
 
+  /** @type () => IteratorResult<A, undefined> */
+  #read() {
+    if (this.#array) {
+      return this.#position < this.#array.length
+        ? { done: false, value: this.#array[this.#position++] }
+        : finished();
+    }
+
+    return /** @type Iterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => IteratorReturnResult<undefined> */
   return() {
     if (!this.#done) {
       this.#done = true;
       this.#inner?.return?.();
-      this.#source.return?.();
+      this.#source?.return?.();
     }
 
     return finished();
@@ -678,19 +778,26 @@ class FlatMapIterator extends Iterator {
  * @extends {Iterator<A, undefined, unknown>}
  */
 class DropIterator extends Iterator {
-  /** @type Iterator<A> */
+  /** @type Iterator<A> | undefined */
   #source;
+  /** @type A[] | undefined */
+  #array;
+  #position = 0;
   /** @type number */
   #remaining;
   #done = false;
 
   /**
-   * @param {Iterator<A>} source
+   * @param {Iterable<A>} iter
    * @param {number} count
    */
-  constructor(source, count) {
+  constructor(iter, count) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getIterator(iter);
+    }
     this.#remaining = count;
   }
 
@@ -701,7 +808,7 @@ class DropIterator extends Iterator {
     }
 
     while (true) {
-      const result = this.#source.next();
+      const result = this.#read();
       if (result.done) {
         this.#done = true;
         return finished();
@@ -715,11 +822,22 @@ class DropIterator extends Iterator {
     }
   }
 
+  /** @type () => IteratorResult<A, undefined> */
+  #read() {
+    if (this.#array) {
+      return this.#position < this.#array.length
+        ? { done: false, value: this.#array[this.#position++] }
+        : finished();
+    }
+
+    return /** @type Iterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => IteratorReturnResult<undefined> */
   return() {
     if (!this.#done) {
       this.#done = true;
-      this.#source.return?.();
+      this.#source?.return?.();
     }
 
     return finished();
@@ -731,8 +849,11 @@ class DropIterator extends Iterator {
  * @extends {Iterator<A, undefined, unknown>}
  */
 class DropWhileIterator extends Iterator {
-  /** @type Iterator<A> */
+  /** @type Iterator<A> | undefined */
   #source;
+  /** @type A[] | undefined */
+  #array;
+  #position = 0;
   /** @type API.Predicate<A> */
   #fn;
   #dropping = true;
@@ -740,12 +861,16 @@ class DropWhileIterator extends Iterator {
   #done = false;
 
   /**
-   * @param {Iterator<A>} source
+   * @param {Iterable<A>} iter
    * @param {API.Predicate<A>} fn
    */
-  constructor(source, fn) {
+  constructor(iter, fn) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getIterator(iter);
+    }
     this.#fn = fn;
   }
 
@@ -756,7 +881,7 @@ class DropWhileIterator extends Iterator {
     }
 
     while (true) {
-      const result = this.#source.next();
+      const result = this.#read();
       if (result.done) {
         this.#done = true;
         return finished();
@@ -777,11 +902,22 @@ class DropWhileIterator extends Iterator {
     }
   }
 
+  /** @type () => IteratorResult<A, undefined> */
+  #read() {
+    if (this.#array) {
+      return this.#position < this.#array.length
+        ? { done: false, value: this.#array[this.#position++] }
+        : finished();
+    }
+
+    return /** @type Iterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => IteratorReturnResult<undefined> */
   return() {
     if (!this.#done) {
       this.#done = true;
-      this.#source.return?.();
+      this.#source?.return?.();
     }
 
     return finished();
@@ -793,19 +929,26 @@ class DropWhileIterator extends Iterator {
  * @extends {Iterator<A, undefined, unknown>}
  */
 class TakeIterator extends Iterator {
-  /** @type Iterator<A> */
+  /** @type Iterator<A> | undefined */
   #source;
+  /** @type A[] | undefined */
+  #array;
+  #position = 0;
   /** @type number */
   #remaining;
   #done = false;
 
   /**
-   * @param {Iterator<A>} source
+   * @param {Iterable<A>} iter
    * @param {number} count
    */
-  constructor(source, count) {
+  constructor(iter, count) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getIterator(iter);
+    }
     this.#remaining = count;
   }
 
@@ -820,7 +963,7 @@ class TakeIterator extends Iterator {
     }
     this.#remaining--;
 
-    const result = this.#source.next();
+    const result = this.#read();
     if (result.done) {
       this.#done = true;
       return finished();
@@ -829,11 +972,22 @@ class TakeIterator extends Iterator {
     return result;
   }
 
+  /** @type () => IteratorResult<A, undefined> */
+  #read() {
+    if (this.#array) {
+      return this.#position < this.#array.length
+        ? { done: false, value: this.#array[this.#position++] }
+        : finished();
+    }
+
+    return /** @type Iterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => IteratorReturnResult<undefined> */
   return() {
     if (!this.#done) {
       this.#done = true;
-      this.#source.return?.();
+      this.#source?.return?.();
     }
 
     return finished();
@@ -845,20 +999,27 @@ class TakeIterator extends Iterator {
  * @extends {Iterator<A, undefined, unknown>}
  */
 class TakeWhileIterator extends Iterator {
-  /** @type Iterator<A> */
+  /** @type Iterator<A> | undefined */
   #source;
+  /** @type A[] | undefined */
+  #array;
+  #position = 0;
   /** @type API.Predicate<A> */
   #fn;
   #index = 0;
   #done = false;
 
   /**
-   * @param {Iterator<A>} source
+   * @param {Iterable<A>} iter
    * @param {API.Predicate<A>} fn
    */
-  constructor(source, fn) {
+  constructor(iter, fn) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getIterator(iter);
+    }
     this.#fn = fn;
   }
 
@@ -868,7 +1029,7 @@ class TakeWhileIterator extends Iterator {
       return finished();
     }
 
-    const result = this.#source.next();
+    const result = this.#read();
     if (result.done) {
       this.#done = true;
       return finished();
@@ -885,11 +1046,22 @@ class TakeWhileIterator extends Iterator {
     return keep ? result : this.return();
   }
 
+  /** @type () => IteratorResult<A, undefined> */
+  #read() {
+    if (this.#array) {
+      return this.#position < this.#array.length
+        ? { done: false, value: this.#array[this.#position++] }
+        : finished();
+    }
+
+    return /** @type Iterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => IteratorReturnResult<undefined> */
   return() {
     if (!this.#done) {
       this.#done = true;
-      this.#source.return?.();
+      this.#source?.return?.();
     }
 
     return finished();
