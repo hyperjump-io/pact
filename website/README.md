@@ -37,6 +37,7 @@ reads the next one, so it works on any iterable, like a `Set`, a `Map`, a
 generator, or one that never ends, and a step like `take` or a collector
 like `find` stops reading as soon as it has what it needs. Spreading an
 iterable into an array to use array methods reads all of it first.
+[Benchmarks](benchmarks.md) measures what that's worth.
 
 Using v1? [Migrating from v1](migrating.md) lists what changed.
 
@@ -51,4 +52,5 @@ Using v1? [Migrating from v1](migrating.md) lists what changed.
   functions that end a pipeline
 - [Async](async.md): async iterables, async callbacks, and mixing them
   with sync ones
+- [Benchmarks](benchmarks.md): pipelines compared with array methods
 - [Migrating from v1](migrating.md): what changed, and what to do about it

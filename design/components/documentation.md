@@ -6,8 +6,13 @@ hjlint's, browser's, and the other packages', from `../hyperjump.io`, whose
 README has how to write them. pact is listed with the components there.
 
 - `website/README.md` introduces it and lists the pages, which are guides:
-  install, pipelines, transforming, sources, collecting, async, and
-  migrating from v1.
+  install, pipelines, transforming, sources, collecting, async,
+  benchmarks, and migrating from v1.
+- The benchmarks page compares pipelines with array methods, which is
+  what users would otherwise write. Its numbers come from
+  `benchmark/benchmarks/array-methods.bench.ts`
+  ([Array methods](../benchmarks/array-methods.md)), and are updated when
+  they're measured again. It says where array methods are faster too.
 - There's no API reference. The hand-written `.d.ts` files, with their
   JSDoc, are in every editor, and a guide that needs a type says what
   matters about it.
