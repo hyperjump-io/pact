@@ -8,11 +8,12 @@ It's an ES module with no dependencies. It needs the global `Iterator`
 that the native Iterator helpers come with: Node.js 22 or later, and
 browsers since Chrome 122, Firefox 131, and Safari 18.4.
 
-There are two entry points. Their functions have the same names.
+There are two entry points. Their functions have the same names, so
+import each one as a namespace.
 
 ```typescript
-import { pipe, map, toArray } from "@hyperjump/pact";
-import * as Async from "@hyperjump/pact/async";
+import * as Pact from "@hyperjump/pact";
+import * as PactAsync from "@hyperjump/pact/async";
 ```
 
 - `@hyperjump/pact` has the functions for iterables.
@@ -49,9 +50,8 @@ return promises.
 | `ZipLongestOptions<P>` | `zip`'s options in the `longest` mode, with `padding` |
 
 ```typescript
-import { filter } from "@hyperjump/pact";
-import type { Predicate } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-const isEven: Predicate<number> = (n) => n % 2 === 0;
-const evens = filter(isEven);
+const isEven: Pact.Predicate<number> = (n) => n % 2 === 0;
+const evens = Pact.filter(isEven);
 ```

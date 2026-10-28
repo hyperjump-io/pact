@@ -4,13 +4,13 @@
 gets what the one before it returned.
 
 ```typescript
-import { pipe, filter, map, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(
+Pact.pipe(
   [1, 2, 3, 4],
-  filter((n) => n % 2 === 0),
-  map((n) => n * 2),
-  toArray
+  Pact.filter((n) => n % 2 === 0),
+  Pact.map((n) => n * 2),
+  Pact.toArray
 ); // [4, 8]
 ```
 
@@ -33,9 +33,9 @@ configuration, like `map(fn)` or `take(3)`. What it returns is a function
 that takes the iterable, so a step can be called without `pipe` too:
 
 ```typescript
-import { map } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-const double = map((n: number) => n * 2);
+const double = Pact.map((n: number) => n * 2);
 [...double([1, 2, 3])]; // [2, 4, 6]
 ```
 
@@ -49,13 +49,13 @@ pipeline one at a time, as the end of it asks for them. So a step can work
 on an iterable that never ends, as long as something stops asking.
 
 ```typescript
-import { pipe, range, map, take, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(
-  range(0),
-  map((n) => n * n),
-  take(4),
-  toArray
+Pact.pipe(
+  Pact.range(0),
+  Pact.map((n) => n * n),
+  Pact.take(4),
+  Pact.toArray
 ); // [0, 1, 4, 9]
 ```
 
@@ -69,15 +69,24 @@ made once and used with any number of iterables. What it returns is a step
 itself, so it can go in another pipeline.
 
 ```typescript
-import { pipe, compose, filter, map, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-const doubledEvens = compose(
-  filter((n: number) => n % 2 === 0),
-  map((n) => n * 2)
+const doubledEvens = Pact.compose(
+  Pact.filter((n: number) => n % 2 === 0),
+  Pact.map((n) => n * 2)
 );
 
-pipe([1, 2, 3, 4], doubledEvens, toArray); // [4, 8]
-pipe([5, 6], doubledEvens, toArray); // [12]
+Pact.pipe(
+  [1, 2, 3, 4],
+  doubledEvens,
+  Pact.toArray
+); // [4, 8]
+
+Pact.pipe(
+  [5, 6],
+  doubledEvens,
+  Pact.toArray
+); // [12]
 ```
 
 A step made once can be used as many times as you like. Each use starts
@@ -89,9 +98,9 @@ Every iterator pact returns is an `Iterator`, so the native helper methods
 work on it, and you can mix them with pact's steps.
 
 ```typescript
-import { filter } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-const evens = filter((n: number) => n % 2 === 0)([1, 2, 3, 4]);
+const evens = Pact.filter((n: number) => n % 2 === 0)([1, 2, 3, 4]);
 evens.map((n) => n * 10).toArray(); // [20, 40]
 ```
 
@@ -104,7 +113,7 @@ closed. Stopping early is what `take`, `takeWhile`, `find`, `some`,
 step does. A callback that throws closes the source too.
 
 ```typescript
-import { pipe, find } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
 const letters = function* () {
   try {
@@ -116,7 +125,11 @@ const letters = function* () {
   }
 };
 
-pipe(letters(), find((letter) => letter === "a")); // "a"
+Pact.pipe(
+  letters(),
+  Pact.map((letter) => letter.toUpperCase()),
+  Pact.find((letter) => letter === "A")
+); // "A"
 ```
 
 ```text

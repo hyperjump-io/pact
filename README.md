@@ -17,13 +17,13 @@ npm install @hyperjump/pact
 ## Usage
 
 ```javascript
-import { pipe, range, filter, map, reduce } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(
-  range(1, 10),
-  filter((n) => n % 2 === 0),
-  map((n) => n * 2),
-  reduce((sum, n) => sum + n, 0)
+Pact.pipe(
+  Pact.range(1, 10),
+  Pact.filter((n) => n % 2 === 0),
+  Pact.map((n) => n * 2),
+  Pact.reduce((sum, n) => sum + n, 0)
 ); // 40
 ```
 

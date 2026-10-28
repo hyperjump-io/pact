@@ -5,16 +5,16 @@ the same names, for async iterables. Their callbacks can return promises,
 and what a collector returns is a promise.
 
 ```typescript
-import { pipe, filter, map, toArray } from "@hyperjump/pact/async";
+import * as PactAsync from "@hyperjump/pact/async";
 
 const fetchUser = async (id: number) => ({ id, name: `User ${id}` });
 
-await pipe(
+await PactAsync.pipe(
   [1, 2, 3],
-  filter((id) => id !== 2),
-  map(fetchUser),
-  map((user) => user.name),
-  toArray
+  PactAsync.filter((id) => id !== 2),
+  PactAsync.map(fetchUser),
+  PactAsync.map((user) => user.name),
+  PactAsync.toArray
 ); // ["User 1", "User 3"]
 ```
 
@@ -24,19 +24,18 @@ as in a `for await` loop.
 
 ## Mixing sync and async
 
-To use both in one module, import the async functions as a namespace. A
-pipeline can start with sync steps and switch to async ones at the first
+A pipeline can start with sync steps and switch to async ones at the first
 step that needs it. `pipe` is the same function in both.
 
 ```typescript
-import { pipe, range, filter } from "@hyperjump/pact";
-import * as Async from "@hyperjump/pact/async";
+import * as Pact from "@hyperjump/pact";
+import * as PactAsync from "@hyperjump/pact/async";
 
-await pipe(
-  range(1, 5),
-  filter((n) => n % 2 === 1),
-  Async.map(async (n) => n * 10),
-  Async.toArray
+await Pact.pipe(
+  Pact.range(1, 5),
+  Pact.filter((n) => n % 2 === 1),
+  PactAsync.map(async (n) => n * 10),
+  PactAsync.toArray
 ); // [10, 30]
 ```
 
@@ -62,7 +61,7 @@ Every async iterator pact returns has a `[Symbol.asyncDispose]()` method,
 which closes it, so it works with `await using`.
 
 ```typescript
-import { map } from "@hyperjump/pact/async";
+import * as PactAsync from "@hyperjump/pact/async";
 
 const lines = async function* () {
   try {
@@ -73,7 +72,7 @@ const lines = async function* () {
   }
 };
 
-const upper = map((line: string) => line.toUpperCase())(lines());
+const upper = PactAsync.map((line: string) => line.toUpperCase())(lines());
 await upper.next(); // { done: false, value: "A" }
 await upper[Symbol.asyncDispose]();
 ```

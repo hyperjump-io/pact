@@ -11,14 +11,14 @@ and `toObject` take `[key, value]` pairs. `toObject` makes an object with
 no prototype, so a key like `__proto__` is an ordinary property.
 
 ```typescript
-import { pipe, toArray, toSet, toMap, toObject } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(new Set([1, 2]), toArray); // [1, 2]
-pipe([1, 1, 2], toSet); // new Set([1, 2])
+Pact.toArray(new Set([1, 2])); // [1, 2]
+Pact.toSet([1, 1, 2]); // new Set([1, 2])
 
 const pairs: [string, number][] = [["a", 1], ["b", 2]];
-pipe(pairs, toMap); // new Map([["a", 1], ["b", 2]])
-pipe(pairs, toObject); // { a: 1, b: 2 }
+Pact.toMap(pairs); // new Map([["a", 1], ["b", 2]])
+Pact.toObject(pairs); // { a: 1, b: 2 }
 ```
 
 ## reduce
@@ -29,10 +29,12 @@ initial value, and an empty iterable throws a `TypeError`, as with
 `Array.prototype.reduce`.
 
 ```typescript
-import { pipe, reduce } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe([1, 2, 3], reduce((sum, n) => sum + n, 10)); // 16
-pipe([1, 2, 3], reduce((sum, n) => sum + n)); // 6
+const sum = (total: number, n: number) => total + n;
+
+Pact.reduce(sum, 10)([1, 2, 3]); // 16
+Pact.reduce(sum)([1, 2, 3]); // 6
 ```
 
 ## every, some, and find
@@ -43,11 +45,11 @@ it does for, or `undefined`. Each one stops reading, and closes the
 iterable, as soon as it knows the answer.
 
 ```typescript
-import { pipe, every, some, find } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe([1, 2, 3], every((n) => n > 0)); // true
-pipe([1, 2, 3], some((n) => n > 2)); // true
-pipe([1, 2, 3], find((n) => n > 1)); // 2
+Pact.every((n: number) => n > 0)([1, 2, 3]); // true
+Pact.some((n: number) => n > 2)([1, 2, 3]); // true
+Pact.find((n: number) => n > 1)([1, 2, 3]); // 2
 ```
 
 ## forEach
@@ -57,12 +59,12 @@ effects at the end of a pipeline. To look at values in the middle of one,
 use [`tap`](transforming.md#tap).
 
 ```typescript
-import { pipe, filter, forEach } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(
+Pact.pipe(
   ["a.json", "b.txt"],
-  filter((file) => file.endsWith(".json")),
-  forEach((file) => console.log(file))
+  Pact.filter((file) => file.endsWith(".json")),
+  Pact.forEach((file) => console.log(file))
 );
 ```
 
@@ -76,10 +78,10 @@ a.json
 closes the iterator. `count` returns how many values there are.
 
 ```typescript
-import { pipe, range, head, count } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(range(5), head); // 5
-pipe(range(0, 5), count); // 5
+Pact.head(Pact.range(5)); // 5
+Pact.count(Pact.range(0, 5)); // 5
 ```
 
 ## join
@@ -87,7 +89,11 @@ pipe(range(0, 5), count); // 5
 Joins the values into a string, with a separator between them.
 
 ```typescript
-import { pipe, map, join } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(["a", "b"], map((s) => s.toUpperCase()), join(", ")); // "A, B"
+Pact.pipe(
+  ["a", "b"],
+  Pact.map((s) => s.toUpperCase()),
+  Pact.join(", ")
+); // "A, B"
 ```

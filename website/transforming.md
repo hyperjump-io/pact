@@ -9,10 +9,19 @@ after the value. A function with an optional second parameter gets the
 index there, so pass `parseInt` its value yourself:
 
 ```typescript
-import { pipe, map, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(["10", "10", "10"], map(parseInt), toArray); // [10, NaN, 2]
-pipe(["10", "10", "10"], map((s) => parseInt(s)), toArray); // [10, 10, 10]
+Pact.pipe(
+  ["10", "10", "10"],
+  Pact.map(parseInt),
+  Pact.toArray
+); // [10, NaN, 2]
+
+Pact.pipe(
+  ["10", "10", "10"],
+  Pact.map((s) => parseInt(s)),
+  Pact.toArray
+); // [10, 10, 10]
 ```
 
 ## map
@@ -20,10 +29,13 @@ pipe(["10", "10", "10"], map((s) => parseInt(s)), toArray); // [10, 10, 10]
 Calls a function with each value, and yields what it returns.
 
 ```typescript
-import { pipe, map, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(["a", "b"], map((letter, index) => `${index}:${letter}`), toArray);
-// ["0:a", "1:b"]
+Pact.pipe(
+  ["a", "b"],
+  Pact.map((letter, index) => `${index}:${letter}`),
+  Pact.toArray
+); // ["0:a", "1:b"]
 ```
 
 ## filter
@@ -31,9 +43,13 @@ pipe(["a", "b"], map((letter, index) => `${index}:${letter}`), toArray);
 Yields the values a function returns `true` for.
 
 ```typescript
-import { pipe, filter, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe([1, 2, 3, 4], filter((n) => n > 2), toArray); // [3, 4]
+Pact.pipe(
+  [1, 2, 3, 4],
+  Pact.filter((n) => n > 2),
+  Pact.toArray
+); // [3, 4]
 ```
 
 ## flatMap
@@ -44,10 +60,13 @@ iterator too, but not a string or another value that isn't iterable,
 which throws a `TypeError`.
 
 ```typescript
-import { pipe, flatMap, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(["a b", "c"], flatMap((s) => s.split(" ")), toArray);
-// ["a", "b", "c"]
+Pact.pipe(
+  ["a b", "c"],
+  Pact.flatMap((s) => s.split(" ")),
+  Pact.toArray
+); // ["a", "b", "c"]
 ```
 
 ## flatten
@@ -57,10 +76,19 @@ is 1 by default. A value that isn't iterable is yielded as it is. A string
 is iterable, so it's flattened into its characters.
 
 ```typescript
-import { pipe, flatten, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe([1, [2, [3, [4]]]], flatten(), toArray); // [1, 2, [3, [4]]]
-pipe([1, [2, [3, [4]]]], flatten(Infinity), toArray); // [1, 2, 3, 4]
+Pact.pipe(
+  [1, [2, [3, [4]]]],
+  Pact.flatten(),
+  Pact.toArray
+); // [1, 2, [3, [4]]]
+
+Pact.pipe(
+  [1, [2, [3, [4]]]],
+  Pact.flatten(Infinity),
+  Pact.toArray
+); // [1, 2, 3, 4]
 ```
 
 ## scan
@@ -69,9 +97,13 @@ Like `reduce`, but yields the accumulated value after each one, instead of
 only the last one. It needs an initial value.
 
 ```typescript
-import { pipe, scan, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe([1, 2, 3], scan((sum, n) => sum + n, 0), toArray); // [1, 3, 6]
+Pact.pipe(
+  [1, 2, 3],
+  Pact.scan((sum, n) => sum + n, 0),
+  Pact.toArray
+); // [1, 3, 6]
 ```
 
 ## tap
@@ -82,13 +114,13 @@ like logging them. To call a function with each value at the end of one,
 use [`forEach`](collecting.md#foreach).
 
 ```typescript
-import { pipe, tap, map, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(
+Pact.pipe(
   [1, 2],
-  tap((n) => console.log("before", n)),
-  map((n) => n * 2),
-  toArray
+  Pact.tap((n) => console.log("before", n)),
+  Pact.map((n) => n * 2),
+  Pact.toArray
 ); // [2, 4]
 ```
 
@@ -104,10 +136,19 @@ before 2
 never ends.
 
 ```typescript
-import { pipe, range, take, drop, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(range(0), take(3), toArray); // [0, 1, 2]
-pipe([1, 2, 3, 4], drop(3), toArray); // [4]
+Pact.pipe(
+  Pact.range(0),
+  Pact.take(3),
+  Pact.toArray
+); // [0, 1, 2]
+
+Pact.pipe(
+  [1, 2, 3, 4],
+  Pact.drop(3),
+  Pact.toArray
+); // [4]
 ```
 
 ## takeWhile and dropWhile
@@ -117,8 +158,17 @@ then closes its source. `dropWhile` drops values until a function returns
 `false` for one, and yields that one and the rest.
 
 ```typescript
-import { pipe, takeWhile, dropWhile, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe([1, 2, 3, 1], takeWhile((n) => n < 3), toArray); // [1, 2]
-pipe([1, 2, 3, 1], dropWhile((n) => n < 3), toArray); // [3, 1]
+Pact.pipe(
+  [1, 2, 3, 1],
+  Pact.takeWhile((n) => n < 3),
+  Pact.toArray
+); // [1, 2]
+
+Pact.pipe(
+  [1, 2, 3, 1],
+  Pact.dropWhile((n) => n < 3),
+  Pact.toArray
+); // [3, 1]
 ```

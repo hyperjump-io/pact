@@ -29,8 +29,11 @@ const doubled = map((n) => n * 2, numbers);
 const total = reduce((sum, n) => sum + n, 0, numbers);
 
 // v2
-const doubled = pipe(numbers, map((n) => n * 2));
-const total = reduce((sum, n) => sum + n, 0)(numbers);
+const doubled = Pact.pipe(
+  numbers,
+  Pact.map((n) => n * 2)
+);
+const total = Pact.reduce((sum, n) => sum + n, 0)(numbers);
 ```
 
 `flatten` took the iterable first, and its depth after it. It takes just
@@ -41,7 +44,7 @@ the depth now.
 flatten(nested, 2);
 
 // v2
-pipe(nested, flatten(2));
+Pact.pipe(nested, Pact.flatten(2));
 ```
 
 The sources, `range`, `empty`, `concat`, and `zip`, and the collectors
@@ -59,10 +62,10 @@ them from.
 import { pipe, asyncMap, asyncCollectArray } from "@hyperjump/pact";
 
 // v2
-import { pipe, map, toArray } from "@hyperjump/pact/async";
+import * as PactAsync from "@hyperjump/pact/async";
 ```
 
-A module that uses both can import the async ones as a namespace (see
+A module that uses both imports each one as a namespace (see
 [Mixing sync and async](async.md#mixing-sync-and-async)). Their types lost
 the prefix too: `AsyncMapper` is `Mapper` from `@hyperjump/pact/async`.
 
@@ -86,7 +89,7 @@ when any of them is done. v1 went on until the first one was done, with
 zip(names, years);
 
 // v2
-zip([names, years], { mode: "longest" });
+Pact.zip([names, years], { mode: "longest" });
 ```
 
 `{ mode: "longest" }` keeps going until all of them are done, so to get
@@ -105,7 +108,7 @@ there. The usual one is `parseInt`, whose second parameter is the radix.
 map(parseInt);
 
 // v2
-map((s) => parseInt(s));
+Pact.map((s) => parseInt(s));
 ```
 
 ## reduce without an initial value
@@ -140,7 +143,7 @@ iterable object, including a string, which v1 yielded the characters of.
 concat("ab", "cd");
 
 // v2
-concat([..."ab"], [..."cd"]);
+Pact.concat([..."ab"], [..."cd"]);
 ```
 
 ## Steps get their iterator when they're made

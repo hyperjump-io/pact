@@ -5,7 +5,7 @@
 - `pipe`, `compose`, and `range` are in both.
 
 There are no `async`-prefixed exports (`asyncMap`). Code that uses both
-imports them with a namespace (`import * as Async from
+imports them with a namespace (`import * as PactAsync from
 "@hyperjump/pact/async"`) or renames them.
 
 - Type names don't have the prefix either. `Mapper`, `Predicate`, and
@@ -19,14 +19,14 @@ imports them with a namespace (`import * as Async from
   that `pipe`, `compose`, and `range` are the same functions in both.
 
 ```javascript
-import { pipe, range, filter } from "@hyperjump/pact";
-import * as Async from "@hyperjump/pact/async";
+import * as Pact from "@hyperjump/pact";
+import * as PactAsync from "@hyperjump/pact/async";
 
-await pipe(
-  range(1, 10),
-  filter((n) => n % 2 === 0),
-  Async.map(async (n) => n * 2),
-  Async.toArray
+await Pact.pipe(
+  Pact.range(1, 10),
+  Pact.filter((n) => n % 2 === 0),
+  PactAsync.map(async (n) => n * 2),
+  PactAsync.toArray
 );
 ```
 

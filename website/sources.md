@@ -11,12 +11,17 @@ Yields numbers from `from` up to `to`, not including it, counting by
 `step` counts down, and a `step` of 0 throws a `RangeError`.
 
 ```typescript
-import { pipe, range, take, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(range(0, 5), toArray); // [0, 1, 2, 3, 4]
-pipe(range(0, 10, 3), toArray); // [0, 3, 6, 9]
-pipe(range(5, 0, -2), toArray); // [5, 3, 1]
-pipe(range(1), take(3), toArray); // [1, 2, 3]
+Pact.toArray(Pact.range(0, 5)); // [0, 1, 2, 3, 4]
+Pact.toArray(Pact.range(0, 10, 3)); // [0, 3, 6, 9]
+Pact.toArray(Pact.range(5, 0, -2)); // [5, 3, 1]
+
+Pact.pipe(
+  Pact.range(1),
+  Pact.take(3),
+  Pact.toArray
+); // [1, 2, 3]
 ```
 
 ## empty
@@ -24,9 +29,9 @@ pipe(range(1), take(3), toArray); // [1, 2, 3]
 Yields nothing.
 
 ```typescript
-import { pipe, empty, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(empty(), toArray); // []
+Pact.toArray(Pact.empty()); // []
 ```
 
 ## concat
@@ -37,9 +42,9 @@ throws a `TypeError`, and an iterable isn't read until the ones before it
 are done.
 
 ```typescript
-import { pipe, concat, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(concat([1, 2], new Set([3]), [4]), toArray); // [1, 2, 3, 4]
+Pact.toArray(Pact.concat([1, 2], new Set([3]), [4])); // [1, 2, 3, 4]
 ```
 
 ## zip
@@ -49,12 +54,12 @@ from the TC39 Joint Iteration proposal. It takes an array of any number of
 iterables, or iterators, but not strings.
 
 ```typescript
-import { pipe, zip, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
 const names = ["Ada", "Grace", "Alan"];
 const years = [1815, 1906];
 
-pipe(zip([names, years]), toArray);
+Pact.toArray(Pact.zip([names, years]));
 // [["Ada", 1815], ["Grace", 1906]]
 ```
 
@@ -67,14 +72,13 @@ What happens when one is done before the others is its `mode`:
 | `"strict"` | It throws a `TypeError`, unless they're all done |
 
 ```typescript
-import { pipe, zip, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
 const names = ["Ada", "Grace", "Alan"];
 const years = [1815, 1906];
 
-pipe(
-  zip([names, years], { mode: "longest", padding: ["?", 0] }),
-  toArray
+Pact.toArray(
+  Pact.zip([names, years], { mode: "longest", padding: ["?", 0] })
 );
 // [["Ada", 1815], ["Grace", 1906], ["Alan", 0]]
 ```
@@ -89,11 +93,10 @@ the same keys, like `Iterator.zipKeyed`. A key whose value is `undefined`
 is left out. In the `longest` mode, `padding` is an object too.
 
 ```typescript
-import { pipe, zipKeyed, toArray } from "@hyperjump/pact";
+import * as Pact from "@hyperjump/pact";
 
-pipe(
-  zipKeyed({ name: ["Ada", "Grace"], year: [1815, 1906] }),
-  toArray
+Pact.toArray(
+  Pact.zipKeyed({ name: ["Ada", "Grace"], year: [1815, 1906] })
 );
 // [{ name: "Ada", year: 1815 }, { name: "Grace", year: 1906 }]
 ```
