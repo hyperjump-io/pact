@@ -156,8 +156,18 @@ export const forEach = (fn) => (iter) => {
 /** @type API.count */
 export const count = (iter) => reduce((count) => count + 1, 0)(iter);
 
+// A loop, because spreading an iterator into an array is several times
+// slower on Node 22 (see design/benchmarks/to-array.md)
 /** @type API.toArray */
-export const toArray = (iter) => [...iter];
+export const toArray = (iter) => {
+  /** @type IterableItem<typeof iter>[] */
+  const result = [];
+  for (const item of iter) {
+    result.push(item);
+  }
+
+  return result;
+};
 
 /** @type API.toSet */
 export const toSet = (iter) => {

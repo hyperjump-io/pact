@@ -11,3 +11,5 @@ benchmarks in `benchmark/benchmarks/` are kept up to date. The ones in
 - [Pipelines](pipelines.md) (2026-10-27): the benchmarks kept up to date
 - [Array methods](array-methods.md) (2026-10-27): pact compared with array
   methods, for the website
+- [toArray](to-array.md) (2026-10-28): spreading an iterator compared with a
+  loop
