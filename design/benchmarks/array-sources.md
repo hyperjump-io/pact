@@ -105,3 +105,28 @@ in a fresh process, with the variants taking turns. Median of 3, in µs:
   lose less with it. That's the one used.
 - Why other sources are slower at all isn't known. They take the same path
   as before, with one more check.
+
+## Async
+
+2026-10-28. The async steps read an array by index too, instead of
+through `FromSyncIterator`, and only wait for a value that's a promise. An
+array with an async iterator is read with it, since that's what
+`for await` would read. `benchmark/claude/async-array-sources.js` compares
+copies of `src/` as `array-sources.js` does, warmed up with other
+callbacks and sources. Median of 3, in µs, Node 22.22:
+
+| | Before | After |
+| --- | --- | --- |
+| 10,000 items: `filter`, `map`, `reduce` | 2033 | 1199 |
+| 10,000 items: async `map`, `reduce` | 2365 | 1535 |
+| 10,000 items: `map`, `take(10)` | 3.6 | 4.6 |
+| `Set`: `filter`, `map`, `reduce` | 1997 | 2047 |
+| Async generator: `filter`, `map`, `reduce` | 2150 | 2246 |
+| json-schema `properties`: `map`, `toObject` (10 entries) | 4.57 | 3.82 |
+
+- Arrays are 1.5 to 1.7 times faster. A value from an array used to cost
+  a call queued in `FromSyncIterator`, a promise, and a turn waiting for
+  it, and now it's read with no promise at all.
+- Other sources are 2 to 5% slower, as with the sync steps.
+- `take(10)` is too short to measure this way. Run again, three times
+  each, it was 3.9 to 8.9 µs before and 2.8 to 3.3 µs after.

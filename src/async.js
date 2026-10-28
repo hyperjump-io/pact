@@ -10,34 +10,34 @@ export { pipe, compose, range } from "./common.js";
  */
 
 /** @type API.map */
-export const map = (fn) => (iter) => new MapIterator(getAsyncIterator(iter), fn);
+export const map = (fn) => (iter) => new MapIterator(iter, fn);
 
 /** @type API.tap */
-export const tap = (fn) => (iter) => new TapIterator(getAsyncIterator(iter), fn);
+export const tap = (fn) => (iter) => new TapIterator(iter, fn);
 
 /** @type API.filter */
-export const filter = (fn) => (iter) => new FilterIterator(getAsyncIterator(iter), fn);
+export const filter = (fn) => (iter) => new FilterIterator(iter, fn);
 
 /** @type API.scan */
-export const scan = (fn, initial) => (iter) => new ScanIterator(getAsyncIterator(iter), fn, initial);
+export const scan = (fn, initial) => (iter) => new ScanIterator(iter, fn, initial);
 
 /** @type API.flatten */
 export const flatten = (depth = 1) => (iter) => new FlattenIterator(getAsyncIterator(iter), depth);
 
 /** @type API.flatMap */
-export const flatMap = (fn) => (iter) => new FlatMapIterator(getAsyncIterator(iter), fn);
+export const flatMap = (fn) => (iter) => new FlatMapIterator(iter, fn);
 
 /** @type API.drop */
-export const drop = (count) => (iter) => new DropIterator(getAsyncIterator(iter), count);
+export const drop = (count) => (iter) => new DropIterator(iter, count);
 
 /** @type API.dropWhile */
-export const dropWhile = (fn) => (iter) => new DropWhileIterator(getAsyncIterator(iter), fn);
+export const dropWhile = (fn) => (iter) => new DropWhileIterator(iter, fn);
 
 /** @type API.take */
-export const take = (count) => (iter) => new TakeIterator(getAsyncIterator(iter), count);
+export const take = (count) => (iter) => new TakeIterator(iter, count);
 
 /** @type API.takeWhile */
-export const takeWhile = (fn) => (iter) => new TakeWhileIterator(getAsyncIterator(iter), fn);
+export const takeWhile = (fn) => (iter) => new TakeWhileIterator(iter, fn);
 
 /** @type API.head */
 export const head = async (iter) => {
@@ -491,25 +491,59 @@ const isThenable = (value) => {
     && typeof (/** @type any */ (value)).then === "function";
 };
 
+// A step reads an array that iterates with the built-in iterator, and
+// doesn't have an async iterator, by index instead of through
+// FromSyncIterator, and only waits for a value that's a promise. Each step
+// has its own #read(), as in index.js (see
+// design/benchmarks/array-sources.md).
+/** @type <A>(iter: Iterable<A> | AsyncIterable<A>) => iter is A[] */
+const isPlainArray = (iter) => {
+  return Array.isArray(iter) && iter[Symbol.iterator] === arrayIterator && !(Symbol.asyncIterator in iter);
+};
+
+const arrayIterator = Array.prototype[Symbol.iterator];
+
+/**
+ * Waits for a value from an array that's a promise, as FromSyncIterator
+ * does. If it rejects, `end` stops the step reading the array.
+ *
+ * @type <A>(value: PromiseLike<A>, end: () => void) => Promise<IteratorResult<A, undefined>>
+ */
+const settle = async (value, end) => {
+  try {
+    return { done: false, value: await value };
+  } catch (error) {
+    end();
+    throw error;
+  }
+};
+
 /**
  * @template A, B
  * @extends {AsyncStep<B>}
  */
 class MapIterator extends AsyncStep {
-  /** @type AsyncIterator<A> */
+  /** @type AsyncIterator<A> | undefined */
   #source;
+  /** @type (A | PromiseLike<A>)[] | undefined */
+  #array;
+  #position = 0;
   /** @type API.Mapper<A, B> */
   #fn;
   #index = 0;
   #done = false;
 
   /**
-   * @param {AsyncIterator<A>} source
+   * @param {Iterable<A> | AsyncIterable<A>} iter
    * @param {API.Mapper<A, B>} fn
    */
-  constructor(source, fn) {
+  constructor(iter, fn) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getAsyncIterator(iter);
+    }
     this.#fn = fn;
   }
 
@@ -519,7 +553,10 @@ class MapIterator extends AsyncStep {
       return finished();
     }
 
-    const result = await this.#source.next();
+    let result = this.#read();
+    if (isThenable(result)) {
+      result = await result;
+    }
     if (result.done) {
       this.#done = true;
       return finished();
@@ -537,11 +574,31 @@ class MapIterator extends AsyncStep {
     }
   }
 
+  /** @type () => IteratorResult<A, undefined> | Promise<IteratorResult<A, undefined>> */
+  #read() {
+    if (this.#array) {
+      if (this.#position >= this.#array.length) {
+        return finished();
+      }
+
+      const value = this.#array[this.#position++];
+      if (isThenable(value)) {
+        return settle(value, () => {
+          this.#array = [];
+        });
+      }
+
+      return { done: false, value };
+    }
+
+    return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => Promise<IteratorReturnResult<undefined>> */
   async [close]() {
     if (!this.#done) {
       this.#done = true;
-      await this.#source.return?.();
+      await this.#source?.return?.();
     }
 
     return finished();
@@ -553,20 +610,27 @@ class MapIterator extends AsyncStep {
  * @extends {AsyncStep<A>}
  */
 class TapIterator extends AsyncStep {
-  /** @type AsyncIterator<A> */
+  /** @type AsyncIterator<A> | undefined */
   #source;
+  /** @type (A | PromiseLike<A>)[] | undefined */
+  #array;
+  #position = 0;
   /** @type API.Tapper<A> */
   #fn;
   #index = 0;
   #done = false;
 
   /**
-   * @param {AsyncIterator<A>} source
+   * @param {Iterable<A> | AsyncIterable<A>} iter
    * @param {API.Tapper<A>} fn
    */
-  constructor(source, fn) {
+  constructor(iter, fn) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getAsyncIterator(iter);
+    }
     this.#fn = fn;
   }
 
@@ -576,7 +640,10 @@ class TapIterator extends AsyncStep {
       return finished();
     }
 
-    const result = await this.#source.next();
+    let result = this.#read();
+    if (isThenable(result)) {
+      result = await result;
+    }
     if (result.done) {
       this.#done = true;
       return finished();
@@ -595,11 +662,31 @@ class TapIterator extends AsyncStep {
     return result;
   }
 
+  /** @type () => IteratorResult<A, undefined> | Promise<IteratorResult<A, undefined>> */
+  #read() {
+    if (this.#array) {
+      if (this.#position >= this.#array.length) {
+        return finished();
+      }
+
+      const value = this.#array[this.#position++];
+      if (isThenable(value)) {
+        return settle(value, () => {
+          this.#array = [];
+        });
+      }
+
+      return { done: false, value };
+    }
+
+    return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => Promise<IteratorReturnResult<undefined>> */
   async [close]() {
     if (!this.#done) {
       this.#done = true;
-      await this.#source.return?.();
+      await this.#source?.return?.();
     }
 
     return finished();
@@ -611,20 +698,27 @@ class TapIterator extends AsyncStep {
  * @extends {AsyncStep<A>}
  */
 class FilterIterator extends AsyncStep {
-  /** @type AsyncIterator<A> */
+  /** @type AsyncIterator<A> | undefined */
   #source;
+  /** @type (A | PromiseLike<A>)[] | undefined */
+  #array;
+  #position = 0;
   /** @type API.Predicate<A> */
   #fn;
   #index = 0;
   #done = false;
 
   /**
-   * @param {AsyncIterator<A>} source
+   * @param {Iterable<A> | AsyncIterable<A>} iter
    * @param {API.Predicate<A>} fn
    */
-  constructor(source, fn) {
+  constructor(iter, fn) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getAsyncIterator(iter);
+    }
     this.#fn = fn;
   }
 
@@ -635,7 +729,10 @@ class FilterIterator extends AsyncStep {
     }
 
     while (true) {
-      const result = await this.#source.next();
+      let result = this.#read();
+      if (isThenable(result)) {
+        result = await result;
+      }
       if (result.done) {
         this.#done = true;
         return finished();
@@ -658,11 +755,31 @@ class FilterIterator extends AsyncStep {
     }
   }
 
+  /** @type () => IteratorResult<A, undefined> | Promise<IteratorResult<A, undefined>> */
+  #read() {
+    if (this.#array) {
+      if (this.#position >= this.#array.length) {
+        return finished();
+      }
+
+      const value = this.#array[this.#position++];
+      if (isThenable(value)) {
+        return settle(value, () => {
+          this.#array = [];
+        });
+      }
+
+      return { done: false, value };
+    }
+
+    return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => Promise<IteratorReturnResult<undefined>> */
   async [close]() {
     if (!this.#done) {
       this.#done = true;
-      await this.#source.return?.();
+      await this.#source?.return?.();
     }
 
     return finished();
@@ -674,8 +791,11 @@ class FilterIterator extends AsyncStep {
  * @extends {AsyncStep<B>}
  */
 class ScanIterator extends AsyncStep {
-  /** @type AsyncIterator<A> */
+  /** @type AsyncIterator<A> | undefined */
   #source;
+  /** @type (A | PromiseLike<A>)[] | undefined */
+  #array;
+  #position = 0;
   /** @type API.Reducer<A, B> */
   #fn;
   /** @type B */
@@ -684,13 +804,17 @@ class ScanIterator extends AsyncStep {
   #done = false;
 
   /**
-   * @param {AsyncIterator<A>} source
+   * @param {Iterable<A> | AsyncIterable<A>} iter
    * @param {API.Reducer<A, B>} fn
    * @param {B} initial
    */
-  constructor(source, fn, initial) {
+  constructor(iter, fn, initial) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getAsyncIterator(iter);
+    }
     this.#fn = fn;
     this.#acc = initial;
   }
@@ -701,7 +825,10 @@ class ScanIterator extends AsyncStep {
       return finished();
     }
 
-    const result = await this.#source.next();
+    let result = this.#read();
+    if (isThenable(result)) {
+      result = await result;
+    }
     if (result.done) {
       this.#done = true;
       return finished();
@@ -721,11 +848,31 @@ class ScanIterator extends AsyncStep {
     return { done: false, value: this.#acc };
   }
 
+  /** @type () => IteratorResult<A, undefined> | Promise<IteratorResult<A, undefined>> */
+  #read() {
+    if (this.#array) {
+      if (this.#position >= this.#array.length) {
+        return finished();
+      }
+
+      const value = this.#array[this.#position++];
+      if (isThenable(value)) {
+        return settle(value, () => {
+          this.#array = [];
+        });
+      }
+
+      return { done: false, value };
+    }
+
+    return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => Promise<IteratorReturnResult<undefined>> */
   async [close]() {
     if (!this.#done) {
       this.#done = true;
-      await this.#source.return?.();
+      await this.#source?.return?.();
     }
 
     return finished();
@@ -800,8 +947,11 @@ class FlattenIterator extends AsyncStep {
  * @extends {AsyncStep<B>}
  */
 class FlatMapIterator extends AsyncStep {
-  /** @type AsyncIterator<A> */
+  /** @type AsyncIterator<A> | undefined */
   #source;
+  /** @type (A | PromiseLike<A>)[] | undefined */
+  #array;
+  #position = 0;
   /** @type API.FlatMapper<A, B> */
   #fn;
   /** @type AsyncIterator<B> | undefined */
@@ -810,12 +960,16 @@ class FlatMapIterator extends AsyncStep {
   #done = false;
 
   /**
-   * @param {AsyncIterator<A>} source
+   * @param {Iterable<A> | AsyncIterable<A>} iter
    * @param {API.FlatMapper<A, B>} fn
    */
-  constructor(source, fn) {
+  constructor(iter, fn) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getAsyncIterator(iter);
+    }
     this.#fn = fn;
   }
 
@@ -842,7 +996,10 @@ class FlatMapIterator extends AsyncStep {
         this.#inner = undefined;
       }
 
-      const result = await this.#source.next();
+      let result = this.#read();
+      if (isThenable(result)) {
+        result = await result;
+      }
       if (result.done) {
         this.#done = true;
         return finished();
@@ -861,12 +1018,32 @@ class FlatMapIterator extends AsyncStep {
     }
   }
 
+  /** @type () => IteratorResult<A, undefined> | Promise<IteratorResult<A, undefined>> */
+  #read() {
+    if (this.#array) {
+      if (this.#position >= this.#array.length) {
+        return finished();
+      }
+
+      const value = this.#array[this.#position++];
+      if (isThenable(value)) {
+        return settle(value, () => {
+          this.#array = [];
+        });
+      }
+
+      return { done: false, value };
+    }
+
+    return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => Promise<IteratorReturnResult<undefined>> */
   async [close]() {
     if (!this.#done) {
       this.#done = true;
       await this.#inner?.return?.();
-      await this.#source.return?.();
+      await this.#source?.return?.();
     }
 
     return finished();
@@ -878,19 +1055,26 @@ class FlatMapIterator extends AsyncStep {
  * @extends {AsyncStep<A>}
  */
 class DropIterator extends AsyncStep {
-  /** @type AsyncIterator<A> */
+  /** @type AsyncIterator<A> | undefined */
   #source;
+  /** @type (A | PromiseLike<A>)[] | undefined */
+  #array;
+  #position = 0;
   /** @type number */
   #remaining;
   #done = false;
 
   /**
-   * @param {AsyncIterator<A>} source
+   * @param {Iterable<A> | AsyncIterable<A>} iter
    * @param {number} count
    */
-  constructor(source, count) {
+  constructor(iter, count) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getAsyncIterator(iter);
+    }
     this.#remaining = count;
   }
 
@@ -901,7 +1085,10 @@ class DropIterator extends AsyncStep {
     }
 
     while (true) {
-      const result = await this.#source.next();
+      let result = this.#read();
+      if (isThenable(result)) {
+        result = await result;
+      }
       if (result.done) {
         this.#done = true;
         return finished();
@@ -915,11 +1102,31 @@ class DropIterator extends AsyncStep {
     }
   }
 
+  /** @type () => IteratorResult<A, undefined> | Promise<IteratorResult<A, undefined>> */
+  #read() {
+    if (this.#array) {
+      if (this.#position >= this.#array.length) {
+        return finished();
+      }
+
+      const value = this.#array[this.#position++];
+      if (isThenable(value)) {
+        return settle(value, () => {
+          this.#array = [];
+        });
+      }
+
+      return { done: false, value };
+    }
+
+    return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => Promise<IteratorReturnResult<undefined>> */
   async [close]() {
     if (!this.#done) {
       this.#done = true;
-      await this.#source.return?.();
+      await this.#source?.return?.();
     }
 
     return finished();
@@ -931,8 +1138,11 @@ class DropIterator extends AsyncStep {
  * @extends {AsyncStep<A>}
  */
 class DropWhileIterator extends AsyncStep {
-  /** @type AsyncIterator<A> */
+  /** @type AsyncIterator<A> | undefined */
   #source;
+  /** @type (A | PromiseLike<A>)[] | undefined */
+  #array;
+  #position = 0;
   /** @type API.Predicate<A> */
   #fn;
   #dropping = true;
@@ -940,12 +1150,16 @@ class DropWhileIterator extends AsyncStep {
   #done = false;
 
   /**
-   * @param {AsyncIterator<A>} source
+   * @param {Iterable<A> | AsyncIterable<A>} iter
    * @param {API.Predicate<A>} fn
    */
-  constructor(source, fn) {
+  constructor(iter, fn) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getAsyncIterator(iter);
+    }
     this.#fn = fn;
   }
 
@@ -956,7 +1170,10 @@ class DropWhileIterator extends AsyncStep {
     }
 
     while (true) {
-      const result = await this.#source.next();
+      let result = this.#read();
+      if (isThenable(result)) {
+        result = await result;
+      }
       if (result.done) {
         this.#done = true;
         return finished();
@@ -981,11 +1198,31 @@ class DropWhileIterator extends AsyncStep {
     }
   }
 
+  /** @type () => IteratorResult<A, undefined> | Promise<IteratorResult<A, undefined>> */
+  #read() {
+    if (this.#array) {
+      if (this.#position >= this.#array.length) {
+        return finished();
+      }
+
+      const value = this.#array[this.#position++];
+      if (isThenable(value)) {
+        return settle(value, () => {
+          this.#array = [];
+        });
+      }
+
+      return { done: false, value };
+    }
+
+    return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => Promise<IteratorReturnResult<undefined>> */
   async [close]() {
     if (!this.#done) {
       this.#done = true;
-      await this.#source.return?.();
+      await this.#source?.return?.();
     }
 
     return finished();
@@ -997,19 +1234,26 @@ class DropWhileIterator extends AsyncStep {
  * @extends {AsyncStep<A>}
  */
 class TakeIterator extends AsyncStep {
-  /** @type AsyncIterator<A> */
+  /** @type AsyncIterator<A> | undefined */
   #source;
+  /** @type (A | PromiseLike<A>)[] | undefined */
+  #array;
+  #position = 0;
   /** @type number */
   #remaining;
   #done = false;
 
   /**
-   * @param {AsyncIterator<A>} source
+   * @param {Iterable<A> | AsyncIterable<A>} iter
    * @param {number} count
    */
-  constructor(source, count) {
+  constructor(iter, count) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getAsyncIterator(iter);
+    }
     this.#remaining = count;
   }
 
@@ -1024,7 +1268,10 @@ class TakeIterator extends AsyncStep {
     }
     this.#remaining--;
 
-    const result = await this.#source.next();
+    let result = this.#read();
+    if (isThenable(result)) {
+      result = await result;
+    }
     if (result.done) {
       this.#done = true;
       return finished();
@@ -1033,11 +1280,31 @@ class TakeIterator extends AsyncStep {
     return result;
   }
 
+  /** @type () => IteratorResult<A, undefined> | Promise<IteratorResult<A, undefined>> */
+  #read() {
+    if (this.#array) {
+      if (this.#position >= this.#array.length) {
+        return finished();
+      }
+
+      const value = this.#array[this.#position++];
+      if (isThenable(value)) {
+        return settle(value, () => {
+          this.#array = [];
+        });
+      }
+
+      return { done: false, value };
+    }
+
+    return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => Promise<IteratorReturnResult<undefined>> */
   async [close]() {
     if (!this.#done) {
       this.#done = true;
-      await this.#source.return?.();
+      await this.#source?.return?.();
     }
 
     return finished();
@@ -1049,20 +1316,27 @@ class TakeIterator extends AsyncStep {
  * @extends {AsyncStep<A>}
  */
 class TakeWhileIterator extends AsyncStep {
-  /** @type AsyncIterator<A> */
+  /** @type AsyncIterator<A> | undefined */
   #source;
+  /** @type (A | PromiseLike<A>)[] | undefined */
+  #array;
+  #position = 0;
   /** @type API.Predicate<A> */
   #fn;
   #index = 0;
   #done = false;
 
   /**
-   * @param {AsyncIterator<A>} source
+   * @param {Iterable<A> | AsyncIterable<A>} iter
    * @param {API.Predicate<A>} fn
    */
-  constructor(source, fn) {
+  constructor(iter, fn) {
     super();
-    this.#source = source;
+    if (isPlainArray(iter)) {
+      this.#array = iter;
+    } else {
+      this.#source = getAsyncIterator(iter);
+    }
     this.#fn = fn;
   }
 
@@ -1072,7 +1346,10 @@ class TakeWhileIterator extends AsyncStep {
       return finished();
     }
 
-    const result = await this.#source.next();
+    let result = this.#read();
+    if (isThenable(result)) {
+      result = await result;
+    }
     if (result.done) {
       this.#done = true;
       return finished();
@@ -1092,11 +1369,31 @@ class TakeWhileIterator extends AsyncStep {
     return keep ? result : this[close]();
   }
 
+  /** @type () => IteratorResult<A, undefined> | Promise<IteratorResult<A, undefined>> */
+  #read() {
+    if (this.#array) {
+      if (this.#position >= this.#array.length) {
+        return finished();
+      }
+
+      const value = this.#array[this.#position++];
+      if (isThenable(value)) {
+        return settle(value, () => {
+          this.#array = [];
+        });
+      }
+
+      return { done: false, value };
+    }
+
+    return /** @type AsyncIterator<A, undefined> */ (this.#source).next();
+  }
+
   /** @type () => Promise<IteratorReturnResult<undefined>> */
   async [close]() {
     if (!this.#done) {
       this.#done = true;
-      await this.#source.return?.();
+      await this.#source?.return?.();
     }
 
     return finished();

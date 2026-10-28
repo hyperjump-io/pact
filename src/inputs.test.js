@@ -108,6 +108,12 @@ const asyncInputs = {
   }()),
   "sync generator": syncInputs.generator,
   "array": syncInputs.array,
+  "array with its own iterator": syncInputs["array with its own iterator"],
+  "array with an async iterator": (items) => Object.assign([], {
+    async* [Symbol.asyncIterator]() {
+      yield* items;
+    }
+  }),
   "set": syncInputs.set
 };
 
@@ -177,6 +183,37 @@ describe("arrays", () => {
     const array = [1];
     array[2] = 3;
     expect([...Pact.map((n) => n)(array)]).to.eql([1, undefined, 3]);
+  });
+});
+
+// Async steps read an array by index too, instead of through the adapter
+// for sync iterables, so these check that it's read as the adapter would.
+describe("async arrays", () => {
+  /** @type Record<string, (items: any[]) => Iterable<any>> */
+  const sources = { array: (items) => items, set: (items) => new Set(items) };
+
+  test("an array with its own iterator is read with it", async () => {
+    const array = Object.assign([1, 2, 3], {
+      * [Symbol.iterator]() {
+        yield 3;
+        yield 2;
+      }
+    });
+    expect(await toArray(Async.map(double)(array))).to.eql([6, 4]);
+  });
+
+  test.each(Object.entries(sources))("a promise in %s is waited for", async (_kind, source) => {
+    const iter = source([1, Promise.resolve(2), 3]);
+    expect(await toArray(Async.map(double)(iter))).to.eql([2, 4, 6]);
+  });
+
+  test.each(Object.entries(sources))("a promise in %s that rejects ends it", async (_kind, source) => {
+    const rejected = Promise.reject(Error("boom"));
+    rejected.catch(() => {});
+    const step = Async.map(double)(source([1, rejected, 3]));
+    expect(await step.next()).to.eql({ done: false, value: 2 });
+    await expect(step.next()).rejects.toThrow("boom");
+    expect(await step.next()).to.eql({ done: true, value: undefined });
   });
 });
 

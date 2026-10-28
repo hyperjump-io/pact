@@ -33,7 +33,10 @@ check for every function:
 A step that reads a source (`map`, `tap`, `filter`, `scan`, `flatMap`,
 `drop`, `dropWhile`, `take`, and `takeWhile`) reads an array by index
 instead of through its iterator, when the array's `[Symbol.iterator]` is
-`Array.prototype[Symbol.iterator]`. An array with its own iterator, or a
+`Array.prototype[Symbol.iterator]`. The async steps do too, unless the
+array has a `[Symbol.asyncIterator]`, and they only wait for a value
+that's a promise, as `FromSyncIterator` does. If it rejects, the step
+stops reading the array, as `FromSyncIterator` closes. An array with its own iterator, or a
 subclass that overrides it, is read through it. Like the array iterator,
 it reads `length` each time, so values added while it's read are read,
 and a hole is `undefined`.
@@ -114,8 +117,6 @@ times faster (see [Pipelines](../benchmarks/pipelines.md#iterator-classes)).
 
 - Why are sources that aren't arrays 5 to 13% slower since steps read
   arrays by index? They take the same path as before, with one more check.
-- The async steps don't read arrays by index. An async pipeline from an
-  array goes through the sync-to-async adapter.
 - v2 needs a global `Iterator` (Node 22, and browsers from 2025). Is that
   acceptable as the minimum, or does it need a fallback?
 - Sync classes don't implement `[Symbol.dispose]()`. TypeScript's

@@ -7,7 +7,9 @@ Async functions accept sync iterables as well as async ones, as in v1.
   resolved promise without waiting a turn unless the value is a promise,
   which it waits for, and it closes the source if one rejects. v1 wrapped
   it with `asyncMap`, which added a whole async generator to every
-  pipeline that started from an array.
+  pipeline that started from an array. A step reads an array by index
+  instead, without `FromSyncIterator` (see
+  [Iterators](iterators.md#array-sources)).
 - A callback can be sync or async. What it returns is waited for if it's
   a promise.
 
