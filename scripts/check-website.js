@@ -1,4 +1,4 @@
-// Runs every javascript example in website/ against src/. A statement with a
+// Runs every typescript example in website/ against src/. A statement with a
 // `// value` comment after it, on its line or the next, is checked against
 // that value, and what an example prints is checked against the `text`
 // block after it. Examples that show v1 code (`// v1`) are skipped.
@@ -31,11 +31,11 @@ for (const file of await readdir(join(repo, "website"))) {
   const blocks = [...markdown.matchAll(/```(\w+)[^\n]*\n([\s\S]*?)```/g)];
 
   for (const [index, [, language, code]] of blocks.entries()) {
-    if (language !== "javascript" || code.includes("// v1")) {
+    if (language !== "typescript" || code.includes("// v1")) {
       continue;
     }
 
-    const source = ts.createSourceFile("example.js", code, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
+    const source = ts.createSourceFile("example.ts", code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
     const edits = [];
     for (const statement of source.statements) {
       const comment = code.slice(statement.end).match(/^[ \t]*\n?[ \t]*\/\/ (.+)/);
@@ -56,7 +56,9 @@ for (const file of await readdir(join(repo, "website"))) {
     for (const edit of edits.sort((a, b) => b.start - a.start)) {
       example = example.slice(0, edit.start) + edit.text + example.slice(edit.end);
     }
-    example = example
+    example = ts.transpileModule(example, {
+      compilerOptions: { target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext }
+    }).outputText
       .replaceAll("\"@hyperjump/pact/async\"", JSON.stringify(pathToFileURL(join(repo, "src/async.js")).href))
       .replaceAll("\"@hyperjump/pact\"", JSON.stringify(pathToFileURL(join(repo, "src/index.js")).href));
 

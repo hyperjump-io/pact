@@ -10,7 +10,7 @@ browsers since Chrome 122, Firefox 131, and Safari 18.4.
 
 There are two entry points. Their functions have the same names.
 
-```javascript
+```typescript
 import { pipe, map, toArray } from "@hyperjump/pact";
 import * as Async from "@hyperjump/pact/async";
 ```

@@ -4,7 +4,7 @@
 the same names, for async iterables. Their callbacks can return promises,
 and what a collector returns is a promise.
 
-```javascript
+```typescript
 import { pipe, filter, map, toArray } from "@hyperjump/pact/async";
 
 const fetchUser = async (id) => ({ id, name: `User ${id}` });
@@ -28,7 +28,7 @@ To use both in one module, import the async functions as a namespace. A
 pipeline can start with sync steps and switch to async ones at the first
 step that needs it. `pipe` is the same function in both.
 
-```javascript
+```typescript
 import { pipe, range, filter } from "@hyperjump/pact";
 import * as Async from "@hyperjump/pact/async";
 
@@ -61,7 +61,7 @@ as the slowest of them instead of all of them together.
 Every async iterator pact returns has a `[Symbol.asyncDispose]()` method,
 which closes it, so it works with `await using`.
 
-```javascript
+```typescript
 import { map } from "@hyperjump/pact/async";
 
 const lines = async function* () {

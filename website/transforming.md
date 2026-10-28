@@ -8,7 +8,7 @@ Like the native Iterator helpers, a step's callback gets each value's index
 after the value. A function with an optional second parameter gets the
 index there, so pass `parseInt` its value yourself:
 
-```javascript
+```typescript
 import { pipe, map, toArray } from "@hyperjump/pact";
 
 pipe(["10", "10", "10"], map(parseInt), toArray); // [10, NaN, 2]
@@ -19,7 +19,7 @@ pipe(["10", "10", "10"], map((s) => parseInt(s)), toArray); // [10, 10, 10]
 
 Calls a function with each value, and yields what it returns.
 
-```javascript
+```typescript
 import { pipe, map, toArray } from "@hyperjump/pact";
 
 pipe(["a", "b"], map((letter, index) => `${index}:${letter}`), toArray);
@@ -30,7 +30,7 @@ pipe(["a", "b"], map((letter, index) => `${index}:${letter}`), toArray);
 
 Yields the values a function returns `true` for.
 
-```javascript
+```typescript
 import { pipe, filter, toArray } from "@hyperjump/pact";
 
 pipe([1, 2, 3, 4], filter((n) => n > 2), toArray); // [3, 4]
@@ -43,7 +43,7 @@ values of each iterable, one level deep. The function can return an
 iterator too, but not a string or another value that isn't iterable,
 which throws a `TypeError`.
 
-```javascript
+```typescript
 import { pipe, flatMap, toArray } from "@hyperjump/pact";
 
 pipe(["a b", "c"], flatMap((s) => s.split(" ")), toArray);
@@ -56,7 +56,7 @@ Yields the values of the iterables in an iterable, down to a depth, which
 is 1 by default. A value that isn't iterable is yielded as it is. A string
 is iterable, so it's flattened into its characters.
 
-```javascript
+```typescript
 import { pipe, flatten, toArray } from "@hyperjump/pact";
 
 pipe([1, [2, [3, [4]]]], flatten(), toArray); // [1, 2, [3, [4]]]
@@ -68,7 +68,7 @@ pipe([1, [2, [3, [4]]]], flatten(Infinity), toArray); // [1, 2, 3, 4]
 Like `reduce`, but yields the accumulated value after each one, instead of
 only the last one. It needs an initial value.
 
-```javascript
+```typescript
 import { pipe, scan, toArray } from "@hyperjump/pact";
 
 pipe([1, 2, 3], scan((sum, n) => sum + n, 0), toArray); // [1, 3, 6]
@@ -81,7 +81,7 @@ function returns. It's for looking at values in the middle of a pipeline,
 like logging them. To call a function with each value at the end of one,
 use [`forEach`](collecting.md#foreach).
 
-```javascript
+```typescript
 import { pipe, tap, map, toArray } from "@hyperjump/pact";
 
 pipe(
@@ -103,7 +103,7 @@ before 2
 `take` closes its source when it has enough, so it can end an iterable that
 never ends.
 
-```javascript
+```typescript
 import { pipe, range, take, drop, toArray } from "@hyperjump/pact";
 
 pipe(range(0), take(3), toArray); // [0, 1, 2]
@@ -116,7 +116,7 @@ pipe([1, 2, 3, 4], drop(3), toArray); // [4]
 then closes its source. `dropWhile` drops values until a function returns
 `false` for one, and yields that one and the rest.
 
-```javascript
+```typescript
 import { pipe, takeWhile, dropWhile, toArray } from "@hyperjump/pact";
 
 pipe([1, 2, 3, 1], takeWhile((n) => n < 3), toArray); // [1, 2]

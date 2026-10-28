@@ -10,7 +10,7 @@ Yields numbers from `from` up to `to`, not including it, counting by
 `step`, which is 1 by default. Without `to`, it never ends. A negative
 `step` counts down, and a `step` of 0 throws a `RangeError`.
 
-```javascript
+```typescript
 import { pipe, range, take, toArray } from "@hyperjump/pact";
 
 pipe(range(0, 5), toArray); // [0, 1, 2, 3, 4]
@@ -23,7 +23,7 @@ pipe(range(1), take(3), toArray); // [1, 2, 3]
 
 Yields nothing.
 
-```javascript
+```typescript
 import { pipe, empty, toArray } from "@hyperjump/pact";
 
 pipe(empty(), toArray); // []
@@ -36,7 +36,7 @@ Yields the values of each iterable, one after the other. Like
 throws a `TypeError`, and an iterable isn't read until the ones before it
 are done.
 
-```javascript
+```typescript
 import { pipe, concat, toArray } from "@hyperjump/pact";
 
 pipe(concat([1, 2], new Set([3]), [4]), toArray); // [1, 2, 3, 4]
@@ -48,7 +48,7 @@ Yields arrays with the next value of each iterable, like `Iterator.zip`
 from the TC39 Joint Iteration proposal. It takes an array of any number of
 iterables, or iterators, but not strings.
 
-```javascript
+```typescript
 import { pipe, zip, toArray } from "@hyperjump/pact";
 
 const names = ["Ada", "Grace", "Alan"];
@@ -66,7 +66,7 @@ What happens when one is done before the others is its `mode`:
 | `"longest"` | It keeps going until all of them are done, with `undefined` for the ones that are, or the value at the same position in `padding` |
 | `"strict"` | It throws a `TypeError`, unless they're all done |
 
-```javascript
+```typescript
 import { pipe, zip, toArray } from "@hyperjump/pact";
 
 const names = ["Ada", "Grace", "Alan"];
@@ -88,7 +88,7 @@ Same as `zip`, but takes an object of iterables, and yields objects with
 the same keys, like `Iterator.zipKeyed`. A key whose value is `undefined`
 is left out. In the `longest` mode, `padding` is an object too.
 
-```javascript
+```typescript
 import { pipe, zipKeyed, toArray } from "@hyperjump/pact";
 
 pipe(

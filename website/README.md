@@ -4,7 +4,7 @@ Higher order functions for iterators and async iterators. Each function is
 a step you put in a `pipe`, and a pipeline does its work one value at a
 time, only as values are asked for.
 
-```javascript
+```typescript
 import { pipe, range, filter, map, reduce } from "@hyperjump/pact";
 
 pipe(

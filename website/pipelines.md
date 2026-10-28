@@ -3,7 +3,7 @@
 `pipe` runs a value through any number of functions, in order. Each one
 gets what the one before it returned.
 
-```javascript
+```typescript
 import { pipe, filter, map, toArray } from "@hyperjump/pact";
 
 pipe(
@@ -32,7 +32,7 @@ A step or a collector is made by calling a function with its
 configuration, like `map(fn)` or `take(3)`. What it returns is a function
 that takes the iterable, so a step can be called without `pipe` too:
 
-```javascript
+```typescript
 import { map } from "@hyperjump/pact";
 
 const double = map((n) => n * 2);
@@ -48,7 +48,7 @@ A step doesn't read anything when it's made. Values go through the
 pipeline one at a time, as the end of it asks for them. So a step can work
 on an iterable that never ends, as long as something stops asking.
 
-```javascript
+```typescript
 import { pipe, range, map, take, toArray } from "@hyperjump/pact";
 
 pipe(
@@ -68,7 +68,7 @@ pipe(
 made once and used with any number of iterables. What it returns is a step
 itself, so it can go in another pipeline.
 
-```javascript
+```typescript
 import { pipe, compose, filter, map, toArray } from "@hyperjump/pact";
 
 const doubledEvens = compose(
@@ -88,7 +88,7 @@ from its configuration, so `take(2)` takes two values every time.
 Every iterator pact returns is an `Iterator`, so the native helper methods
 work on it, and you can mix them with pact's steps.
 
-```javascript
+```typescript
 import { filter } from "@hyperjump/pact";
 
 const evens = filter((n) => n % 2 === 0)([1, 2, 3, 4]);
@@ -103,7 +103,7 @@ closed. Stopping early is what `take`, `takeWhile`, `find`, `some`,
 `every`, `head`, and `zip` do, and it's what `break` in a `for...of` over a
 step does. A callback that throws closes the source too.
 
-```javascript
+```typescript
 import { pipe, find } from "@hyperjump/pact";
 
 const letters = function* () {

@@ -23,7 +23,7 @@ or with just its configuration. In v2, it takes just its configuration,
 and returns a function that takes the iterable. Put it in a `pipe`, or call
 what it returns.
 
-```javascript
+```typescript
 // v1
 const doubled = map((n) => n * 2, numbers);
 const total = reduce((sum, n) => sum + n, 0, numbers);
@@ -36,7 +36,7 @@ const total = reduce((sum, n) => sum + n, 0)(numbers);
 `flatten` took the iterable first, and its depth after it. It takes just
 the depth now.
 
-```javascript
+```typescript
 // v1
 flatten(nested, 2);
 
@@ -54,7 +54,7 @@ The root module has only the sync functions now. The async ones are in
 `@hyperjump/pact/async`, without the `async` prefix, which v1 also exported
 them from.
 
-```javascript
+```typescript
 // v1
 import { pipe, asyncMap, asyncCollectArray } from "@hyperjump/pact";
 
@@ -81,7 +81,7 @@ the prefix too: `AsyncMapper` is `Mapper` from `@hyperjump/pact/async`.
 when any of them is done. v1 went on until the first one was done, with
 `undefined` for the second one if it was shorter.
 
-```javascript
+```typescript
 // v1
 zip(names, years);
 
@@ -100,7 +100,7 @@ Iterator helpers, and a reducer gets it after the accumulated value and the
 value. A function with an optional second or third parameter gets the index
 there. The usual one is `parseInt`, whose second parameter is the radix.
 
-```javascript
+```typescript
 // v1, and wrong in v2
 map(parseInt);
 
@@ -120,7 +120,7 @@ does. v1 started with `undefined`.
 can't be read. To read the first value of a generator and then the rest,
 call its `next()` instead.
 
-```javascript
+```typescript
 // v1
 const first = head(lines);
 const rest = [...lines];
@@ -135,7 +135,7 @@ const rest = [...lines];
 `concat` throws a `TypeError` when it's called with something that isn't an
 iterable object, including a string, which v1 yielded the characters of.
 
-```javascript
+```typescript
 // v1
 concat("ab", "cd");
 

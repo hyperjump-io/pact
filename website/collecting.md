@@ -10,7 +10,7 @@ Collect the values into an array, a `Set`, a `Map`, or an object. `toMap`
 and `toObject` take `[key, value]` pairs. `toObject` makes an object with
 no prototype, so a key like `__proto__` is an ordinary property.
 
-```javascript
+```typescript
 import { pipe, toArray, toSet, toMap, toObject } from "@hyperjump/pact";
 
 pipe(new Set([1, 2]), toArray); // [1, 2]
@@ -26,7 +26,7 @@ last accumulated value. Without an initial value, the first value is the
 initial value, and an empty iterable throws a `TypeError`, as with
 `Array.prototype.reduce`.
 
-```javascript
+```typescript
 import { pipe, reduce } from "@hyperjump/pact";
 
 pipe([1, 2, 3], reduce((sum, n) => sum + n, 10)); // 16
@@ -40,7 +40,7 @@ returns whether it does for any of them, and `find` returns the first value
 it does for, or `undefined`. Each one stops reading, and closes the
 iterable, as soon as it knows the answer.
 
-```javascript
+```typescript
 import { pipe, every, some, find } from "@hyperjump/pact";
 
 pipe([1, 2, 3], every((n) => n > 0)); // true
@@ -54,7 +54,7 @@ Calls a function with each value, and returns `undefined`. It's for side
 effects at the end of a pipeline. To look at values in the middle of one,
 use [`tap`](transforming.md#tap).
 
-```javascript
+```typescript
 import { pipe, filter, forEach } from "@hyperjump/pact";
 
 pipe(
@@ -73,7 +73,7 @@ a.json
 `head` returns the first value, or `undefined` if there isn't one, and then
 closes the iterator. `count` returns how many values there are.
 
-```javascript
+```typescript
 import { pipe, range, head, count } from "@hyperjump/pact";
 
 pipe(range(5), head); // 5
@@ -84,7 +84,7 @@ pipe(range(0, 5), count); // 5
 
 Joins the values into a string, with a separator between them.
 
-```javascript
+```typescript
 import { pipe, map, join } from "@hyperjump/pact";
 
 pipe(["a", "b"], map((s) => s.toUpperCase()), join(", ")); // "A, B"
