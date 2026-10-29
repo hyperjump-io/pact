@@ -39,7 +39,9 @@ like `find` stops reading as soon as it has what it needs. Spreading an
 iterable into an array to use array methods reads all of it first.
 [Benchmarks](benchmarks.md) measures what that's worth.
 
-Using v1? [Migrating from v1](migrating.md) lists what changed.
+Using version 1.x? Its docs are in the
+[1.x README](https://github.com/hyperjump-io/pact/tree/v1#readme), and
+[Migrating from v1](migrating.md) lists what changed.
 
 ## Contents
 
