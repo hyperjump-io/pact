@@ -26,8 +26,9 @@ README has how to write them. pact is listed with the components there.
   (`scripts/version-docs.js`). v2's pages describe v2 as a whole, without
   markers, with what changed in [Migrating from v1](../../website/migrating.md).
 - The `docs-changed` workflow tells hyperjump.io to rebuild when `website/`
-  changes on `main`, the branch the site builds from. It needs a
-  `SITE_DISPATCH_TOKEN` secret.
+  changes on `main`, the branch the site builds from. Its token is from the
+  org's docs dispatch app (`SITE_DISPATCH_CLIENT_ID` and
+  `SITE_DISPATCH_APP_KEY`).
 
 ## Rejected
 
