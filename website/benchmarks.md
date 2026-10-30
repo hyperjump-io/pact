@@ -1,18 +1,18 @@
 # Benchmarks
 
-Array methods make a new array at every step, and each step reads all of
-the one before it. A pipeline makes no arrays in between, and stops
-reading when it has what it needs. Each benchmark here does the same work
-both ways, with the time it took after it. The times include the native
-Iterator helpers too (`numbers.values().filter(isEven).map(double)`),
-which work like pact's steps.
+Array methods make a new array at every step, and each step reads the
+whole array from the step before it. A pipeline doesn't make arrays in
+between steps, and it stops reading when it has what it needs. Each
+benchmark here does the same work both ways and shows how long each took.
+The tables also include the native Iterator helpers, which work like pact's
+steps: `numbers.values().filter(isEven).map(double)`.
 
-The times are the mean for one run, measured with Vitest's `bench` on
-Node.js 22.22, on 2026-10-28. Before they're measured, other pipelines
-with other callbacks and sources are run, as in an app that uses pact in
-many places. In a program that runs only one pipeline, pact is faster
-than it is here, because the engine can optimize pact's code for that one
-pipeline.
+The times are the mean for one run. They were measured with Vitest's
+`bench` on Node.js 22.22 on 2026-10-28. Before each measurement, other
+pipelines with other callbacks and sources are run. That simulates an app
+that uses pact in many places. A program that runs only one pipeline will
+see pact run faster than shown here, because the engine can optimize pact's
+code for that one pipeline.
 
 ## Stopping early with take
 
@@ -39,10 +39,10 @@ numbers.filter(isEven).map(double).slice(0, 10);
 | --- | --- | --- |
 | **0.53 µs** | 1.35 ms | 0.68 µs |
 
-pact is 2,500 times faster than array methods. The pipeline reads 20 numbers. The array
-methods read 100,000, make an array of 50,000 and another of 50,000, and
-then copy 10 of them. A pipeline's time depends on how much of the input
-it needs, and the array methods' on how big the input is.
+pact is 2,500 times faster than array methods. The pipeline reads 20
+numbers. The array methods read 100,000, make two arrays of 50,000, and
+then copy 10 of them. A pipeline's time depends on how much of the input it
+needs. The array methods' time depends on how big the input is.
 
 ## Stopping early with find
 
@@ -66,8 +66,8 @@ numbers.map(double).find(isTarget); // 1998
 | --- | --- | --- |
 | **12 µs** | 0.77 ms | 21 µs |
 
-pact is 64 times faster than array methods. The pipeline maps the first 1,000 numbers, and
-the array methods map all 100,000 before `find` starts.
+pact is 64 times faster than array methods. The pipeline maps the first
+1,000 numbers. The array methods map all 100,000 before `find` starts.
 
 ## A Set
 
@@ -93,10 +93,10 @@ Pact.pipe(
 | --- | --- | --- |
 | **1.95 ms** | 2.01 ms | 2.34 ms |
 
-About the same. Array methods only work on arrays, so a `Set`, a `Map`,
-or a generator has to be spread into an array first, which is one more
-array. A pipeline reads any iterable as it is, including one
-that never ends, which can't be spread at all.
+About the same. Array methods only work on arrays, so a `Set`, a `Map`, or
+a generator has to be spread into an array first. That's one more array. A
+pipeline reads any iterable as is. That includes an iterable that never
+ends, which can't be spread at all.
 
 ## Every value used
 
@@ -123,10 +123,11 @@ numbers.filter(isEven).map(double).reduce(add, 0); // 4999900000
 | 1.71 ms | **1.63 ms** | 2.35 ms |
 
 About the same. The engine optimizes array methods separately for each
-place they're called, so it can put the callbacks' code inline. pact's
-code is the same for every pipeline, so in an app it sees many callbacks,
-and calls them as functions. What makes up for it is the arrays in
-between, which take array methods time to fill and to collect as garbage.
+place they're called, so it can inline the callbacks' code. pact's code is
+shared by every pipeline, so in an app it sees many different callbacks and
+has to call them as functions. What makes up for it is that array methods
+spend time filling arrays in between steps and then garbage collecting
+them.
 
 ## More steps
 
@@ -161,13 +162,12 @@ numbers
 | --- | --- | --- |
 | **2.31 ms** | 2.62 ms | 3.66 ms |
 
-pact is 1.1 times faster. Each step adds a function call for each value
-to the pipeline, and an array to the array methods.
+pact is 1.1 times faster. Each step adds a function call per value to the
+pipeline. It adds a whole array to the array methods.
 
-The memory isn't in these times. A pipeline holds one value at a time,
-and array methods hold an array the size of what each step makes, so an
-input that doesn't fit in memory twice over can only go through a
-pipeline.
+These times don't show memory use. A pipeline holds one value at a time.
+Array methods hold an array for each step's output. If an input doesn't
+fit in memory twice over, only a pipeline can process it.
 
 ## A short pipeline
 
@@ -192,11 +192,11 @@ numbers.filter(isEven).map(double); // [0, 4, 8, 12, 16]
 | --- | --- | --- |
 | 0.32 µs | **0.05 µs** | 0.33 µs |
 
-Array methods are 6 times faster. Each value costs a pipeline a call
-to each step's iterator and a new object to pass it in, and setting up
-the steps costs more than calling array methods. Small arrays are where
-array methods are fastest, because the arrays they make are small too.
+Array methods are 6 times faster. For each value, a pipeline calls each
+step's iterator and creates a new object to pass the value along. Setting
+up the steps also costs more than calling array methods. Array methods are
+fastest on small arrays, because the arrays they make are small too.
 
-It's a third of a microsecond, which only matters in a loop that's been
-measured to be slow. If it does, and the input is an array that's always
-small, use array methods.
+The difference is a third of a microsecond. That only matters in a loop
+you've measured to be slow. If it does matter, and the input is always a
+small array, use array methods.

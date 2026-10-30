@@ -1,6 +1,6 @@
 # Pipelines
 
-`pipe` runs a value through any number of functions, in order. Each one
+`pipe` runs a value through any number of functions in order. Each function
 gets what the one before it returned.
 
 ```typescript
@@ -21,16 +21,16 @@ isn't one. pact's functions have three roles in it:
 
 | Role | Functions | Is |
 | --- | --- | --- |
-| Source | [`range`, `empty`, `concat`, `zip`, `zipKeyed`](sources.md) | Makes an iterator, to start a pipeline |
-| Step | [`map`, `filter`, `take`, and the others](transforming.md) | Takes an iterable, and returns an iterator over new values |
-| Collector | [`toArray`, `reduce`, `find`, and the others](collecting.md) | Takes an iterable, and returns a value |
+| Source | [`range`, `empty`, `concat`, `zip`, `zipKeyed`](sources.md) | Makes an iterator that starts a pipeline |
+| Step | [`map`, `filter`, `take`, and the others](transforming.md) | Takes an iterable and returns an iterator over new values |
+| Collector | [`toArray`, `reduce`, `find`, and the others](collecting.md) | Takes an iterable and returns a value |
 
 Any iterable can start a pipeline: an array, a `Set`, a `Map`, a string, a
 generator, or a source.
 
-A step or a collector is made by calling a function with its
-configuration, like `map(fn)` or `take(3)`. What it returns is a function
-that takes the iterable, so a step can be called without `pipe` too:
+You make a step or a collector by calling a function with its
+configuration, like `map(fn)` or `take(3)`. That returns a function that
+takes the iterable. You can call a step without `pipe` too:
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -40,13 +40,13 @@ const double = Pact.map((n: number) => n * 2);
 ```
 
 A collector that doesn't need configuration, like `toArray` or `count`,
-goes in a pipeline as it is, without calling it.
+goes in a pipeline as is. You don't call it.
 
 ## Lazy
 
 A step doesn't read anything when it's made. Values go through the
-pipeline one at a time, as the end of it asks for them. So a step can work
-on an iterable that never ends, as long as something stops asking.
+pipeline one at a time as the end of the pipeline asks for them. A step can
+work on an iterable that never ends, as long as something stops asking.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -59,14 +59,14 @@ Pact.pipe(
 ); // [0, 1, 4, 9]
 ```
 
-`range(0)` counts forever, but `take(4)` stops after four values, and
-`map` only squares those four.
+`range(0)` counts forever, but `take(4)` stops after four values. `map`
+only squares those four.
 
 ## Building pipelines with compose
 
-`compose` combines steps into one, without a source, so a pipeline can be
-made once and used with any number of iterables. What it returns is a step
-itself, so it can go in another pipeline.
+`compose` combines steps into one step without a source. You can make a
+pipeline once and use it with any number of iterables. Since the result is
+a step, it can also go in another pipeline.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -89,13 +89,13 @@ Pact.pipe(
 ); // [12]
 ```
 
-A step made once can be used as many times as you like. Each use starts
-from its configuration, so `take(2)` takes two values every time.
+A step can be used as many times as you like. Each use starts fresh from
+its configuration, so `take(2)` takes two values every time.
 
 ## Native helpers
 
-Every iterator pact returns is an `Iterator`, so the native helper methods
-work on it, and you can mix them with pact's steps.
+Every iterator pact returns is an `Iterator`. The native helper methods
+work on it, so you can mix them with pact's steps.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -106,11 +106,11 @@ evens.map((n) => n * 10).toArray(); // [20, 40]
 
 ## Closing
 
-When a pipeline stops before its source is done, it closes the source,
-so its cleanup runs: a generator's `finally` block, or a file that's
-closed. Stopping early is what `take`, `takeWhile`, `find`, `some`,
-`every`, `head`, and `zip` do, and it's what `break` in a `for...of` over a
-step does. A callback that throws closes the source too.
+When a pipeline stops before its source is done, it closes the source.
+That runs the source's cleanup, like a generator's `finally` block or
+closing a file. `take`, `takeWhile`, `find`, `some`, `every`, `head`, and
+`zip` all stop early. So does a `break` in a `for...of` over a step. A
+callback that throws closes the source too.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -136,10 +136,10 @@ Pact.pipe(
 closed
 ```
 
-Closing means the rest of it can't be read. `head` closes the iterator it
-reads the first value from, so to read the first value of a generator and
+Once an iterator is closed, the rest of it can't be read. `head` closes
+the iterator it reads from. To read the first value of a generator and
 then the rest, call its `next()` instead.
 
-A step gets an iterator from its iterable when it's made, not when it's
-first read, so a step given something that isn't iterable throws right
-away.
+A step gets an iterator from its iterable when the step is made, not when
+it's first read. If you give a step something that isn't iterable, it
+throws right away.

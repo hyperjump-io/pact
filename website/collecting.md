@@ -1,14 +1,14 @@
 # Collecting
 
 A collector takes an iterable and returns a value, so it ends a pipeline.
-The ones that need configuration are called with it, like `reduce(fn, 0)`,
-and the others go in a pipeline as they are, like `toArray`.
+Collectors that need configuration are called with it, like
+`reduce(fn, 0)`. The others go in a pipeline as is, like `toArray`.
 
 ## toArray, toSet, toMap, and toObject
 
 Collect the values into an array, a `Set`, a `Map`, or an object. `toMap`
-and `toObject` take `[key, value]` pairs. `toObject` makes an object with
-no prototype, so a key like `__proto__` is an ordinary property.
+and `toObject` take `[key, value]` pairs. `toObject` makes an object without
+a prototype, so a key like `__proto__` is just an ordinary property.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -23,10 +23,10 @@ Pact.toObject(pairs); // { a: 1, b: 2 }
 
 ## reduce
 
-Calls a function with an accumulated value and each value, and returns the
-last accumulated value. Without an initial value, the first value is the
-initial value, and an empty iterable throws a `TypeError`, as with
-`Array.prototype.reduce`.
+Calls a function with the accumulated value and each value in turn. It
+returns the final accumulated value. Without an initial value, the first
+value is used as the initial value. In that case an empty iterable throws a
+`TypeError`, just like `Array.prototype.reduce`.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -39,10 +39,12 @@ Pact.reduce(sum)([1, 2, 3]); // 6
 
 ## every, some, and find
 
-`every` returns whether a function returns `true` for every value, `some`
-returns whether it does for any of them, and `find` returns the first value
-it does for, or `undefined`. Each one stops reading, and closes the
-iterable, as soon as it knows the answer.
+- `every` checks whether a function returns `true` for every value.
+- `some` checks whether it returns `true` for any value.
+- `find` returns the first value it returns `true` for, or `undefined`.
+
+Each one stops reading and closes the iterable as soon as it knows the
+answer.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -54,9 +56,9 @@ Pact.find((n: number) => n > 1)([1, 2, 3]); // 2
 
 ## forEach
 
-Calls a function with each value, and returns `undefined`. It's for side
-effects at the end of a pipeline. To look at values in the middle of one,
-use [`tap`](transforming.md#tap).
+Calls a function with each value and returns `undefined`. Use it for side
+effects at the end of a pipeline. To look at values in the middle of a
+pipeline, use [`tap`](transforming.md#tap).
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -74,8 +76,9 @@ a.json
 
 ## head and count
 
-`head` returns the first value, or `undefined` if there isn't one, and then
-closes the iterator. `count` returns how many values there are.
+`head` returns the first value and then closes the iterator. If there are
+no values, it returns `undefined`. `count` returns how many values there
+are.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -86,7 +89,7 @@ Pact.count(Pact.range(0, 5)); // 5
 
 ## join
 
-Joins the values into a string, with a separator between them.
+Joins the values into a string with a separator between them.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";

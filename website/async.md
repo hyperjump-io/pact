@@ -1,8 +1,8 @@
 # Async
 
-`@hyperjump/pact/async` has the same functions as `@hyperjump/pact`, with
-the same names, for async iterables. Their callbacks can return promises,
-and what a collector returns is a promise.
+`@hyperjump/pact/async` has the same functions as `@hyperjump/pact` with
+the same names, but for async iterables. Their callbacks can return
+promises. Collectors return a promise.
 
 ```typescript
 import * as PactAsync from "@hyperjump/pact/async";
@@ -18,14 +18,14 @@ await PactAsync.pipe(
 ); // ["User 1", "User 3"]
 ```
 
-Each function takes iterables as well as async iterables, so an async
-pipeline can start with an array. A promise in an iterable is waited for,
-as in a `for await` loop.
+Each function accepts sync iterables as well as async ones, so an async
+pipeline can start with an array. If an iterable contains promises, they're
+awaited, just like in a `for await` loop.
 
 ## Mixing sync and async
 
-A pipeline can start with sync steps and switch to async ones at the first
-step that needs it. `pipe` is the same function in both.
+A pipeline can start with sync steps and switch to async steps where it
+needs to. `pipe` is the same function in both entry points.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -39,26 +39,28 @@ await Pact.pipe(
 ); // [10, 30]
 ```
 
-Everything async costs at least a promise for each value at each step, so
-an async pipeline is several times slower than a sync one over the same
-values. Use the sync functions for values that aren't async, and switch to
-async only where a step needs it.
+Every async step costs at least one promise per value. That makes an async
+pipeline several times slower than a sync one over the same values. Use the
+sync functions for values that aren't async. Switch to async only at the
+step that needs it.
 
 ## Reading in order
 
-A call to `next()` that's made before the one before it is done waits for
-it, as with an async generator. So `next()` calls that overlap get the
-values in order, even through a step like `filter`, which reads a
-different number of values for each one.
+If you call `next()` before the previous call is done, it waits for the
+previous call to finish. Async generators work the same way. That means
+overlapping `next()` calls get the values in order. This holds even through
+a step like `filter`, which may read several source values for each value
+it yields.
 
-`zip` is the exception, where it helps: for each array it yields, it reads
-the iterables that aren't done at the same time, so an array takes as long
-as the slowest of them instead of all of them together.
+`zip` is the exception, because running in parallel helps there. For each
+array it yields, it reads from all the unfinished iterables at the same
+time. Each array takes as long as the slowest iterable instead of the sum
+of all of them.
 
 ## Disposing
 
-Every async iterator pact returns has a `[Symbol.asyncDispose]()` method,
-which closes it, so it works with `await using`.
+Every async iterator pact returns has a `[Symbol.asyncDispose]()` method
+that closes it. That means it works with `await using`.
 
 ```typescript
 import * as PactAsync from "@hyperjump/pact/async";

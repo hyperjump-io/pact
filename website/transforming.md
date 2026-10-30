@@ -1,12 +1,13 @@
 # Transforming
 
-A step takes an iterable and returns an iterator over new values. Each one
-is made by calling it with its configuration (see
-[Pipelines](pipelines.md#sources-steps-and-collectors)).
+A step takes an iterable and returns an iterator over new values. You make
+a step by calling its function with its configuration. See
+[Pipelines](pipelines.md#sources-steps-and-collectors).
 
-Like the native Iterator helpers, a step's callback gets each value's index
-after the value. A function with an optional second parameter gets the
-index there, so pass `parseInt` its value yourself:
+Like the native Iterator helpers, a step passes each value's index to its
+callback as the second argument. A function with an optional second
+parameter will get the index there. With a function like `parseInt`, wrap
+it and pass the value yourself:
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -26,7 +27,7 @@ Pact.pipe(
 
 ## map
 
-Calls a function with each value, and yields what it returns.
+Calls a function with each value and yields what it returns.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -54,10 +55,10 @@ Pact.pipe(
 
 ## flatMap
 
-Calls a function that returns an iterable with each value, and yields the
-values of each iterable, one level deep. The function can return an
-iterator too, but not a string or another value that isn't iterable,
-which throws a `TypeError`.
+Calls a function with each value. The function returns an iterable, and
+`flatMap` yields the values of that iterable, one level deep. The function
+can also return an iterator. Returning a string or anything else that isn't
+an iterable object throws a `TypeError`.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -71,9 +72,9 @@ Pact.pipe(
 
 ## flatten
 
-Yields the values of the iterables in an iterable, down to a depth, which
-is 1 by default. A value that isn't iterable is yielded as it is. A string
-is iterable, so it's flattened into its characters.
+Yields the values of nested iterables, down to a given depth. The depth is
+1 by default. A value that isn't iterable is yielded as is. Strings are
+iterable, so they're flattened into their characters.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -93,8 +94,8 @@ Pact.pipe(
 
 ## scan
 
-Like `reduce`, but yields the accumulated value after each one, instead of
-only the last one. It needs an initial value.
+Like `reduce`, but it yields the accumulated value after every value
+instead of only at the end. It needs an initial value.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -108,10 +109,10 @@ Pact.pipe(
 
 ## tap
 
-Calls a function with each value, and yields the value, not what the
-function returns. It's for looking at values in the middle of a pipeline,
-like logging them. To call a function with each value at the end of one,
-use [`forEach`](collecting.md#foreach).
+Calls a function with each value and yields the value itself, not what the
+function returns. Use it to look at values in the middle of a pipeline, for
+example to log them. To call a function with each value at the end of a
+pipeline, use [`forEach`](collecting.md#foreach).
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -131,9 +132,9 @@ before 2
 
 ## take and drop
 
-`take` yields the first values, and `drop` yields the values after them.
-`take` closes its source when it has enough, so it can end an iterable that
-never ends.
+`take` yields the first values. `drop` skips the first values and yields
+the rest. `take` closes its source once it has enough, so it can end an
+iterable that would otherwise never end.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -153,9 +154,9 @@ Pact.pipe(
 
 ## takeWhile and dropWhile
 
-`takeWhile` yields values until a function returns `false` for one, and
-then closes its source. `dropWhile` drops values until a function returns
-`false` for one, and yields that one and the rest.
+`takeWhile` yields values until a function returns `false` for one. Then it
+closes its source. `dropWhile` skips values until a function returns
+`false` for one. Then it yields that value and the rest.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";

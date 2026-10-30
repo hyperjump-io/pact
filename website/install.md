@@ -5,11 +5,11 @@ npm install @hyperjump/pact
 ```
 
 It's an ES module with no dependencies. It needs the global `Iterator`
-that the native Iterator helpers come with: Node.js 22 or later, and
-browsers since Chrome 122, Firefox 131, and Safari 18.4.
+that comes with the native Iterator helpers. That means Node.js 22 or
+later, Chrome 122 or later, Firefox 131 or later, or Safari 18.4 or later.
 
-There are two entry points. Their functions have the same names, so
-import each one as a namespace.
+There are two entry points. Their functions have the same names, so import
+each one as a namespace.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -17,26 +17,26 @@ import * as PactAsync from "@hyperjump/pact/async";
 ```
 
 - `@hyperjump/pact` has the functions for iterables.
-- `@hyperjump/pact/async` has the functions for async iterables (see
-  [Async](async.md)).
+- `@hyperjump/pact/async` has the functions for async iterables. See
+  [Async](async.md).
 
 ## TypeScript
 
-The package includes its type declarations, and needs TypeScript 5.6 or
-later. Each step's input is checked against the step before it, so a
-pipeline that passes numbers to a step that takes strings is a type error.
-A step that's made outside a pipeline, like one made for `compose`, has no
-step before it to get its input's type from, so give its callback's
-parameter a type.
+The package includes its type declarations. It needs TypeScript 5.6 or
+later. Each step's input type is checked against the output of the step
+before it. A pipeline that passes numbers to a step that takes strings is a
+type error. A step made outside a pipeline has no step before it to get its
+input type from. This includes a step made for `compose`. Give its
+callback's parameter a type.
 
 Every function that returns an iterator is declared to return an
-`IteratorObject` (`AsyncIteratorObject` from `@hyperjump/pact/async`).
+`IteratorObject`. In `@hyperjump/pact/async` it's an `AsyncIteratorObject`.
 With `esnext` or `es2025` in your `lib`, the native helper methods are
-typed on it, as they are on an array's iterator.
+typed on it, just like on an array's iterator.
 
 The types of the callbacks and options are exported too. The ones from
-`@hyperjump/pact/async` have the same names, and their callbacks can
-return promises.
+`@hyperjump/pact/async` have the same names. Their callbacks can return
+promises.
 
 | Type | Is |
 | --- | --- |
