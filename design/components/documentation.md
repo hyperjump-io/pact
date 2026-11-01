@@ -1,10 +1,13 @@
 # Documentation
 
 The user docs are in `website/`, as plain markdown that reads well on
-GitHub. The hyperjump.io site is built from them, with json-schema's,
-hjlint's, browser's, and the other packages', from `../hyperjump.io`,
-where `design/style/` says how to write the prose and the README says
-how pages are put together. pact is listed with the components there.
+GitHub. The hyperjump.io site is built from them and from the docs of
+json-schema, hjlint, browser, and the other packages. The site lists pact
+with the components. The site's
+[style guide](https://github.com/hyperjump-io/hyperjump.io/tree/main/design/style)
+says how to write the prose, and its
+[design docs](https://github.com/hyperjump-io/hyperjump.io/blob/main/design/README.md#writing-docs)
+say how to put pages together.
 
 - `website/README.md` introduces it and lists the pages, which are guides:
   install, pipelines, transforming, sources, collecting, async,
