@@ -19,7 +19,8 @@ so a function can't be missed and an API change updates one row:
   its source, and a callback that throws closes the source. The async
   functions are tested with sync and async sources. A `closable` source
   records whether it was closed. It also counts as closed when it
-  finishes, so each test stops before the last item.
+  finishes, so each test stops before the last item. A step with more
+  than one iterator open closes all of them when closing one throws.
 - `reuse.test.js`: a step made once and used twice gives the same result
   both times. v1's `take`, `scan`, and `reduce` kept their state in the
   step, so `take(2)` gave nothing the second time and `reduce(add, 0)`

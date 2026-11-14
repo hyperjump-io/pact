@@ -294,13 +294,40 @@ const openAll = (values) => {
       iterators.push(getIterator(getFlattenable(value)));
     }
   } catch (error) {
-    for (const iterator of iterators) {
-      iterator.return?.();
+    try {
+      closeAll(iterators);
+    } catch {
+      // The error that stopped it is the one to pass on
     }
     throw error;
   }
 
   return iterators;
+};
+
+/**
+ * Closes every iterator, even if closing one of them throws, and then
+ * throws the first error, as the native helpers do.
+ *
+ * @type (iterators: (Iterator<any> | undefined)[]) => void
+ */
+const closeAll = (iterators) => {
+  let failed = false;
+  let firstError;
+  for (const iterator of iterators) {
+    try {
+      iterator?.return?.();
+    } catch (error) {
+      if (!failed) {
+        failed = true;
+        firstError = error;
+      }
+    }
+  }
+
+  if (failed) {
+    throw firstError;
+  }
 };
 
 /** @type (padding: Iterable<any> | undefined, length: number) => any[] */
@@ -696,9 +723,7 @@ class FlattenIterator extends Iterator {
 
   /** @type () => IteratorReturnResult<undefined> */
   return() {
-    while (this.#stack.length > 0) {
-      /** @type Iterator<any> */ (this.#stack.pop()).return?.();
-    }
+    closeAll(this.#stack.splice(0).reverse());
 
     return finished();
   }
@@ -788,8 +813,7 @@ class FlatMapIterator extends Iterator {
   return() {
     if (!this.#done) {
       this.#done = true;
-      this.#inner?.return?.();
-      this.#source?.return?.();
+      closeAll([this.#inner, this.#source]);
     }
 
     return finished();
@@ -1268,11 +1292,7 @@ class ZipIterator extends Iterator {
   return() {
     if (!this.#done) {
       this.#done = true;
-      this.#iterators.forEach((iterator, index) => {
-        if (!this.#iteratorDone[index]) {
-          iterator.return?.();
-        }
-      });
+      closeAll(this.#iterators.filter((_iterator, index) => !this.#iteratorDone[index]));
     }
 
     return finished();

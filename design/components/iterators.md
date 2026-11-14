@@ -18,6 +18,11 @@ check for every function:
   (see [Close what you open](../principles/close-what-you-open.md)).
   `flatten` and `flatMap` close the iterable they're in, and `concat`
   closes the one it's reading.
+- A step with more than one iterator open (`flatMap`, `flatten`, and
+  `zip`) closes all of them, even if closing one throws, and then throws
+  the first error, as the native helpers do. `zip` called with something
+  that isn't iterable closes the ones it opened and throws the
+  `TypeError`, not an error from closing.
 - A callback that throws closes the source before the error is passed on.
 - An error from the source is passed on without closing it, as a
   generator's `for...of` does.

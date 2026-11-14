@@ -202,3 +202,111 @@ const toArray = async (iter) => {
   }
   return result;
 };
+
+// A step with more than one iterator open closes all of them, even if
+// closing one throws. These sources record a call to `return()`, because a
+// generator that hasn't started doesn't run its `finally`.
+
+/** @type () => Iterable<number> & { closed: boolean }  */
+const recorder = () => {
+  const iterable = {
+    closed: false,
+    /** @type () => Iterator<number> */
+    [Symbol.iterator]: () => ({
+      next: () => ({ value: 1, done: false }),
+      return: () => {
+        iterable.closed = true;
+        return { value: undefined, done: true };
+      }
+    })
+  };
+  return iterable;
+};
+
+/** @type Iterable<number> */
+const closeThrows = {
+  [Symbol.iterator]: () => ({
+    next: () => ({ value: 1, done: false }),
+    return: () => {
+      throw Error("close");
+    }
+  })
+};
+
+/** @type AsyncIterable<number> */
+const asyncCloseThrows = {
+  [Symbol.asyncIterator]: () => ({
+    next: async () => ({ value: 1, done: false }),
+    return: () => {
+      throw Error("close");
+    }
+  })
+};
+
+/** @type AsyncIterable<number> */
+const asyncCloseRejects = {
+  [Symbol.asyncIterator]: () => ({
+    next: async () => ({ value: 1, done: false }),
+    return: async () => {
+      throw Error("close");
+    }
+  })
+};
+
+describe("closing closes every iterator when closing one throws", () => {
+  /** @type [string, (failing: any, source: any) => Iterator<any>][] */
+  const steps = [
+    ["flatMap", (failing, source) => Pact.flatMap(() => failing)(source)],
+    ["flatten", (failing, source) => Pact.flatten()(Pact.map(() => failing)(source))],
+    ["zip", (failing, source) => Pact.zip([failing, source])]
+  ];
+
+  test.each(steps)("%s", (_name, step) => {
+    const source = recorder();
+    const result = step(closeThrows, source);
+    result.next();
+    expect(() => result.return?.()).to.throw("close");
+    expect(source.closed).to.equal(true);
+  });
+
+  test("zip with something that isn't iterable", () => {
+    const source = recorder();
+    expect(() => Pact.zip([closeThrows, source, /** @type any */ (5)])).to.throw(TypeError);
+    expect(source.closed).to.equal(true);
+  });
+});
+
+describe("async closing closes every iterator when closing one throws", () => {
+  /** @type [string, (failing: any, source: any) => AsyncIterator<any>][] */
+  const steps = [
+    ["Async.flatMap", (failing, source) => Async.flatMap(() => failing)(source)],
+    ["Async.flatten", (failing, source) => Async.flatten()(Async.map(() => failing)(source))],
+    ["Async.zip", (failing, source) => Async.zip([failing, source])]
+  ];
+
+  /** @type [string, Iterable<number> | AsyncIterable<number>][] */
+  const failures = [
+    ["a sync source", closeThrows],
+    ["an async source that throws", asyncCloseThrows],
+    ["an async source that rejects", asyncCloseRejects]
+  ];
+
+  describe.each(failures)("%s", (_name, failing) => {
+    test.each(steps)("%s", async (_name, step) => {
+      const source = recorder();
+      const result = step(failing, source);
+      await result.next();
+      await expect(result.return?.()).rejects.toThrow("close");
+      expect(source.closed).to.equal(true);
+    });
+
+    test("Async.zip with something that isn't iterable", async () => {
+      const source = recorder();
+      expect(() => Async.zip([failing, source, /** @type any */ (5)])).to.throw(TypeError);
+      await new Promise((resolve) => {
+        setTimeout(resolve);
+      });
+      expect(source.closed).to.equal(true);
+    });
+  });
+});

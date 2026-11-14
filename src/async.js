@@ -309,7 +309,8 @@ const zipOptions = (options) => {
 /**
  * Gets an iterator from each value, closing the ones it already got if one
  * of them isn't iterable. Closing is started but not waited for, because
- * this throws before anything is read.
+ * this throws before anything is read, and an error from closing is dropped,
+ * because the error that stopped it is the one to pass on.
  *
  * @type (values: any[]) => AsyncIterator<any>[]
  */
@@ -321,13 +322,36 @@ const openAll = (values) => {
       iterators.push(getAsyncIterator(getFlattenable(value)));
     }
   } catch (error) {
-    for (const iterator of iterators) {
-      void iterator.return?.();
-    }
+    void closeAll(iterators).catch(() => {});
     throw error;
   }
 
   return iterators;
+};
+
+/**
+ * Closes every iterator, one after the other, even if closing one of them
+ * throws, and then throws the first error, as the native helpers do.
+ *
+ * @type (iterators: (AsyncIterator<any> | undefined)[]) => Promise<void>
+ */
+const closeAll = async (iterators) => {
+  let failed = false;
+  let firstError;
+  for (const iterator of iterators) {
+    try {
+      await iterator?.return?.();
+    } catch (error) {
+      if (!failed) {
+        failed = true;
+        firstError = error;
+      }
+    }
+  }
+
+  if (failed) {
+    throw firstError;
+  }
 };
 
 /** @type (padding: Iterable<any> | undefined, length: number) => any[] */
@@ -954,9 +978,7 @@ class FlattenIterator extends AsyncStep {
 
   /** @type () => Promise<IteratorReturnResult<undefined>> */
   async [close]() {
-    while (this.#stack.length > 0) {
-      await /** @type AsyncIterator<any> */ (this.#stack.pop()).return?.();
-    }
+    await closeAll(this.#stack.splice(0).reverse());
 
     return finished();
   }
@@ -1062,8 +1084,7 @@ class FlatMapIterator extends AsyncStep {
   async [close]() {
     if (!this.#done) {
       this.#done = true;
-      await this.#inner?.return?.();
-      await this.#source?.return?.();
+      await closeAll([this.#inner, this.#source]);
     }
 
     return finished();
@@ -1593,9 +1614,15 @@ class ZipIterator extends AsyncStep {
   async [close]() {
     if (!this.#done) {
       this.#done = true;
-      await Promise.all(this.#iterators.map((iterator, index) => {
+      // At the same time, as they're read. The callback is async so that a
+      // `return()` that throws doesn't stop the others being closed.
+      const results = await Promise.allSettled(this.#iterators.map(async (iterator, index) => {
         return this.#iteratorDone[index] ? undefined : iterator.return?.();
       }));
+      const rejected = results.find((result) => result.status === "rejected");
+      if (rejected) {
+        throw rejected.reason;
+      }
     }
 
     return finished();
