@@ -10,6 +10,12 @@ Async functions accept sync iterables as well as async ones, as in v1.
   pipeline that started from an array. A step reads an array by index
   instead, without `FromSyncIterator` (see
   [Iterators](iterators.md#array-sources)).
+- `flatMap` and `zip` also accept an iterator that isn't iterable, as the
+  native `flatMap` does. There's no telling whether one is sync or async,
+  so `FromBareIterator` waits for its results and for values that are
+  promises, and closes it if one rejects. Treating it as async, which is
+  what happened before, gave back the promises a sync one yields without
+  waiting for them.
 - A callback can be sync or async. What it returns is waited for if it's
   a promise.
 

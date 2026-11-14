@@ -489,6 +489,18 @@ describe("Async.flatMap", () => {
     expect(await Async.toArray(result)).to.eql([1, 2]);
   });
 
+  test("waits for the promises a sync iterator that isn't iterable yields", async () => {
+    const result = Async.flatMap((/** @type number */ n) => bare([Promise.resolve(n), n]))([1, 2]);
+    expect(await Async.toArray(result)).to.eql([1, 1, 2, 2]);
+  });
+
+  test("a promise that rejects closes a sync iterator that isn't iterable", async () => {
+    const inner = bare([Promise.reject(Error("boom")), 2]);
+    const result = Async.flatMap(() => inner)([1]);
+    await expect(result.next()).rejects.toThrow("boom");
+    expect(inner.closed).to.equal(true);
+  });
+
   test("a string throws", async () => {
     const result = Async.flatMap(() => /** @type any */ ("ab"))([1]);
     await expect(Async.toArray(result)).rejects.toThrow(TypeError);
@@ -1128,6 +1140,13 @@ describe("Async.zip", () => {
   });
 });
 
+describe("Async.zip", () => {
+  test("waits for the promises a sync iterator that isn't iterable yields", async () => {
+    const result = Async.zip([bare([Promise.resolve(1), 2])]);
+    expect(await Async.toArray(result)).to.eql([[1], [2]]);
+  });
+});
+
 describe("Async.zipKeyed", () => {
   test("yields objects with the same keys", async () => {
     const result = Async.zipKeyed({ n: [1, 2], s: asyncClosable(["a", "b"]) });
@@ -1203,3 +1222,25 @@ describe("native Iterator helpers", () => {
     expect(zip([[1], ["a"]]).toArray()).to.eql([[1, "a"]]);
   });
 });
+
+/**
+ * A sync iterator over `items` that isn't iterable, and records whether it
+ * was closed.
+ *
+ * @type <A>(items: A[]) => Iterator<A> & { closed: boolean }
+ */
+const bare = (items) => {
+  let position = 0;
+  return {
+    closed: false,
+    next() {
+      return position < items.length
+        ? { value: items[position++], done: false }
+        : { value: undefined, done: true };
+    },
+    return() {
+      this.closed = true;
+      return { value: undefined, done: true };
+    }
+  };
+};

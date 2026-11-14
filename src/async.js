@@ -281,7 +281,7 @@ const getFlattenable = (value) => {
 
   return Symbol.asyncIterator in value || Symbol.iterator in value
     ? value
-    : { [Symbol.asyncIterator]: () => /** @type AsyncIterator<any> */ (value) };
+    : { [Symbol.asyncIterator]: () => new FromBareIterator(value) };
 };
 
 /**
@@ -533,6 +533,65 @@ class FromSyncIterator extends AsyncStep {
     }
 
     return Promise.resolve(finished());
+  }
+}
+
+/**
+ * Adapts an iterator that isn't iterable, which `flatMap` and `zip` accept.
+ * There's no telling whether it's sync or async, so a result that's a
+ * promise is waited for, and so is a value that's a promise, as with
+ * FromSyncIterator. If the value rejects, the iterator is closed.
+ *
+ * @template A
+ * @extends {AsyncStep<A>}
+ */
+class FromBareIterator extends AsyncStep {
+  /** @type Iterator<A | PromiseLike<A>> | AsyncIterator<A | PromiseLike<A>> */
+  #source;
+  #done = false;
+
+  /**
+   * @param {Iterator<A | PromiseLike<A>> | AsyncIterator<A | PromiseLike<A>>} source
+   */
+  constructor(source) {
+    super();
+    this.#source = source;
+  }
+
+  /** @type () => Promise<IteratorResult<A, undefined>> */
+  async [pull]() {
+    if (this.#done) {
+      return finished();
+    }
+
+    let result;
+    try {
+      result = await this.#source.next();
+    } catch (error) {
+      this.#done = true;
+      throw error;
+    }
+    if (result.done) {
+      this.#done = true;
+      return finished();
+    }
+
+    try {
+      return { value: await result.value, done: false };
+    } catch (error) {
+      await this[close]();
+      throw error;
+    }
+  }
+
+  /** @type () => Promise<IteratorReturnResult<undefined>> */
+  async [close]() {
+    if (!this.#done) {
+      this.#done = true;
+      await this.#source.return?.();
+    }
+
+    return finished();
   }
 }
 
