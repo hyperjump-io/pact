@@ -16,6 +16,10 @@ let problems = 0;
 let checks = 0;
 const examples = new Map();
 
+// An example that doesn't end, like an infinite source without a `take`,
+// is a problem, and doesn't hang the check
+const timeout = 10_000;
+
 const prelude = `import { isDeepStrictEqual, inspect } from "node:util";
 const __normalize = (v) => Array.isArray(v) ? v.map(__normalize)
   : v && typeof v === "object" && !(v instanceof Map) && !(v instanceof Set) && !(v instanceof Error) ? { ...v } : v;
@@ -70,12 +74,18 @@ for (const file of await readdir(join(repo, "website"))) {
 
     const path = join(out, `${file}-${index}.mjs`);
     await writeFile(path, prelude + example);
-    const result = spawnSync("node", [path], { encoding: "utf8" });
+    const result = spawnSync("node", [path], { encoding: "utf8", timeout });
 
     const printed = blocks[index + 1]?.[1] === "text" ? blocks[index + 1][2] : undefined;
-    if (result.stderr.trim()) {
+    if (result.error) {
       problems++;
-      console.log(`website/${file}, example ${index + 1}:\n${result.stderr.trim()}\n`);
+      const reason = /** @type NodeJS.ErrnoException */ (result.error).code === "ETIMEDOUT"
+        ? `didn't finish in ${timeout / 1000} seconds`
+        : result.error.message;
+      console.log(`website/${file}, example ${index + 1} ${reason}\n`);
+    } else if (result.status !== 0 || result.stderr.trim()) {
+      problems++;
+      console.log(`website/${file}, example ${index + 1}:\n${result.stderr.trim() || `exited with ${result.signal ?? result.status}`}\n`);
     } else if (printed !== undefined && result.stdout.trim() !== printed.trim()) {
       problems++;
       console.log(`website/${file}, example ${index + 1} printed:\n${result.stdout}\nnot:\n${printed}`);

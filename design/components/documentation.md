@@ -24,7 +24,10 @@ say how to put pages together.
   and checks each `// value` comment and printed `text` block
   (`scripts/check-website.js`), and CI runs it, so an example can't drift
   from what the code does. It type-checks every example, strictly, against
-  the `.d.ts` files too, so the examples are `typescript` blocks.
+  the `.d.ts` files too, so the examples are `typescript` blocks. An
+  example that doesn't end in 10 seconds, or exits with an error, is a
+  problem. Several examples read an infinite `range`, so one that lost
+  its `take` would otherwise hang the check.
 - A feature that isn't released gets `*Coming soon*` on its own line under
   its heading. `npm version` replaces it with `*Added in vX.Y.Z*`
   (`scripts/version-docs.js`). v2's pages describe v2 as a whole, without
