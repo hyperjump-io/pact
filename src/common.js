@@ -4,6 +4,12 @@
 
 /** @type API.range */
 export const range = (from, to, step = 1) => {
+  if (typeof from !== "number" || (to !== undefined && typeof to !== "number") || typeof step !== "number") {
+    throw TypeError("`from`, `to`, and `step` must be numbers");
+  }
+  if (Number.isNaN(from) || Number.isNaN(to) || Number.isNaN(step)) {
+    throw RangeError("`from`, `to`, and `step` can't be NaN");
+  }
   if (step === 0) {
     throw RangeError("`step` can't be 0");
   }

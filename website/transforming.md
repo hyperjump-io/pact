@@ -134,7 +134,8 @@ before 2
 
 `take` yields the first values. `drop` skips the first values and yields
 the rest. `take` closes its source once it has enough, so it can end an
-iterable that would otherwise never end.
+iterable that would otherwise never end. Both truncate the count to an
+integer. A count that's `NaN` or negative throws a `RangeError`.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";

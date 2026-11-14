@@ -28,13 +28,19 @@ export const flatten = (depth = 1) => (iter) => new FlattenIterator(getAsyncIter
 export const flatMap = (fn) => (iter) => new FlatMapIterator(iter, fn);
 
 /** @type API.drop */
-export const drop = (count) => (iter) => new DropIterator(iter, count);
+export const drop = (count) => {
+  const limit = toCount(count);
+  return (iter) => new DropIterator(iter, limit);
+};
 
 /** @type API.dropWhile */
 export const dropWhile = (fn) => (iter) => new DropWhileIterator(iter, fn);
 
 /** @type API.take */
-export const take = (count) => (iter) => new TakeIterator(iter, count);
+export const take = (count) => {
+  const limit = toCount(count);
+  return (iter) => new TakeIterator(iter, limit);
+};
 
 /** @type API.takeWhile */
 export const takeWhile = (fn) => (iter) => new TakeWhileIterator(iter, fn);
@@ -234,6 +240,19 @@ export const join = (separator) => async (iter) => {
   }
 
   return result;
+};
+
+// A count is read as the native helpers read theirs: it's truncated to an
+// integer, and one that's NaN or negative throws. Without this, `take(NaN)`
+// would never stop.
+/** @type (count: number) => number */
+const toCount = (count) => {
+  const limit = Math.trunc(Number(count));
+  if (Number.isNaN(limit) || limit < 0) {
+    throw RangeError("`count` must be a number that's 0 or more");
+  }
+
+  return limit;
 };
 
 /** @type (value: unknown) => boolean */

@@ -8,7 +8,8 @@ spread across several.
 
 Yields numbers from `from` up to but not including `to`. It counts by
 `step`, which is 1 by default. Without `to`, it never ends. A negative
-`step` counts down. A `step` of 0 throws a `RangeError`.
+`step` counts down. A `step` of 0 throws a `RangeError`, and so does a
+`from`, `to`, or `step` that's `NaN`.
 
 ```typescript
 import * as Pact from "@hyperjump/pact";

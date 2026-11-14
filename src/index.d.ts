@@ -48,6 +48,8 @@ export type FlatMapper<A, B> = (item: A, index: number) => Iterable<B> | Iterato
 
 /**
  * Yields all the values in the iterator except for the first `n` values.
+ * `count` is truncated to an integer. One that's NaN or negative throws a
+ * RangeError.
  */
 export const drop: <A>(count: number) => (iterator: Iterable<A>) => IteratorObject<A, undefined, unknown>;
 
@@ -59,6 +61,8 @@ export const dropWhile: <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => Iter
 
 /**
  * Yields the first `n` values in the iterator.
+ * `count` is truncated to an integer. One that's NaN or negative throws a
+ * RangeError.
  */
 export const take: <A>(count: number) => (iterator: Iterable<A>) => IteratorObject<A, undefined, unknown>;
 

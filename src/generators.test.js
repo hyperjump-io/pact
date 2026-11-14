@@ -862,6 +862,52 @@ describe("range", () => {
   test("a step of 0 throws", () => {
     expect(() => [...range(0, 10, 0)]).to.throw(RangeError);
   });
+
+  test.each([
+    ["from", () => range(NaN, 10)],
+    ["to", () => range(0, NaN)],
+    ["step", () => range(0, 10, NaN)]
+  ])("a %s of NaN throws", (_name, run) => {
+    expect(run).to.throw(RangeError);
+  });
+
+  test.each([
+    ["from", () => range(/** @type any */ ("0"), 10)],
+    ["to", () => range(0, /** @type any */ ("abc"))],
+    ["step", () => range(0, 10, /** @type any */ ("1"))]
+  ])("a %s that isn't a number throws", (_name, run) => {
+    expect(run).to.throw(TypeError);
+  });
+});
+
+// A count that would never run out, or that can't be counted down, is an
+// error, as it is for the native helpers
+describe.each([
+  ["take", take],
+  ["drop", drop],
+  ["Async.take", Async.take],
+  ["Async.drop", Async.drop]
+])("the count of %s", (_name, step) => {
+  test.each([
+    ["NaN", NaN],
+    ["undefined", undefined],
+    ["not a number", "abc"],
+    ["negative", -1]
+  ])("%s throws", (_name, count) => {
+    expect(() => step(/** @type any */ (count))).to.throw(RangeError);
+  });
+
+  test("a fraction is truncated", async () => {
+    const result = [];
+    for await (const item of step(1.9)([1, 2, 3])) {
+      result.push(item);
+    }
+    expect(result).to.have.length(step === take || step === Async.take ? 1 : 2);
+  });
+
+  test("Infinity is allowed", () => {
+    expect(() => step(Infinity)).not.to.throw();
+  });
 });
 
 describe("empty", () => {

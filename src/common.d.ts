@@ -3,7 +3,8 @@ import type { LastReturnType } from "./type-utils.d.ts";
 /**
  * Yields numbers starting from `from` until `to`, counting by `step`, which
  * is 1 by default. A negative `step` counts down, and a `step` of 0 throws a
- * RangeError. If `to` is not passed, the iterator will be infinite.
+ * RangeError, and so does a `from`, `to`, or `step` that's NaN. If `to` is
+ * not passed, the iterator will be infinite.
  */
 export const range: (from: number, to?: number, step?: number) => IteratorObject<number, undefined, unknown>;
 
