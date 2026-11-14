@@ -140,6 +140,38 @@ describe("closing a step closes its source", () => {
   });
 });
 
+// The padding is read before anything is opened, so there's nothing to close
+describe("zip with padding that can't be read doesn't open its iterables", () => {
+  /** @type [string, (source: any) => any][] */
+  const zips = [
+    ["zip", (source) => Pact.zip([source], { mode: "longest", padding: unopenable })],
+    ["zipKeyed", (source) => Pact.zipKeyed({ a: source }, { mode: "longest", padding: unreadable })],
+    ["Async.zip", (source) => Async.zip([source], { mode: "longest", padding: unopenable })],
+    ["Async.zipKeyed", (source) => Async.zipKeyed({ a: source }, { mode: "longest", padding: unreadable })]
+  ];
+
+  test.each(zips)("%s", (_name, run) => {
+    let opened = false;
+    const source = {
+      [Symbol.iterator]: () => {
+        opened = true;
+        return [][Symbol.iterator]();
+      }
+    };
+    expect(() => run(source)).to.throw("boom");
+    expect(opened).to.equal(false);
+  });
+});
+
+/** @type Iterable<any> */
+const unopenable = { [Symbol.iterator]: boom };
+
+const unreadable = {
+  get a() {
+    return boom();
+  }
+};
+
 describe("a callback that throws closes the source", () => {
   test.each(callbackThrows)("%s", (_name, run) => {
     const source = closable(items);

@@ -26,6 +26,10 @@ check for every function:
 - A callback that throws closes the source before the error is passed on.
 - An error from the source is passed on without closing it, as a
   generator's `for...of` does.
+- `zip` and `zipKeyed` read `padding` before they open anything, so
+  padding that throws leaves nothing open. `Iterator.zip` opens the
+  iterables first and closes them, which is the same unless reading the
+  padding and opening an iterable have side effects on each other.
 - It has no `throw()` method.
 - A step opens its source when it's called, not when it's first read, as
   the native helpers do, so a step called with something that isn't

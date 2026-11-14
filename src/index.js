@@ -60,8 +60,9 @@ export const empty = () => new ConcatIterator([]);
 /** @type API.zip */
 export const zip = (iterables, options) => {
   const { mode, padding } = zipOptions(options);
-  const iterators = openAll([...iterables]);
-  return new ZipIterator(iterators, mode, mode === "longest" ? readPadding(padding, iterators.length) : []);
+  const values = [...iterables];
+  const paddingValues = mode === "longest" ? readPadding(padding, values.length) : [];
+  return new ZipIterator(openAll(values), mode, paddingValues);
 };
 
 /** @type API.zipKeyed */
@@ -70,10 +71,10 @@ export const zipKeyed = (iterables, options) => {
   const keys = Reflect.ownKeys(iterables).filter((key) => {
     return Object.prototype.propertyIsEnumerable.call(iterables, key) && iterables[/** @type any */ (key)] !== undefined;
   });
-  const iterators = openAll(keys.map((key) => iterables[/** @type any */ (key)]));
   const paddingValues = mode === "longest" && padding !== undefined
     ? keys.map((key) => /** @type any */ (padding)[key])
     : [];
+  const iterators = openAll(keys.map((key) => iterables[/** @type any */ (key)]));
 
   return map((/** @type any[] */ values) => {
     const result = Object.create(null);
