@@ -45,6 +45,71 @@ const async = [
   ["Async.zipKeyed", () => Async.zipKeyed({ a: [1] })]
 ];
 
+// What reads a source, with a source whose second next() throws
+/** @type [string, (source: any) => Iterator<any>][] */
+const syncReaders = [
+  ["map", (source) => Pact.map((n) => n)(source)],
+  ["tap", (source) => Pact.tap(() => {})(source)],
+  ["filter", (source) => Pact.filter(() => true)(source)],
+  ["scan", (source) => Pact.scan((a, n) => a + n, 0)(source)],
+  ["flatten", (source) => Pact.flatten()(source)],
+  ["flatMap", (source) => Pact.flatMap((n) => [n])(source)],
+  ["drop", (source) => Pact.drop(0)(source)],
+  ["dropWhile", (source) => Pact.dropWhile(() => false)(source)],
+  ["take", (source) => Pact.take(3)(source)],
+  ["takeWhile", (source) => Pact.takeWhile(() => true)(source)],
+  ["concat", (source) => Pact.concat(source)],
+  ["zip", (source) => Pact.zip([source])],
+  ["zipKeyed", (source) => Pact.zipKeyed({ a: source })]
+];
+
+/** @type [string, (source: any) => AsyncIterator<any>][] */
+const asyncReaders = [
+  ["Async.map", (source) => Async.map((n) => n)(source)],
+  ["Async.tap", (source) => Async.tap(() => {})(source)],
+  ["Async.filter", (source) => Async.filter(() => true)(source)],
+  ["Async.scan", (source) => Async.scan((a, n) => a + n, 0)(source)],
+  ["Async.flatten", (source) => Async.flatten()(source)],
+  ["Async.flatMap", (source) => Async.flatMap((n) => [n])(source)],
+  ["Async.drop", (source) => Async.drop(0)(source)],
+  ["Async.dropWhile", (source) => Async.dropWhile(() => false)(source)],
+  ["Async.take", (source) => Async.take(3)(source)],
+  ["Async.takeWhile", (source) => Async.takeWhile(() => true)(source)],
+  ["Async.concat", (source) => Async.concat(source)],
+  ["Async.zip", (source) => Async.zip([source])],
+  ["Async.zipKeyed", (source) => Async.zipKeyed({ a: source })]
+];
+
+/** @type () => Iterable<number> */
+const throwsSecond = () => {
+  let calls = 0;
+  return {
+    [Symbol.iterator]: () => ({
+      next() {
+        if (++calls === 2) {
+          throw Error("boom");
+        }
+        return { value: calls, done: false };
+      }
+    })
+  };
+};
+
+/** @type () => AsyncIterable<number> */
+const rejectsSecond = () => {
+  let calls = 0;
+  return {
+    [Symbol.asyncIterator]: () => ({
+      async next() {
+        if (++calls === 2) {
+          throw Error("boom");
+        }
+        return { value: calls, done: false };
+      }
+    })
+  };
+};
+
 describe("sync iterators", () => {
   test.each(sync)("%s is an Iterator", (_name, make) => {
     const iterator = make();
@@ -61,6 +126,13 @@ describe("sync iterators", () => {
   test.each(sync)("%s doesn't have throw()", (_name, make) => {
     expect(make().throw).to.equal(undefined);
   });
+
+  test.each(syncReaders)("%s is done after its source throws", (_name, step) => {
+    const iterator = step(throwsSecond());
+    iterator.next();
+    expect(() => iterator.next()).to.throw("boom");
+    expect(iterator.next()).to.eql({ done: true, value: undefined });
+  });
 });
 
 describe("async iterators", () => {
@@ -74,6 +146,19 @@ describe("async iterators", () => {
     const iterator = make();
     await Async.toArray(iterator);
     expect(await iterator.next()).to.eql({ done: true, value: undefined });
+  });
+
+  describe.each([
+    ["an async source", rejectsSecond],
+    ["a sync source", throwsSecond],
+    ["an array", () => [1, Promise.reject(Error("boom")), 3]]
+  ])("%s", (_name, source) => {
+    test.each(asyncReaders)("%s is done after its source throws", async (_name, step) => {
+      const iterator = step(source());
+      await iterator.next();
+      await expect(iterator.next()).rejects.toThrow("boom");
+      expect(await iterator.next()).to.eql({ done: true, value: undefined });
+    });
   });
 
   test("calls to next() that overlap are answered in order", async () => {

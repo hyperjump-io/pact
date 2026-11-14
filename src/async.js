@@ -495,7 +495,13 @@ class FromSyncIterator extends AsyncStep {
       return Promise.resolve(finished());
     }
 
-    const result = this.#source.next();
+    let result;
+    try {
+      result = this.#source.next();
+    } catch (error) {
+      this.#done = true;
+      throw error;
+    }
     if (result.done) {
       this.#done = true;
       return Promise.resolve(finished());
@@ -550,18 +556,11 @@ const arrayIterator = Array.prototype[Symbol.iterator];
 
 /**
  * Waits for a value from an array that's a promise, as FromSyncIterator
- * does. If it rejects, `end` stops the step reading the array.
+ * does.
  *
- * @type <A>(value: PromiseLike<A>, end: () => void) => Promise<IteratorResult<A, undefined>>
+ * @type <A>(value: PromiseLike<A>) => Promise<IteratorResult<A, undefined>>
  */
-const settle = async (value, end) => {
-  try {
-    return { value: await value, done: false };
-  } catch (error) {
-    end();
-    throw error;
-  }
-};
+const settle = async (value) => ({ value: await value, done: false });
 
 /**
  * @template A, B
@@ -598,9 +597,15 @@ class MapIterator extends AsyncStep {
       return finished();
     }
 
-    let result = this.#read();
-    if (isThenable(result)) {
-      result = await result;
+    let result;
+    try {
+      result = this.#read();
+      if (isThenable(result)) {
+        result = await result;
+      }
+    } catch (error) {
+      this.#done = true;
+      throw error;
     }
     if (result.done) {
       this.#done = true;
@@ -628,9 +633,7 @@ class MapIterator extends AsyncStep {
 
       const value = this.#array[this.#position++];
       if (isThenable(value)) {
-        return settle(value, () => {
-          this.#array = [];
-        });
+        return settle(value);
       }
 
       return { value, done: false };
@@ -685,9 +688,15 @@ class TapIterator extends AsyncStep {
       return finished();
     }
 
-    let result = this.#read();
-    if (isThenable(result)) {
-      result = await result;
+    let result;
+    try {
+      result = this.#read();
+      if (isThenable(result)) {
+        result = await result;
+      }
+    } catch (error) {
+      this.#done = true;
+      throw error;
     }
     if (result.done) {
       this.#done = true;
@@ -716,9 +725,7 @@ class TapIterator extends AsyncStep {
 
       const value = this.#array[this.#position++];
       if (isThenable(value)) {
-        return settle(value, () => {
-          this.#array = [];
-        });
+        return settle(value);
       }
 
       return { value, done: false };
@@ -774,9 +781,15 @@ class FilterIterator extends AsyncStep {
     }
 
     while (true) {
-      let result = this.#read();
-      if (isThenable(result)) {
-        result = await result;
+      let result;
+      try {
+        result = this.#read();
+        if (isThenable(result)) {
+          result = await result;
+        }
+      } catch (error) {
+        this.#done = true;
+        throw error;
       }
       if (result.done) {
         this.#done = true;
@@ -809,9 +822,7 @@ class FilterIterator extends AsyncStep {
 
       const value = this.#array[this.#position++];
       if (isThenable(value)) {
-        return settle(value, () => {
-          this.#array = [];
-        });
+        return settle(value);
       }
 
       return { value, done: false };
@@ -870,9 +881,15 @@ class ScanIterator extends AsyncStep {
       return finished();
     }
 
-    let result = this.#read();
-    if (isThenable(result)) {
-      result = await result;
+    let result;
+    try {
+      result = this.#read();
+      if (isThenable(result)) {
+        result = await result;
+      }
+    } catch (error) {
+      this.#done = true;
+      throw error;
     }
     if (result.done) {
       this.#done = true;
@@ -902,9 +919,7 @@ class ScanIterator extends AsyncStep {
 
       const value = this.#array[this.#position++];
       if (isThenable(value)) {
-        return settle(value, () => {
-          this.#array = [];
-        });
+        return settle(value);
       }
 
       return { value, done: false };
@@ -1044,9 +1059,15 @@ class FlatMapIterator extends AsyncStep {
         this.#inner = undefined;
       }
 
-      let result = this.#read();
-      if (isThenable(result)) {
-        result = await result;
+      let result;
+      try {
+        result = this.#read();
+        if (isThenable(result)) {
+          result = await result;
+        }
+      } catch (error) {
+        this.#done = true;
+        throw error;
       }
       if (result.done) {
         this.#done = true;
@@ -1075,9 +1096,7 @@ class FlatMapIterator extends AsyncStep {
 
       const value = this.#array[this.#position++];
       if (isThenable(value)) {
-        return settle(value, () => {
-          this.#array = [];
-        });
+        return settle(value);
       }
 
       return { value, done: false };
@@ -1132,9 +1151,15 @@ class DropIterator extends AsyncStep {
     }
 
     while (true) {
-      let result = this.#read();
-      if (isThenable(result)) {
-        result = await result;
+      let result;
+      try {
+        result = this.#read();
+        if (isThenable(result)) {
+          result = await result;
+        }
+      } catch (error) {
+        this.#done = true;
+        throw error;
       }
       if (result.done) {
         this.#done = true;
@@ -1158,9 +1183,7 @@ class DropIterator extends AsyncStep {
 
       const value = this.#array[this.#position++];
       if (isThenable(value)) {
-        return settle(value, () => {
-          this.#array = [];
-        });
+        return settle(value);
       }
 
       return { value, done: false };
@@ -1217,9 +1240,15 @@ class DropWhileIterator extends AsyncStep {
     }
 
     while (true) {
-      let result = this.#read();
-      if (isThenable(result)) {
-        result = await result;
+      let result;
+      try {
+        result = this.#read();
+        if (isThenable(result)) {
+          result = await result;
+        }
+      } catch (error) {
+        this.#done = true;
+        throw error;
       }
       if (result.done) {
         this.#done = true;
@@ -1254,9 +1283,7 @@ class DropWhileIterator extends AsyncStep {
 
       const value = this.#array[this.#position++];
       if (isThenable(value)) {
-        return settle(value, () => {
-          this.#array = [];
-        });
+        return settle(value);
       }
 
       return { value, done: false };
@@ -1315,9 +1342,15 @@ class TakeIterator extends AsyncStep {
     }
     this.#remaining--;
 
-    let result = this.#read();
-    if (isThenable(result)) {
-      result = await result;
+    let result;
+    try {
+      result = this.#read();
+      if (isThenable(result)) {
+        result = await result;
+      }
+    } catch (error) {
+      this.#done = true;
+      throw error;
     }
     if (result.done) {
       this.#done = true;
@@ -1336,9 +1369,7 @@ class TakeIterator extends AsyncStep {
 
       const value = this.#array[this.#position++];
       if (isThenable(value)) {
-        return settle(value, () => {
-          this.#array = [];
-        });
+        return settle(value);
       }
 
       return { value, done: false };
@@ -1393,9 +1424,15 @@ class TakeWhileIterator extends AsyncStep {
       return finished();
     }
 
-    let result = this.#read();
-    if (isThenable(result)) {
-      result = await result;
+    let result;
+    try {
+      result = this.#read();
+      if (isThenable(result)) {
+        result = await result;
+      }
+    } catch (error) {
+      this.#done = true;
+      throw error;
     }
     if (result.done) {
       this.#done = true;
@@ -1425,9 +1462,7 @@ class TakeWhileIterator extends AsyncStep {
 
       const value = this.#array[this.#position++];
       if (isThenable(value)) {
-        return settle(value, () => {
-          this.#array = [];
-        });
+        return settle(value);
       }
 
       return { value, done: false };
@@ -1476,21 +1511,26 @@ class ConcatIterator extends AsyncStep {
       return finished();
     }
 
-    while (true) {
-      if (this.#current) {
-        const result = await this.#current.next();
-        if (!result.done) {
-          return result;
+    try {
+      while (true) {
+        if (this.#current) {
+          const result = await this.#current.next();
+          if (!result.done) {
+            return result;
+          }
+          this.#current = undefined;
         }
-        this.#current = undefined;
-      }
 
-      if (this.#index >= this.#iterables.length) {
-        this.#done = true;
-        return finished();
-      }
+        if (this.#index >= this.#iterables.length) {
+          this.#done = true;
+          return finished();
+        }
 
-      this.#current = getAsyncIterator(this.#iterables[this.#index++]);
+        this.#current = getAsyncIterator(this.#iterables[this.#index++]);
+      }
+    } catch (error) {
+      this.#done = true;
+      throw error;
     }
   }
 

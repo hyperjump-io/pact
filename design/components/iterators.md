@@ -25,7 +25,9 @@ check for every function:
   `TypeError`, not an error from closing.
 - A callback that throws closes the source before the error is passed on.
 - An error from the source is passed on without closing it, as a
-  generator's `for...of` does.
+  generator's `for...of` does, and the iterator is done, as a generator
+  and the native helpers are. Without that, the next call would read the
+  source that failed again.
 - `flatten` closes the iterators it's in if a nested iterable throws when
   it's opened, as `for...of` did in v1.
 - `zip` and `zipKeyed` read `padding` before they open anything, so
@@ -47,7 +49,7 @@ instead of through its iterator, when the array's `[Symbol.iterator]` is
 `Array.prototype[Symbol.iterator]`. The async steps do too, unless the
 array has a `[Symbol.asyncIterator]`, and they only wait for a value
 that's a promise, as `FromSyncIterator` does. If it rejects, the step
-stops reading the array, as `FromSyncIterator` closes. An array with its own iterator, or a
+is done, as with any error from a source. An array with its own iterator, or a
 subclass that overrides it, is read through it. Like the array iterator,
 it reads `length` each time, so values added while it's read are read,
 and a hole is `undefined`.

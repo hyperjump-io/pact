@@ -357,7 +357,7 @@ const finished = () => ({ value: undefined, done: true });
 // Each step is a class that extends Iterator, so the native helpers work on
 // it. Once it's done, it stays done. Closing it closes its source, and so
 // does a callback that throws. An error from the source is passed on
-// without closing it, as a generator's for...of does.
+// without closing it, as a generator's for...of does, and the step is done.
 // (see design/components/iterators.md)
 
 // A step reads an array that iterates with the built-in iterator by index,
@@ -427,7 +427,12 @@ class MapIterator extends Iterator {
         : finished();
     }
 
-    return /** @type Iterator<A, undefined> */ (this.#source).next();
+    try {
+      return /** @type Iterator<A, undefined> */ (this.#source).next();
+    } catch (error) {
+      this.#done = true;
+      throw error;
+    }
   }
 
   /** @type () => IteratorReturnResult<undefined> */
@@ -500,7 +505,12 @@ class TapIterator extends Iterator {
         : finished();
     }
 
-    return /** @type Iterator<A, undefined> */ (this.#source).next();
+    try {
+      return /** @type Iterator<A, undefined> */ (this.#source).next();
+    } catch (error) {
+      this.#done = true;
+      throw error;
+    }
   }
 
   /** @type () => IteratorReturnResult<undefined> */
@@ -578,7 +588,12 @@ class FilterIterator extends Iterator {
         : finished();
     }
 
-    return /** @type Iterator<A, undefined> */ (this.#source).next();
+    try {
+      return /** @type Iterator<A, undefined> */ (this.#source).next();
+    } catch (error) {
+      this.#done = true;
+      throw error;
+    }
   }
 
   /** @type () => IteratorReturnResult<undefined> */
@@ -655,7 +670,12 @@ class ScanIterator extends Iterator {
         : finished();
     }
 
-    return /** @type Iterator<A, undefined> */ (this.#source).next();
+    try {
+      return /** @type Iterator<A, undefined> */ (this.#source).next();
+    } catch (error) {
+      this.#done = true;
+      throw error;
+    }
   }
 
   /** @type () => IteratorReturnResult<undefined> */
@@ -812,7 +832,12 @@ class FlatMapIterator extends Iterator {
         : finished();
     }
 
-    return /** @type Iterator<A, undefined> */ (this.#source).next();
+    try {
+      return /** @type Iterator<A, undefined> */ (this.#source).next();
+    } catch (error) {
+      this.#done = true;
+      throw error;
+    }
   }
 
   /** @type () => IteratorReturnResult<undefined> */
@@ -883,7 +908,12 @@ class DropIterator extends Iterator {
         : finished();
     }
 
-    return /** @type Iterator<A, undefined> */ (this.#source).next();
+    try {
+      return /** @type Iterator<A, undefined> */ (this.#source).next();
+    } catch (error) {
+      this.#done = true;
+      throw error;
+    }
   }
 
   /** @type () => IteratorReturnResult<undefined> */
@@ -963,7 +993,12 @@ class DropWhileIterator extends Iterator {
         : finished();
     }
 
-    return /** @type Iterator<A, undefined> */ (this.#source).next();
+    try {
+      return /** @type Iterator<A, undefined> */ (this.#source).next();
+    } catch (error) {
+      this.#done = true;
+      throw error;
+    }
   }
 
   /** @type () => IteratorReturnResult<undefined> */
@@ -1033,7 +1068,12 @@ class TakeIterator extends Iterator {
         : finished();
     }
 
-    return /** @type Iterator<A, undefined> */ (this.#source).next();
+    try {
+      return /** @type Iterator<A, undefined> */ (this.#source).next();
+    } catch (error) {
+      this.#done = true;
+      throw error;
+    }
   }
 
   /** @type () => IteratorReturnResult<undefined> */
@@ -1107,7 +1147,12 @@ class TakeWhileIterator extends Iterator {
         : finished();
     }
 
-    return /** @type Iterator<A, undefined> */ (this.#source).next();
+    try {
+      return /** @type Iterator<A, undefined> */ (this.#source).next();
+    } catch (error) {
+      this.#done = true;
+      throw error;
+    }
   }
 
   /** @type () => IteratorReturnResult<undefined> */
@@ -1150,21 +1195,26 @@ class ConcatIterator extends Iterator {
       return finished();
     }
 
-    while (true) {
-      if (this.#current) {
-        const result = this.#current.next();
-        if (!result.done) {
-          return result;
+    try {
+      while (true) {
+        if (this.#current) {
+          const result = this.#current.next();
+          if (!result.done) {
+            return result;
+          }
+          this.#current = undefined;
         }
-        this.#current = undefined;
-      }
 
-      if (this.#index >= this.#iterables.length) {
-        this.#done = true;
-        return finished();
-      }
+        if (this.#index >= this.#iterables.length) {
+          this.#done = true;
+          return finished();
+        }
 
-      this.#current = this.#iterables[this.#index++][Symbol.iterator]();
+        this.#current = this.#iterables[this.#index++][Symbol.iterator]();
+      }
+    } catch (error) {
+      this.#done = true;
+      throw error;
     }
   }
 
