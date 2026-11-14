@@ -3,10 +3,12 @@
  */
 
 export { pipe, compose, range } from "./common.js";
+import { finished, toCount, toKeyed, zipInputs, zipKeyedInputs } from "./helpers.js";
 
 /**
  * @import { AsyncIterableItem } from "./type-utils.d.ts"
  * @import * as API from "./async.d.ts"
+ * @import { ZipMode } from "./helpers.js"
  */
 
 /** @type API.map */
@@ -59,30 +61,14 @@ export const empty = () => new ConcatIterator([]);
 
 /** @type API.zip */
 export const zip = (iterables, options) => {
-  const { mode, padding } = zipOptions(options);
-  const values = [...iterables];
-  const paddingValues = mode === "longest" ? readPadding(padding, values.length) : [];
-  return new ZipIterator(openAll(values), mode, paddingValues);
+  const { mode, values, padding } = zipInputs(iterables, options);
+  return new ZipIterator(openAll(values), mode, padding);
 };
 
 /** @type API.zipKeyed */
 export const zipKeyed = (iterables, options) => {
-  const { mode, padding } = zipOptions(options);
-  const keys = Reflect.ownKeys(iterables).filter((key) => {
-    return Object.prototype.propertyIsEnumerable.call(iterables, key) && iterables[/** @type any */ (key)] !== undefined;
-  });
-  const paddingValues = mode === "longest" && padding !== undefined
-    ? keys.map((key) => /** @type any */ (padding)[key])
-    : [];
-  const iterators = openAll(keys.map((key) => iterables[/** @type any */ (key)]));
-
-  return map((/** @type any[] */ values) => {
-    const result = Object.create(null);
-    keys.forEach((key, index) => {
-      result[key] = values[index];
-    });
-    return result;
-  })(new ZipIterator(iterators, mode, paddingValues));
+  const { mode, keys, values, padding } = zipKeyedInputs(iterables, options);
+  return map(toKeyed(keys))(new ZipIterator(openAll(values), mode, padding));
 };
 
 /** @type API.concat */
@@ -243,19 +229,6 @@ export const join = (separator) => async (iter) => {
   return result;
 };
 
-// A count is read as the native helpers read theirs: it's truncated to an
-// integer, and one that's NaN or negative throws. Without this, `take(NaN)`
-// would never stop.
-/** @type (count: number) => number */
-const toCount = (count) => {
-  const limit = Math.trunc(Number(count));
-  if (Number.isNaN(limit) || limit < 0) {
-    throw RangeError("`count` must be a number that's 0 or more");
-  }
-
-  return limit;
-};
-
 /** @type (value: unknown) => boolean */
 const isIterable = (value) => {
   return value !== null && typeof value === "object"
@@ -282,29 +255,6 @@ const getFlattenable = (value) => {
   return Symbol.asyncIterator in value || Symbol.iterator in value
     ? value
     : { [Symbol.asyncIterator]: () => new FromBareIterator(value) };
-};
-
-/**
- * @typedef {"shortest" | "longest" | "strict"} ZipMode
- */
-
-/** @type (options: API.ZipOptions | API.ZipLongestOptions<any> | undefined) => { mode: ZipMode, padding: any } */
-const zipOptions = (options) => {
-  if (options !== undefined && (options === null || typeof options !== "object")) {
-    throw TypeError("`options` must be an object");
-  }
-
-  const mode = options?.mode ?? "shortest";
-  if (mode !== "shortest" && mode !== "longest" && mode !== "strict") {
-    throw TypeError("`mode` must be \"shortest\", \"longest\", or \"strict\"");
-  }
-
-  const padding = mode === "longest" ? /** @type API.ZipLongestOptions<any> */ (options)?.padding : undefined;
-  if (padding !== undefined && (padding === null || typeof padding !== "object")) {
-    throw TypeError("`padding` must be an object");
-  }
-
-  return { mode, padding };
 };
 
 /**
@@ -354,26 +304,6 @@ const closeAll = async (iterators) => {
     throw firstError;
   }
 };
-
-/** @type (padding: Iterable<any> | undefined, length: number) => any[] */
-const readPadding = (padding, length) => {
-  /** @type any[] */
-  const values = [];
-  if (padding !== undefined && length > 0) {
-    for (const value of padding) {
-      values.push(value);
-      if (values.length === length) {
-        break;
-      }
-    }
-  }
-
-  return values;
-};
-
-// `{ value, done }`, in that order, as in index.js
-/** @type () => IteratorReturnResult<undefined> */
-const finished = () => ({ value: undefined, done: true });
 
 // The method a step implements to read its next result, and the one it
 // implements to close. AsyncStep calls them one at a time.

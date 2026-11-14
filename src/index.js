@@ -3,10 +3,12 @@
  */
 
 export { pipe, compose, range } from "./common.js";
+import { finished, toCount, toKeyed, zipInputs, zipKeyedInputs } from "./helpers.js";
 
 /**
  * @import { IterableItem } from "./type-utils.d.ts"
  * @import * as API from "./index.d.ts"
+ * @import { ZipMode } from "./helpers.js"
  */
 
 /** @type API.map */
@@ -59,30 +61,14 @@ export const empty = () => new ConcatIterator([]);
 
 /** @type API.zip */
 export const zip = (iterables, options) => {
-  const { mode, padding } = zipOptions(options);
-  const values = [...iterables];
-  const paddingValues = mode === "longest" ? readPadding(padding, values.length) : [];
-  return new ZipIterator(openAll(values), mode, paddingValues);
+  const { mode, values, padding } = zipInputs(iterables, options);
+  return new ZipIterator(openAll(values), mode, padding);
 };
 
 /** @type API.zipKeyed */
 export const zipKeyed = (iterables, options) => {
-  const { mode, padding } = zipOptions(options);
-  const keys = Reflect.ownKeys(iterables).filter((key) => {
-    return Object.prototype.propertyIsEnumerable.call(iterables, key) && iterables[/** @type any */ (key)] !== undefined;
-  });
-  const paddingValues = mode === "longest" && padding !== undefined
-    ? keys.map((key) => /** @type any */ (padding)[key])
-    : [];
-  const iterators = openAll(keys.map((key) => iterables[/** @type any */ (key)]));
-
-  return map((/** @type any[] */ values) => {
-    const result = Object.create(null);
-    keys.forEach((key, index) => {
-      result[key] = values[index];
-    });
-    return result;
-  })(new ZipIterator(iterators, mode, paddingValues));
+  const { mode, keys, values, padding } = zipKeyedInputs(iterables, options);
+  return map(toKeyed(keys))(new ZipIterator(openAll(values), mode, padding));
 };
 
 /** @type API.concat */
@@ -227,19 +213,6 @@ export const join = (separator) => (iter) => {
   return result;
 };
 
-// A count is read as the native helpers read theirs: it's truncated to an
-// integer, and one that's NaN or negative throws. Without this, `take(NaN)`
-// would never stop.
-/** @type (count: number) => number */
-const toCount = (count) => {
-  const limit = Math.trunc(Number(count));
-  if (Number.isNaN(limit) || limit < 0) {
-    throw RangeError("`count` must be a number that's 0 or more");
-  }
-
-  return limit;
-};
-
 /** @type <A>(iter: Iterable<A>) => Iterator<A> */
 const getIterator = (iter) => {
   if (typeof iter?.[Symbol.iterator] === "function") {
@@ -256,29 +229,6 @@ const getFlattenable = (value) => {
   }
 
   return Symbol.iterator in value ? value : { [Symbol.iterator]: () => value };
-};
-
-/**
- * @typedef {"shortest" | "longest" | "strict"} ZipMode
- */
-
-/** @type (options: API.ZipOptions | API.ZipLongestOptions<any> | undefined) => { mode: ZipMode, padding: any } */
-const zipOptions = (options) => {
-  if (options !== undefined && (options === null || typeof options !== "object")) {
-    throw TypeError("`options` must be an object");
-  }
-
-  const mode = options?.mode ?? "shortest";
-  if (mode !== "shortest" && mode !== "longest" && mode !== "strict") {
-    throw TypeError("`mode` must be \"shortest\", \"longest\", or \"strict\"");
-  }
-
-  const padding = mode === "longest" ? /** @type API.ZipLongestOptions<any> */ (options)?.padding : undefined;
-  if (padding !== undefined && (padding === null || typeof padding !== "object")) {
-    throw TypeError("`padding` must be an object");
-  }
-
-  return { mode, padding };
 };
 
 /**
@@ -330,29 +280,6 @@ const closeAll = (iterators) => {
     throw firstError;
   }
 };
-
-/** @type (padding: Iterable<any> | undefined, length: number) => any[] */
-const readPadding = (padding, length) => {
-  /** @type any[] */
-  const values = [];
-  if (padding !== undefined && length > 0) {
-    for (const value of padding) {
-      values.push(value);
-      if (values.length === length) {
-        break;
-      }
-    }
-  }
-
-  return values;
-};
-
-// Every result is written `{ value, done }`, in that order, so it has the
-// same hidden class as the results of the built-in iterators, and code
-// reading `done` and `value` only sees one (see
-// design/benchmarks/array-sources.md)
-/** @type () => IteratorReturnResult<undefined> */
-const finished = () => ({ value: undefined, done: true });
 
 // Each step is a class that extends Iterator, so the native helpers work on
 // it. Once it's done, it stays done. Closing it closes its source, and so

@@ -1,3 +1,5 @@
+import { finished } from "./helpers.js";
+
 /**
  * @import * as API from "./common.d.ts"
  */
@@ -63,7 +65,7 @@ class RangeIterator extends Iterator {
   /** @type () => IteratorResult<number, undefined> */
   next() {
     if (this.#done) {
-      return { value: undefined, done: true };
+      return finished();
     }
 
     // Each value is worked out from its index, as Iterator.range does.
@@ -80,6 +82,6 @@ class RangeIterator extends Iterator {
   /** @type () => IteratorReturnResult<undefined> */
   return() {
     this.#done = true;
-    return { value: undefined, done: true };
+    return finished();
   }
 }
