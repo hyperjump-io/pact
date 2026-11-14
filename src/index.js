@@ -17,43 +17,43 @@ import { finished, toCount, toKeyed, zipInputs, zipKeyedInputs } from "./helpers
  * @typedef {T extends Iterable<infer U> ? U : never} IterableItem
  */
 
-/** @type API.map */
+/** @type typeof API.map */
 export const map = (fn) => (iter) => new MapIterator(iter, fn);
 
-/** @type API.tap */
+/** @type typeof API.tap */
 export const tap = (fn) => (iter) => new TapIterator(iter, fn);
 
-/** @type API.filter */
+/** @type typeof API.filter */
 export const filter = (/** @type API.Predicate<any> */ fn) => (/** @type Iterable<any> */ iter) => new FilterIterator(iter, fn);
 
-/** @type API.scan */
+/** @type typeof API.scan */
 export const scan = (fn, initial) => (iter) => new ScanIterator(iter, fn, initial);
 
-/** @type API.flatten */
+/** @type typeof API.flatten */
 export const flatten = (/** @type number */ depth = 1) => (iter) => new FlattenIterator(getIterator(iter), depth);
 
-/** @type API.flatMap */
+/** @type typeof API.flatMap */
 export const flatMap = (/** @type API.FlatMapper<any, any> */ fn) => (iter) => new FlatMapIterator(iter, fn);
 
-/** @type API.drop */
+/** @type typeof API.drop */
 export const drop = (count) => {
   const limit = toCount(count);
   return (iter) => new DropIterator(iter, limit);
 };
 
-/** @type API.dropWhile */
+/** @type typeof API.dropWhile */
 export const dropWhile = (fn) => (iter) => new DropWhileIterator(iter, fn);
 
-/** @type API.take */
+/** @type typeof API.take */
 export const take = (count) => {
   const limit = toCount(count);
   return (iter) => new TakeIterator(iter, limit);
 };
 
-/** @type API.takeWhile */
+/** @type typeof API.takeWhile */
 export const takeWhile = (fn) => (iter) => new TakeWhileIterator(iter, fn);
 
-/** @type API.head */
+/** @type typeof API.head */
 export const head = (iter) => {
   const iterator = getIterator(iter);
   const result = iterator.next();
@@ -62,22 +62,22 @@ export const head = (iter) => {
   return result.done ? undefined : result.value;
 };
 
-/** @type API.empty */
+/** @type typeof API.empty */
 export const empty = () => new ConcatIterator([]);
 
-/** @type API.zip */
+/** @type typeof API.zip */
 export const zip = (/** @type Iterable<any> */ iterables, /** @type ZipOptions | undefined */ options) => {
   const { mode, values, padding } = zipInputs(iterables, options);
   return new ZipIterator(openAll(values), mode, padding);
 };
 
-/** @type API.zipKeyed */
+/** @type typeof API.zipKeyed */
 export const zipKeyed = (/** @type Record<PropertyKey, any> */ iterables, /** @type ZipOptions | undefined */ options) => {
   const { mode, keys, values, padding } = zipKeyedInputs(iterables, options);
   return map(toKeyed(keys))(new ZipIterator(openAll(values), mode, padding));
 };
 
-/** @type API.concat */
+/** @type typeof API.concat */
 export const concat = (/** @type Iterable<any>[] */ ...iters) => {
   for (const iter of iters) {
     if (iter === null || typeof iter !== "object" || typeof iter[Symbol.iterator] !== "function") {
@@ -88,7 +88,7 @@ export const concat = (/** @type Iterable<any>[] */ ...iters) => {
   return new ConcatIterator(iters);
 };
 
-/** @type API.reduce */
+/** @type typeof API.reduce */
 export const reduce = (/** @type API.Reducer<any, any> */ fn, /** @type any[] */ ...initial) => (/** @type Iterable<any> */ iter) => {
   let hasAcc = initial.length > 0;
   let acc = initial[0];
@@ -110,7 +110,7 @@ export const reduce = (/** @type API.Reducer<any, any> */ fn, /** @type any[] */
   return acc;
 };
 
-/** @type API.every */
+/** @type typeof API.every */
 export const every = (fn) => (iter) => {
   let index = 0;
   for (const item of iter) {
@@ -122,7 +122,7 @@ export const every = (fn) => (iter) => {
   return true;
 };
 
-/** @type API.some */
+/** @type typeof API.some */
 export const some = (fn) => (iter) => {
   let index = 0;
   for (const item of iter) {
@@ -134,7 +134,7 @@ export const some = (fn) => (iter) => {
   return false;
 };
 
-/** @type API.find */
+/** @type typeof API.find */
 export const find = (/** @type API.Predicate<any> */ fn) => (/** @type Iterable<any> */ iter) => {
   let index = 0;
   for (const item of iter) {
@@ -146,7 +146,7 @@ export const find = (/** @type API.Predicate<any> */ fn) => (/** @type Iterable<
   return undefined;
 };
 
-/** @type API.forEach */
+/** @type typeof API.forEach */
 export const forEach = (fn) => (iter) => {
   let index = 0;
   for (const n of iter) {
@@ -154,12 +154,12 @@ export const forEach = (fn) => (iter) => {
   }
 };
 
-/** @type API.count */
+/** @type typeof API.count */
 export const count = (iter) => reduce((count) => count + 1, 0)(iter);
 
 // A loop, because spreading an iterator into an array is several times
 // slower on Node 22 (see design/benchmarks/to-array.md)
-/** @type API.toArray */
+/** @type typeof API.toArray */
 export const toArray = (iter) => {
   /** @type IterableItem<typeof iter>[] */
   const result = [];
@@ -170,7 +170,7 @@ export const toArray = (iter) => {
   return result;
 };
 
-/** @type API.toSet */
+/** @type typeof API.toSet */
 export const toSet = (iter) => {
   /** @type Set<IterableItem<typeof iter>> */
   const result = new Set();
@@ -181,7 +181,7 @@ export const toSet = (iter) => {
   return result;
 };
 
-/** @type API.toMap */
+/** @type typeof API.toMap */
 export const toMap = (iter) => {
   /** @typedef {IterableItem<typeof iter>[0]} K */
   /** @typedef {IterableItem<typeof iter>[1]} V */
@@ -195,7 +195,7 @@ export const toMap = (iter) => {
   return result;
 };
 
-/** @type API.toObject */
+/** @type typeof API.toObject */
 export const toObject = (iter) => {
   /** @typedef {IterableItem<typeof iter>[1]} V */
 
@@ -208,7 +208,7 @@ export const toObject = (iter) => {
   return result;
 };
 
-/** @type API.join */
+/** @type typeof API.join */
 export const join = (separator) => (iter) => {
   let result = "";
   let prefix = "";
@@ -300,14 +300,18 @@ const closeAll = (iterators) => {
 // seen other kinds of iterators. Each step has its own #read(), because a
 // shared one would see every kind of source, from every step, and V8 would
 // stop optimizing it (see design/benchmarks/array-sources.md).
-/** @type <A>(iter: Iterable<A>) => iter is A[] */
+/**
+ * @template A
+ * @param {Iterable<A>} iter
+ * @returns {iter is A[]}
+ */
 const isPlainArray = (iter) => Array.isArray(iter) && iter[Symbol.iterator] === arrayIterator;
 
 const arrayIterator = Array.prototype[Symbol.iterator];
 
 /**
  * @template A, B
- * @extends {Iterator<B, undefined, unknown>}
+ * @augments {Iterator<B, undefined, unknown>}
  */
 class MapIterator extends Iterator {
   /** @type Iterator<A> | undefined */
@@ -383,7 +387,7 @@ class MapIterator extends Iterator {
 
 /**
  * @template A
- * @extends {Iterator<A, undefined, unknown>}
+ * @augments {Iterator<A, undefined, unknown>}
  */
 class TapIterator extends Iterator {
   /** @type Iterator<A> | undefined */
@@ -461,7 +465,7 @@ class TapIterator extends Iterator {
 
 /**
  * @template A
- * @extends {Iterator<A, undefined, unknown>}
+ * @augments {Iterator<A, undefined, unknown>}
  */
 class FilterIterator extends Iterator {
   /** @type Iterator<A> | undefined */
@@ -544,7 +548,7 @@ class FilterIterator extends Iterator {
 
 /**
  * @template A, B
- * @extends {Iterator<B, undefined, unknown>}
+ * @augments {Iterator<B, undefined, unknown>}
  */
 class ScanIterator extends Iterator {
   /** @type Iterator<A> | undefined */
@@ -628,7 +632,7 @@ class ScanIterator extends Iterator {
  * Reads a stack of iterators, one for each level it's in, down to `depth`
  * levels below its source.
  *
- * @extends {Iterator<any, undefined, unknown>}
+ * @augments {Iterator<any, undefined, unknown>}
  */
 class FlattenIterator extends Iterator {
   /** @type Iterator<any>[] */
@@ -692,7 +696,7 @@ class FlattenIterator extends Iterator {
 
 /**
  * @template A, B
- * @extends {Iterator<B, undefined, unknown>}
+ * @augments {Iterator<B, undefined, unknown>}
  */
 class FlatMapIterator extends Iterator {
   /** @type Iterator<A> | undefined */
@@ -788,7 +792,7 @@ class FlatMapIterator extends Iterator {
 
 /**
  * @template A
- * @extends {Iterator<A, undefined, unknown>}
+ * @augments {Iterator<A, undefined, unknown>}
  */
 class DropIterator extends Iterator {
   /** @type Iterator<A> | undefined */
@@ -864,7 +868,7 @@ class DropIterator extends Iterator {
 
 /**
  * @template A
- * @extends {Iterator<A, undefined, unknown>}
+ * @augments {Iterator<A, undefined, unknown>}
  */
 class DropWhileIterator extends Iterator {
   /** @type Iterator<A> | undefined */
@@ -949,7 +953,7 @@ class DropWhileIterator extends Iterator {
 
 /**
  * @template A
- * @extends {Iterator<A, undefined, unknown>}
+ * @augments {Iterator<A, undefined, unknown>}
  */
 class TakeIterator extends Iterator {
   /** @type Iterator<A> | undefined */
@@ -1024,7 +1028,7 @@ class TakeIterator extends Iterator {
 
 /**
  * @template A
- * @extends {Iterator<A, undefined, unknown>}
+ * @augments {Iterator<A, undefined, unknown>}
  */
 class TakeWhileIterator extends Iterator {
   /** @type Iterator<A> | undefined */
@@ -1106,7 +1110,7 @@ class TakeWhileIterator extends Iterator {
  * before it are done.
  *
  * @template A
- * @extends {Iterator<A, undefined, unknown>}
+ * @augments {Iterator<A, undefined, unknown>}
  */
 class ConcatIterator extends Iterator {
   /** @type Iterable<A>[] */
@@ -1169,7 +1173,7 @@ class ConcatIterator extends Iterator {
  * stop. Every iterator that isn't done is closed when it stops, except one
  * that threw.
  *
- * @extends {Iterator<any, undefined, unknown>}
+ * @augments {Iterator<any, undefined, unknown>}
  */
 class ZipIterator extends Iterator {
   /** @type Iterator<any>[] */

@@ -61,8 +61,8 @@ export type Flattened<A, Depth extends number> = {
   done: A;
   recur: A extends string ? A
     : A extends AsyncIterable<infer Item> ? Flattened<Item, [0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20][Depth]>
-      : A extends Iterable<infer Item> ? Flattened<Awaited<Item>, [0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20][Depth]>
-        : A;
+    : A extends Iterable<infer Item> ? Flattened<Awaited<Item>, [0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20][Depth]>
+    : A;
 }[Depth extends 0 ? "done" : `${Depth}` extends `-${string}` ? "done" : "recur"];
 
 /**
@@ -82,8 +82,8 @@ export type FlatMapper<A, B> = Mapper<A, Flattenable<B>>;
 export type Flattenable<A> = (AnyIterable<A> | Iterator<A | PromiseLike<A>> | AsyncIterator<A>) & object;
 export type FlattenableItem<R> = R extends AsyncIterable<infer A> ? A
   : R extends Iterable<infer A> ? Awaited<A>
-    : R extends AsyncIterator<infer A> ? A
-      : R extends Iterator<infer A> ? Awaited<A> : never;
+  : R extends AsyncIterator<infer A> ? A
+  : R extends Iterator<infer A> ? Awaited<A> : never;
 
 /**
  * Yields all the values in the iterator except for the first `count`

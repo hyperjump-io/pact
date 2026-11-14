@@ -4,7 +4,7 @@ import { finished } from "./helpers.js";
  * @import * as API from "./common.d.ts"
  */
 
-/** @type API.range */
+/** @type typeof API.range */
 export const range = (from, to, step = 1) => {
   if (typeof from !== "number" || (to !== undefined && typeof to !== "number") || typeof step !== "number") {
     throw TypeError("`from`, `to`, and `step` must be numbers");
@@ -19,7 +19,7 @@ export const range = (from, to, step = 1) => {
   return new RangeIterator(from, to, step);
 };
 
-/** @type API.pipe */
+/** @type typeof API.pipe */
 export const pipe = (/** @type any */ value, /** @type ((a: any) => any)[] */ ...fns) => {
   let result = value;
   for (const fn of fns) {
@@ -29,10 +29,10 @@ export const pipe = (/** @type any */ value, /** @type ((a: any) => any)[] */ ..
   return result;
 };
 
-/** @type API.compose */
+/** @type typeof API.compose */
 export const compose = (/** @type ((a: any) => any)[] */ ...fns) => (/** @type any */ value) => /** @type any */ (pipe)(value, ...fns);
 
-/** @extends {Iterator<number, undefined, unknown>} */
+/** @augments {Iterator<number, undefined, unknown>} */
 class RangeIterator extends Iterator {
   /** @type number */
   #from;

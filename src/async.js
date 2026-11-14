@@ -17,43 +17,43 @@ import { finished, toCount, toKeyed, zipInputs, zipKeyedInputs } from "./helpers
  * @typedef {T extends AsyncIterable<infer U> ? U : never} AsyncIterableItem
  */
 
-/** @type API.map */
+/** @type typeof API.map */
 export const map = (/** @type API.Mapper<any, any> */ fn) => (iter) => new MapIterator(iter, fn);
 
-/** @type API.tap */
+/** @type typeof API.tap */
 export const tap = (fn) => (iter) => new TapIterator(iter, fn);
 
-/** @type API.filter */
+/** @type typeof API.filter */
 export const filter = (/** @type API.Predicate<any> */ fn) => (/** @type API.AnyIterable<any> */ iter) => new FilterIterator(iter, fn);
 
-/** @type API.scan */
+/** @type typeof API.scan */
 export const scan = (fn, initial) => (iter) => new ScanIterator(iter, fn, initial);
 
-/** @type API.flatten */
+/** @type typeof API.flatten */
 export const flatten = (/** @type number */ depth = 1) => (iter) => new FlattenIterator(getAsyncIterator(iter), depth);
 
-/** @type API.flatMap */
+/** @type typeof API.flatMap */
 export const flatMap = (/** @type API.FlatMapper<any, any> */ fn) => (iter) => new FlatMapIterator(iter, fn);
 
-/** @type API.drop */
+/** @type typeof API.drop */
 export const drop = (count) => {
   const limit = toCount(count);
   return (iter) => new DropIterator(iter, limit);
 };
 
-/** @type API.dropWhile */
+/** @type typeof API.dropWhile */
 export const dropWhile = (fn) => (iter) => new DropWhileIterator(iter, fn);
 
-/** @type API.take */
+/** @type typeof API.take */
 export const take = (count) => {
   const limit = toCount(count);
   return (iter) => new TakeIterator(iter, limit);
 };
 
-/** @type API.takeWhile */
+/** @type typeof API.takeWhile */
 export const takeWhile = (fn) => (iter) => new TakeWhileIterator(iter, fn);
 
-/** @type API.head */
+/** @type typeof API.head */
 export const head = async (iter) => {
   const iterator = getAsyncIterator(iter);
   const result = await iterator.next();
@@ -62,22 +62,22 @@ export const head = async (iter) => {
   return result.done ? undefined : result.value;
 };
 
-/** @type API.empty */
+/** @type typeof API.empty */
 export const empty = () => new ConcatIterator([]);
 
-/** @type API.zip */
+/** @type typeof API.zip */
 export const zip = (/** @type Iterable<any> */ iterables, /** @type ZipOptions | undefined */ options) => {
   const { mode, values, padding } = zipInputs(iterables, options);
   return new ZipIterator(openAll(values), mode, padding);
 };
 
-/** @type API.zipKeyed */
+/** @type typeof API.zipKeyed */
 export const zipKeyed = (/** @type Record<PropertyKey, any> */ iterables, /** @type ZipOptions | undefined */ options) => {
   const { mode, keys, values, padding } = zipKeyedInputs(iterables, options);
   return map(toKeyed(keys))(new ZipIterator(openAll(values), mode, padding));
 };
 
-/** @type API.concat */
+/** @type typeof API.concat */
 export const concat = (/** @type API.AnyIterable<any>[] */ ...iters) => {
   for (const iter of iters) {
     if (!isIterable(iter)) {
@@ -88,7 +88,7 @@ export const concat = (/** @type API.AnyIterable<any>[] */ ...iters) => {
   return new ConcatIterator(iters);
 };
 
-/** @type API.reduce */
+/** @type typeof API.reduce */
 export const reduce = (/** @type API.Reducer<any, any> */ fn, /** @type any[] */ ...initial) => async (/** @type API.AnyIterable<any> */ iter) => {
   let hasAcc = initial.length > 0;
   let acc = initial[0];
@@ -114,7 +114,7 @@ export const reduce = (/** @type API.Reducer<any, any> */ fn, /** @type any[] */
   return acc;
 };
 
-/** @type API.every */
+/** @type typeof API.every */
 export const every = (fn) => async (iter) => {
   let index = 0;
   for await (const item of iter) {
@@ -130,7 +130,7 @@ export const every = (fn) => async (iter) => {
   return true;
 };
 
-/** @type API.some */
+/** @type typeof API.some */
 export const some = (fn) => async (iter) => {
   let index = 0;
   for await (const item of iter) {
@@ -146,7 +146,7 @@ export const some = (fn) => async (iter) => {
   return false;
 };
 
-/** @type API.find */
+/** @type typeof API.find */
 export const find = (/** @type API.Predicate<any> */ fn) => async (/** @type API.AnyIterable<any> */ iter) => {
   let index = 0;
   for await (const item of iter) {
@@ -162,7 +162,7 @@ export const find = (/** @type API.Predicate<any> */ fn) => async (/** @type API
   return undefined;
 };
 
-/** @type API.forEach */
+/** @type typeof API.forEach */
 export const forEach = (fn) => async (iter) => {
   let index = 0;
   for await (const n of iter) {
@@ -173,10 +173,10 @@ export const forEach = (fn) => async (iter) => {
   }
 };
 
-/** @type API.count */
+/** @type typeof API.count */
 export const count = (iter) => reduce((count) => count + 1, 0)(iter);
 
-/** @type API.toArray */
+/** @type typeof API.toArray */
 export const toArray = async (iter) => {
   const result = [];
   for await (const item of iter) {
@@ -186,7 +186,7 @@ export const toArray = async (iter) => {
   return result;
 };
 
-/** @type API.toSet */
+/** @type typeof API.toSet */
 export const toSet = async (iter) => {
   /** @type Set<AsyncIterableItem<typeof iter>> */
   const result = new Set();
@@ -197,7 +197,7 @@ export const toSet = async (iter) => {
   return result;
 };
 
-/** @type API.toMap */
+/** @type typeof API.toMap */
 export const toMap = async (iter) => {
   /** @typedef {AsyncIterableItem<typeof iter>[0]} K */
   /** @typedef {AsyncIterableItem<typeof iter>[1]} V */
@@ -211,7 +211,7 @@ export const toMap = async (iter) => {
   return result;
 };
 
-/** @type API.toObject */
+/** @type typeof API.toObject */
 export const toObject = async (iter) => {
   /** @typedef {AsyncIterableItem<typeof iter>[1]} V */
 
@@ -224,7 +224,7 @@ export const toObject = async (iter) => {
   return result;
 };
 
-/** @type API.join */
+/** @type typeof API.join */
 export const join = (separator) => async (iter) => {
   let result = "";
   let prefix = "";
@@ -237,7 +237,10 @@ export const join = (separator) => async (iter) => {
   return result;
 };
 
-/** @type (value: unknown) => value is Iterable<unknown> | AsyncIterable<unknown> */
+/**
+ * @param {unknown} value
+ * @returns {value is Iterable<unknown> | AsyncIterable<unknown>}
+ */
 const isIterable = (value) => {
   return value !== null && typeof value === "object"
     && ((Symbol.asyncIterator in value && typeof value[Symbol.asyncIterator] === "function")
@@ -411,7 +414,7 @@ Object.setPrototypeOf(AsyncStep.prototype, AsyncIteratorPrototype);
  * waited for, and if it rejects, the iterator is closed.
  *
  * @template A
- * @extends {AsyncStep<A>}
+ * @augments {AsyncStep<A>}
  */
 class FromSyncIterator extends AsyncStep {
   /** @type Iterator<A | PromiseLike<A>> */
@@ -482,7 +485,7 @@ class FromSyncIterator extends AsyncStep {
  * FromSyncIterator. If the value rejects, the iterator is closed.
  *
  * @template A
- * @extends {AsyncStep<A>}
+ * @augments {AsyncStep<A>}
  */
 class FromBareIterator extends AsyncStep {
   /** @type Iterator<A | PromiseLike<A>> | AsyncIterator<A | PromiseLike<A>> */
@@ -534,7 +537,10 @@ class FromBareIterator extends AsyncStep {
   }
 }
 
-/** @type (value: unknown) => value is PromiseLike<any> */
+/**
+ * @param {unknown} value
+ * @returns {value is PromiseLike<any>}
+ */
 const isThenable = (value) => {
   return value !== null && (typeof value === "object" || typeof value === "function")
     && typeof (/** @type any */ (value)).then === "function";
@@ -545,7 +551,11 @@ const isThenable = (value) => {
 // FromSyncIterator, and only waits for a value that's a promise. Each step
 // has its own #read(), as in index.js (see
 // design/benchmarks/array-sources.md).
-/** @type <A>(iter: API.AnyIterable<A>) => iter is (A | PromiseLike<A>)[] */
+/**
+ * @template A
+ * @param {API.AnyIterable<A>} iter
+ * @returns {iter is (A | PromiseLike<A>)[]}
+ */
 const isPlainArray = (iter) => {
   return Array.isArray(iter) && iter[Symbol.iterator] === arrayIterator && !(Symbol.asyncIterator in iter);
 };
@@ -562,7 +572,7 @@ const settle = async (value) => ({ value: await value, done: false });
 
 /**
  * @template A, B
- * @extends {AsyncStep<B>}
+ * @augments {AsyncStep<B>}
  */
 class MapIterator extends AsyncStep {
   /** @type AsyncIterator<A> | undefined */
@@ -653,7 +663,7 @@ class MapIterator extends AsyncStep {
 
 /**
  * @template A
- * @extends {AsyncStep<A>}
+ * @augments {AsyncStep<A>}
  */
 class TapIterator extends AsyncStep {
   /** @type AsyncIterator<A> | undefined */
@@ -745,7 +755,7 @@ class TapIterator extends AsyncStep {
 
 /**
  * @template A
- * @extends {AsyncStep<A>}
+ * @augments {AsyncStep<A>}
  */
 class FilterIterator extends AsyncStep {
   /** @type AsyncIterator<A> | undefined */
@@ -842,7 +852,7 @@ class FilterIterator extends AsyncStep {
 
 /**
  * @template A, B
- * @extends {AsyncStep<B>}
+ * @augments {AsyncStep<B>}
  */
 class ScanIterator extends AsyncStep {
   /** @type AsyncIterator<A> | undefined */
@@ -941,7 +951,7 @@ class ScanIterator extends AsyncStep {
  * Reads a stack of iterators, one for each level it's in, down to `depth`
  * levels below its source.
  *
- * @extends {AsyncStep<any>}
+ * @augments {AsyncStep<any>}
  */
 class FlattenIterator extends AsyncStep {
   /** @type AsyncIterator<any>[] */
@@ -1005,7 +1015,7 @@ class FlattenIterator extends AsyncStep {
 
 /**
  * @template A, B
- * @extends {AsyncStep<B>}
+ * @augments {AsyncStep<B>}
  */
 class FlatMapIterator extends AsyncStep {
   /** @type AsyncIterator<A> | undefined */
@@ -1116,7 +1126,7 @@ class FlatMapIterator extends AsyncStep {
 
 /**
  * @template A
- * @extends {AsyncStep<A>}
+ * @augments {AsyncStep<A>}
  */
 class DropIterator extends AsyncStep {
   /** @type AsyncIterator<A> | undefined */
@@ -1203,7 +1213,7 @@ class DropIterator extends AsyncStep {
 
 /**
  * @template A
- * @extends {AsyncStep<A>}
+ * @augments {AsyncStep<A>}
  */
 class DropWhileIterator extends AsyncStep {
   /** @type AsyncIterator<A> | undefined */
@@ -1303,7 +1313,7 @@ class DropWhileIterator extends AsyncStep {
 
 /**
  * @template A
- * @extends {AsyncStep<A>}
+ * @augments {AsyncStep<A>}
  */
 class TakeIterator extends AsyncStep {
   /** @type AsyncIterator<A> | undefined */
@@ -1389,7 +1399,7 @@ class TakeIterator extends AsyncStep {
 
 /**
  * @template A
- * @extends {AsyncStep<A>}
+ * @augments {AsyncStep<A>}
  */
 class TakeWhileIterator extends AsyncStep {
   /** @type AsyncIterator<A> | undefined */
@@ -1485,7 +1495,7 @@ class TakeWhileIterator extends AsyncStep {
  * before it are done.
  *
  * @template A
- * @extends {AsyncStep<A>}
+ * @augments {AsyncStep<A>}
  */
 class ConcatIterator extends AsyncStep {
   /** @type (API.AnyIterable<A>)[] */
@@ -1549,7 +1559,7 @@ class ConcatIterator extends AsyncStep {
  * array. Every iterator that isn't done is closed when it stops, except one
  * that threw.
  *
- * @extends {AsyncStep<any>}
+ * @augments {AsyncStep<any>}
  */
 class ZipIterator extends AsyncStep {
   /** @type AsyncIterator<any>[] */
@@ -1603,7 +1613,7 @@ class ZipIterator extends AsyncStep {
     }
 
     const results = await Promise.allSettled(this.#iterators.map((iterator, index) => {
-      return this.#iteratorDone[index] ? undefined : iterator.next();
+      return this.#iteratorDone[index] ? Promise.resolve(undefined) : iterator.next();
     }));
 
     // One that's done, or that threw, isn't closed later

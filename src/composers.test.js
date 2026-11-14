@@ -4,7 +4,8 @@ import {
   filter,
   reduce,
   toArray,
-  pipe, compose
+  pipe,
+  compose
 } from "./index.js";
 import * as Async from "./async.js";
 

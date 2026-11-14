@@ -27,7 +27,12 @@ say how to put pages together.
   the `.d.ts` files too, so the examples are `typescript` blocks. An
   example that doesn't end in 10 seconds, or exits with an error, is a
   problem. Several examples read an infinite `range`, so one that lost
-  its `take` would otherwise hang the check.
+  its `take` would otherwise hang the check. Node runs the examples,
+  stripping their types, so they can't use TypeScript syntax that only
+  compiles, like an `enum`, or import a type without `import type`.
+  TypeScript 7 doesn't have its old compiler API, so the script parses and
+  type-checks the examples through `typescript/unstable/*`, which can
+  change in any release.
 - A feature that isn't released gets `*Coming soon*` on its own line under
   its heading. `npm version` replaces it with `*Added in vX.Y.Z*`
   (`scripts/version-docs.js`). v2's pages describe v2 as a whole, without

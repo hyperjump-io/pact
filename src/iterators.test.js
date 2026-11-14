@@ -119,7 +119,7 @@ describe("sync iterators", () => {
 
   test.each(sync)("%s stays done", (_name, make) => {
     const iterator = make();
-    [...iterator];
+    Array.from(iterator);
     expect(iterator.next()).to.eql({ done: true, value: undefined });
   });
 

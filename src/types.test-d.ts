@@ -48,17 +48,43 @@ describe("pipe and compose", () => {
   test("16 steps are checked", () => {
     expectTypeOf(pipe(
       numbers,
-      increment, increment, increment, increment, increment, increment, increment, increment,
-      increment, increment, increment, increment, increment, increment, increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
       Pact.toArray
     )).toEqualTypeOf<number[]>();
 
     pipe(
       numbers,
-      increment, increment, increment, increment, increment, increment, increment, increment,
-      increment, increment, increment, increment, increment, increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
+      increment,
       // @ts-expect-error
-      increment, Pact.join(",")
+      increment,
+      Pact.join(",")
     );
   });
 
