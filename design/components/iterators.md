@@ -105,12 +105,16 @@ is given it as its prototype's prototype.
 
 ## Minimum version
 
-The classes extend the global `Iterator`, which Node has from 22 and
-browsers have from 2025. pact supports every Node version that's still
-maintained, and 22 is the oldest of those, so `engines` in `package.json`
-says `>=22`, and npm warns when it's installed on an older one. Without
-it, importing pact on Node 20 fails with `Iterator is not defined`. The
-floor goes up as versions reach their end of life.
+`engines` in `package.json` says `>=24`, and npm warns when it's installed
+on an older one. The classes extend the global `Iterator`, which Node has
+from 22 and browsers have from 2025, but Node 22's `Iterator.prototype`
+doesn't have `[Symbol.dispose]()`, which TypeScript's `IteratorObject`
+type says every sync iterator has. On Node 22, calling it on a sync
+iterator threw a `TypeError` that the types didn't warn about. Node 24's
+has it, and it calls `return()`, so the sync classes inherit it and don't
+implement it. A browser that has `Iterator` but not explicit resource
+management doesn't have it. The floor goes up as versions reach their end
+of life.
 
 ## Why
 
@@ -150,12 +154,10 @@ times faster (see [Pipelines](../benchmarks/pipelines.md#iterator-classes)).
 - **Queuing every call on a promise chain**, without the fast path. It
   made async pipelines 1.6 times slower than v1, because every call waited
   a turn before it started (`benchmark/claude/async-queue.js`).
+- **Supporting Node 22 and implementing `[Symbol.dispose]()`** in each of
+  the 13 sync classes, or in a base class between them and `Iterator`. It's
+  code that only exists for a version that reaches its end of life in
+  April 2027.
 - **Checking for a call to `next()` from inside its own callback**, which
   a generator throws a TypeError for. It costs something on every call,
   and the native helpers don't all do it.
-
-## Open questions
-
-- Sync classes don't implement `[Symbol.dispose]()`. TypeScript's
-  `IteratorObject` type has it from `Iterator.prototype`, which has it in
-  engines that support explicit resource management, but not in Node 22.

@@ -16,9 +16,10 @@ on generators anymore.
 
 ## Requirements
 
-v2 needs the global `Iterator` that comes with the native Iterator
-helpers. That means Node.js 22 or later, Chrome 122 or later, Firefox 131
-or later, or Safari 18.4 or later. Its types need TypeScript 5.6 or later.
+v2 needs Node.js 24 or later. In a browser, it needs the global `Iterator`
+that comes with the native Iterator helpers. That means Chrome 122 or
+later, Firefox 131 or later, or Safari 18.4 or later. Its types need
+TypeScript 5.6 or later.
 
 ## Functions don't take the iterable
 

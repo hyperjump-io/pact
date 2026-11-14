@@ -4,9 +4,10 @@
 npm install @hyperjump/pact
 ```
 
-It's an ES module with no dependencies. It needs the global `Iterator`
-that comes with the native Iterator helpers. That means Node.js 22 or
-later, Chrome 122 or later, Firefox 131 or later, or Safari 18.4 or later.
+It's an ES module with no dependencies. It needs Node.js 24 or later. In
+a browser, it needs the global `Iterator` that comes with the native
+Iterator helpers. That means Chrome 122 or later, Firefox 131 or later, or
+Safari 18.4 or later.
 
 There are two entry points. Their functions have the same names, so import
 each one as a namespace.
