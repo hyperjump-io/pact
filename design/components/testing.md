@@ -33,3 +33,12 @@ so a function can't be missed and an API change updates one row:
   [Names](names.md#callbacks-get-the-index)).
 - `async.test.js`: both entry points have the same functions (see
   [Entry points](entry-points.md)).
+
+`types.test-d.ts` tests the declarations (see [Types](types.md)): what a
+pipeline infers, with `expectTypeOf`, and what's a type error,
+with `@ts-expect-error`. It's never run. `npm run type-check` checks it,
+and the test run doesn't pick it up, because its name ends in
+`.test-d.ts`. It
+isn't published. The type-check passing isn't enough without it: the
+declarations can agree with the code and still infer the wrong type for a
+caller, which is how `flatten` yielded arrays it had flattened.

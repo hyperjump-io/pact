@@ -13,8 +13,10 @@ pipe(range(1, 10), filter(isEven), map(double), reduce(add, 0));
 - `pipe` is a plain loop over its steps.
 - `compose(...steps)` returns a step that runs `steps` in order, for
   building a pipeline before it has a source.
-- `pipe` and `compose` are typed with overloads for each number of steps,
-  so each step's input is checked against the previous step's output.
+- `pipe` and `compose` are typed with overloads for each number of steps
+  up to 16, so each step's input is checked against the previous step's
+  output. Steps after the 16th aren't checked. It was 8, which a long
+  pipeline reaches.
 
 ## Why
 

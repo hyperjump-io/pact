@@ -8,26 +8,26 @@ import { finished, toCount, toKeyed, zipInputs, zipKeyedInputs } from "./helpers
 /**
  * @import { AsyncIterableItem } from "./type-utils.d.ts"
  * @import * as API from "./async.d.ts"
- * @import { ZipMode } from "./helpers.js"
+ * @import { ZipMode, ZipOptions } from "./helpers.js"
  */
 
 /** @type API.map */
-export const map = (fn) => (iter) => new MapIterator(iter, fn);
+export const map = (/** @type API.Mapper<any, any> */ fn) => (iter) => new MapIterator(iter, fn);
 
 /** @type API.tap */
 export const tap = (fn) => (iter) => new TapIterator(iter, fn);
 
 /** @type API.filter */
-export const filter = (fn) => (iter) => new FilterIterator(iter, fn);
+export const filter = (/** @type API.Predicate<any> */ fn) => (/** @type API.AnyIterable<any> */ iter) => new FilterIterator(iter, fn);
 
 /** @type API.scan */
 export const scan = (fn, initial) => (iter) => new ScanIterator(iter, fn, initial);
 
 /** @type API.flatten */
-export const flatten = (depth = 1) => (iter) => new FlattenIterator(getAsyncIterator(iter), depth);
+export const flatten = (/** @type number */ depth = 1) => (iter) => new FlattenIterator(getAsyncIterator(iter), depth);
 
 /** @type API.flatMap */
-export const flatMap = (fn) => (iter) => new FlatMapIterator(iter, fn);
+export const flatMap = (/** @type API.FlatMapper<any, any> */ fn) => (iter) => new FlatMapIterator(iter, fn);
 
 /** @type API.drop */
 export const drop = (count) => {
@@ -60,19 +60,19 @@ export const head = async (iter) => {
 export const empty = () => new ConcatIterator([]);
 
 /** @type API.zip */
-export const zip = (iterables, options) => {
+export const zip = (/** @type Iterable<any> */ iterables, /** @type ZipOptions | undefined */ options) => {
   const { mode, values, padding } = zipInputs(iterables, options);
   return new ZipIterator(openAll(values), mode, padding);
 };
 
 /** @type API.zipKeyed */
-export const zipKeyed = (iterables, options) => {
+export const zipKeyed = (/** @type Record<PropertyKey, any> */ iterables, /** @type ZipOptions | undefined */ options) => {
   const { mode, keys, values, padding } = zipKeyedInputs(iterables, options);
   return map(toKeyed(keys))(new ZipIterator(openAll(values), mode, padding));
 };
 
 /** @type API.concat */
-export const concat = (...iters) => {
+export const concat = (/** @type API.AnyIterable<any>[] */ ...iters) => {
   for (const iter of iters) {
     if (!isIterable(iter)) {
       throw TypeError("Expected an iterable or an async iterable");
@@ -83,7 +83,7 @@ export const concat = (...iters) => {
 };
 
 /** @type API.reduce */
-export const reduce = (/** @type API.Reducer<any, any> */ fn, /** @type any[] */ ...initial) => async (/** @type Iterable<any> | AsyncIterable<any> */ iter) => {
+export const reduce = (/** @type API.Reducer<any, any> */ fn, /** @type any[] */ ...initial) => async (/** @type API.AnyIterable<any> */ iter) => {
   let hasAcc = initial.length > 0;
   let acc = initial[0];
   let index = 0;
@@ -141,7 +141,7 @@ export const some = (fn) => async (iter) => {
 };
 
 /** @type API.find */
-export const find = (fn) => async (iter) => {
+export const find = (/** @type API.Predicate<any> */ fn) => async (/** @type API.AnyIterable<any> */ iter) => {
   let index = 0;
   for await (const item of iter) {
     let pass = fn(item, index++);
@@ -152,6 +152,8 @@ export const find = (fn) => async (iter) => {
       return item;
     }
   }
+
+  return undefined;
 };
 
 /** @type API.forEach */
@@ -210,7 +212,7 @@ export const toObject = async (iter) => {
   /** @type Record<string, V> */
   const result = Object.create(null);
   for await (const [key, value] of iter) {
-    result[key] = value;
+    result[/** @type string */ (key)] = value;
   }
 
   return result;
@@ -235,7 +237,7 @@ const isIterable = (value) => {
     && (typeof (/** @type any */ (value))[Symbol.asyncIterator] === "function" || typeof (/** @type any */ (value))[Symbol.iterator] === "function");
 };
 
-/** @type <A>(iter: Iterable<A> | AsyncIterable<A>) => AsyncIterator<A> */
+/** @type <A>(iter: API.AnyIterable<A>) => AsyncIterator<A> */
 const getAsyncIterator = (iter) => {
   if (Symbol.asyncIterator in iter && typeof iter[Symbol.asyncIterator] === "function") {
     return iter[Symbol.asyncIterator]();
@@ -246,7 +248,7 @@ const getAsyncIterator = (iter) => {
   }
 };
 
-/** @type <A>(value: Iterable<A> | AsyncIterable<A> | Iterator<A> | AsyncIterator<A>) => Iterable<A> | AsyncIterable<A> */
+/** @type <A>(value: API.Flattenable<A>) => API.AnyIterable<A> */
 const getFlattenable = (value) => {
   if (value === null || typeof value !== "object") {
     throw TypeError("Expected an iterable or an iterator");
@@ -536,7 +538,7 @@ const isThenable = (value) => {
 // FromSyncIterator, and only waits for a value that's a promise. Each step
 // has its own #read(), as in index.js (see
 // design/benchmarks/array-sources.md).
-/** @type <A>(iter: Iterable<A> | AsyncIterable<A>) => iter is A[] */
+/** @type <A>(iter: API.AnyIterable<A>) => iter is (A | PromiseLike<A>)[] */
 const isPlainArray = (iter) => {
   return Array.isArray(iter) && iter[Symbol.iterator] === arrayIterator && !(Symbol.asyncIterator in iter);
 };
@@ -567,7 +569,7 @@ class MapIterator extends AsyncStep {
   #done = false;
 
   /**
-   * @param {Iterable<A> | AsyncIterable<A>} iter
+   * @param {API.AnyIterable<A>} iter
    * @param {API.Mapper<A, B>} fn
    */
   constructor(iter, fn) {
@@ -658,7 +660,7 @@ class TapIterator extends AsyncStep {
   #done = false;
 
   /**
-   * @param {Iterable<A> | AsyncIterable<A>} iter
+   * @param {API.AnyIterable<A>} iter
    * @param {API.Tapper<A>} fn
    */
   constructor(iter, fn) {
@@ -750,7 +752,7 @@ class FilterIterator extends AsyncStep {
   #done = false;
 
   /**
-   * @param {Iterable<A> | AsyncIterable<A>} iter
+   * @param {API.AnyIterable<A>} iter
    * @param {API.Predicate<A>} fn
    */
   constructor(iter, fn) {
@@ -849,7 +851,7 @@ class ScanIterator extends AsyncStep {
   #done = false;
 
   /**
-   * @param {Iterable<A> | AsyncIterable<A>} iter
+   * @param {API.AnyIterable<A>} iter
    * @param {API.Reducer<A, B>} fn
    * @param {B} initial
    */
@@ -1012,7 +1014,7 @@ class FlatMapIterator extends AsyncStep {
   #done = false;
 
   /**
-   * @param {Iterable<A> | AsyncIterable<A>} iter
+   * @param {API.AnyIterable<A>} iter
    * @param {API.FlatMapper<A, B>} fn
    */
   constructor(iter, fn) {
@@ -1120,7 +1122,7 @@ class DropIterator extends AsyncStep {
   #done = false;
 
   /**
-   * @param {Iterable<A> | AsyncIterable<A>} iter
+   * @param {API.AnyIterable<A>} iter
    * @param {number} count
    */
   constructor(iter, count) {
@@ -1209,7 +1211,7 @@ class DropWhileIterator extends AsyncStep {
   #done = false;
 
   /**
-   * @param {Iterable<A> | AsyncIterable<A>} iter
+   * @param {API.AnyIterable<A>} iter
    * @param {API.Predicate<A>} fn
    */
   constructor(iter, fn) {
@@ -1307,7 +1309,7 @@ class TakeIterator extends AsyncStep {
   #done = false;
 
   /**
-   * @param {Iterable<A> | AsyncIterable<A>} iter
+   * @param {API.AnyIterable<A>} iter
    * @param {number} count
    */
   constructor(iter, count) {
@@ -1394,7 +1396,7 @@ class TakeWhileIterator extends AsyncStep {
   #done = false;
 
   /**
-   * @param {Iterable<A> | AsyncIterable<A>} iter
+   * @param {API.AnyIterable<A>} iter
    * @param {API.Predicate<A>} fn
    */
   constructor(iter, fn) {
@@ -1479,7 +1481,7 @@ class TakeWhileIterator extends AsyncStep {
  * @extends {AsyncStep<A>}
  */
 class ConcatIterator extends AsyncStep {
-  /** @type (Iterable<A> | AsyncIterable<A>)[] */
+  /** @type (API.AnyIterable<A>)[] */
   #iterables;
   /** @type AsyncIterator<A> | undefined */
   #current;
@@ -1487,7 +1489,7 @@ class ConcatIterator extends AsyncStep {
   #done = false;
 
   /**
-   * @param {(Iterable<A> | AsyncIterable<A>)[]} iterables
+   * @param {(API.AnyIterable<A>)[]} iterables
    */
   constructor(iterables) {
     super();

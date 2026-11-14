@@ -10,9 +10,12 @@ export const range: (from: number, to?: number, step?: number) => IteratorObject
 
 /**
  * Starting with an iterator, apply any number of functions to transform the
- * values and return the result.
+ * values and return the result. Each function's input is checked against the
+ * output of the one before it, for the first 16 functions.
  */
 export const pipe: (
+  <A>(initialValue: A) => A
+) & (
   <A, B>(initialValue: A, ...fns: [
     (a: A) => B
   ]) => B
@@ -32,7 +35,7 @@ export const pipe: (
     (a: A) => B,
     (b: B) => C,
     (c: C) => D,
-    (c: D) => E
+    (d: D) => E
   ]) => E
 ) & (
   <A, B, C, D, E, F>(initialValue: A, ...fns: [
@@ -73,7 +76,7 @@ export const pipe: (
     (h: H) => I
   ]) => I
 ) & (
-  <A, B, C, D, E, F, G, H, I, J extends ((j: any) => any)[]>(initialValue: A, ...fns: [
+  <A, B, C, D, E, F, G, H, I, J>(initialValue: A, ...fns: [
     (a: A) => B,
     (b: B) => C,
     (c: C) => D,
@@ -82,8 +85,140 @@ export const pipe: (
     (f: F) => G,
     (g: G) => H,
     (h: H) => I,
-    ...J
-  ]) => LastReturnType<J>
+    (i: I) => J
+  ]) => J
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K>(initialValue: A, ...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K
+  ]) => K
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K, L>(initialValue: A, ...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K,
+    (k: K) => L
+  ]) => L
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K, L, M>(initialValue: A, ...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K,
+    (k: K) => L,
+    (l: L) => M
+  ]) => M
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K, L, M, N>(initialValue: A, ...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K,
+    (k: K) => L,
+    (l: L) => M,
+    (m: M) => N
+  ]) => N
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K, L, M, N, O>(initialValue: A, ...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K,
+    (k: K) => L,
+    (l: L) => M,
+    (m: M) => N,
+    (n: N) => O
+  ]) => O
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(initialValue: A, ...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K,
+    (k: K) => L,
+    (l: L) => M,
+    (m: M) => N,
+    (n: N) => O,
+    (o: O) => P
+  ]) => P
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q>(initialValue: A, ...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K,
+    (k: K) => L,
+    (l: L) => M,
+    (m: M) => N,
+    (n: N) => O,
+    (o: O) => P,
+    (p: P) => Q
+  ]) => Q
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R extends ((r: any) => any)[]>(initialValue: A, ...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K,
+    (k: K) => L,
+    (l: L) => M,
+    (m: M) => N,
+    (n: N) => O,
+    (o: O) => P,
+    (p: P) => Q,
+    ...R
+  ]) => LastReturnType<R>
 );
 
 /**
@@ -92,6 +227,8 @@ export const pipe: (
  * source or reusing one with many sources.
  */
 export const compose: (
+  () => <A>(a: A) => A
+) & (
   <A, B>(...fns: [
     (a: A) => B
   ]) => (a: A) => B
@@ -152,7 +289,7 @@ export const compose: (
     (h: H) => I
   ]) => (a: A) => I
 ) & (
-  <A, B, C, D, E, F, G, H, I, J extends ((j: any) => any)[]>(...fns: [
+  <A, B, C, D, E, F, G, H, I, J>(...fns: [
     (a: A) => B,
     (b: B) => C,
     (c: C) => D,
@@ -161,6 +298,169 @@ export const compose: (
     (f: F) => G,
     (g: G) => H,
     (h: H) => I,
-    ...J
-  ]) => (a: A) => LastReturnType<J>
+    (i: I) => J
+  ]) => (a: A) => J
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K>(...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K
+  ]) => (a: A) => K
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K, L>(...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K,
+    (k: K) => L
+  ]) => (a: A) => L
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K, L, M>(...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K,
+    (k: K) => L,
+    (l: L) => M
+  ]) => (a: A) => M
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K, L, M, N>(...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K,
+    (k: K) => L,
+    (l: L) => M,
+    (m: M) => N
+  ]) => (a: A) => N
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K, L, M, N, O>(...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K,
+    (k: K) => L,
+    (l: L) => M,
+    (m: M) => N,
+    (n: N) => O
+  ]) => (a: A) => O
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K,
+    (k: K) => L,
+    (l: L) => M,
+    (m: M) => N,
+    (n: N) => O,
+    (o: O) => P
+  ]) => (a: A) => P
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q>(...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K,
+    (k: K) => L,
+    (l: L) => M,
+    (m: M) => N,
+    (n: N) => O,
+    (o: O) => P,
+    (p: P) => Q
+  ]) => (a: A) => Q
+) & (
+  <A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R extends ((r: any) => any)[]>(...fns: [
+    (a: A) => B,
+    (b: B) => C,
+    (c: C) => D,
+    (d: D) => E,
+    (e: E) => F,
+    (f: F) => G,
+    (g: G) => H,
+    (h: H) => I,
+    (i: I) => J,
+    (j: J) => K,
+    (k: K) => L,
+    (l: L) => M,
+    (m: M) => N,
+    (n: N) => O,
+    (o: O) => P,
+    (p: P) => Q,
+    ...R
+  ]) => (a: A) => LastReturnType<R>
 );
+
+/**
+ * The options of `zip` and `zipKeyed` in the `shortest` and `strict` modes.
+ */
+export type ZipOptions = {
+  mode?: "shortest" | "strict";
+};
+
+/**
+ * The options of `zip` and `zipKeyed` in the `longest` mode. `P` is the type
+ * of `padding`: an iterable for `zip`, and an object for `zipKeyed`.
+ */
+export type ZipLongestOptions<P> = {
+  mode: "longest";
+  padding?: P;
+};
+
+/**
+ * The type of the padding at position `K` of the padding `P`, which is
+ * `undefined` where `P` doesn't have a value.
+ */
+export type ZipPadding<P extends Iterable<unknown>, K> = P extends readonly unknown[]
+  ? number extends P["length"] | K ? P[number] | undefined
+    : K extends keyof P ? P[K] : undefined
+  : P extends Iterable<infer Item> ? Item | undefined : never;
+
+/**
+ * A key of what `zipKeyed` was called with, unless its value is always
+ * `undefined`, which leaves the key out.
+ */
+export type ZipKey<T, K extends keyof T> = [T[K]] extends [undefined] ? never : K;

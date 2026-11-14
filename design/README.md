@@ -42,5 +42,6 @@ documents say where it's going.
   modules
 - [Names](components/names.md): what's renamed, added, and removed
 - [Async](components/async.md): sync sources in async pipelines
+- [Types](components/types.md): what the declarations infer and reject
 - [Testing](components/testing.md)
 - [Documentation](components/documentation.md)

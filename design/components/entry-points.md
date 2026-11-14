@@ -8,9 +8,11 @@ There are no `async`-prefixed exports (`asyncMap`). Code that uses both
 imports them with a namespace (`import * as PactAsync from
 "@hyperjump/pact/async"`) or renames them.
 
-- Type names don't have the prefix either. `Mapper`, `Predicate`, and
+- Type names don't have the prefix either. `Mapper`, `FlatMapper`, and
   `Reducer` from `./async` are the ones whose callbacks can return
-  promises, and `NestedIterable` there can nest AsyncIterables.
+  promises, and `NestedIterable` and `Flattenable` there can be async.
+  `ZipOptions`, `ZipLongestOptions`, and `ZipPadding` are the same in
+  both, so they're declared in `src/common.d.ts`.
 - `pipe`, `compose`, and `range` are in `src/common.js`, which both entry
   points re-export. It isn't in `exports`.
 - `src/helpers.js` has what both entry points use and don't export:

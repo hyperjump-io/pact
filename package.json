@@ -36,6 +36,7 @@
   "files": [
     "src",
     "!src/**/*.test.js",
+    "!src/**/*.test-d.ts",
     "!src/test-utils.js"
   ],
   "scripts": {

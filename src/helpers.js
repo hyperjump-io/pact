@@ -1,5 +1,5 @@
 /**
- * @import { ZipOptions, ZipLongestOptions } from "./index.d.ts"
+ * @import * as API from "./common.d.ts"
  */
 
 // What the sync and async entry points both use and don't export. It's
@@ -8,6 +8,12 @@
 
 /**
  * @typedef {"shortest" | "longest" | "strict"} ZipMode
+ */
+
+/**
+ * The options `zip` and `zipKeyed` can be called with, in any mode.
+ *
+ * @typedef {API.ZipOptions | API.ZipLongestOptions<any>} ZipOptions
  */
 
 // A count is read as the native helpers read theirs: it's truncated to an
@@ -28,7 +34,7 @@ export const toCount = (count) => {
  * position. The padding is read here, before anything is opened, so
  * padding that throws leaves nothing open.
  *
- * @type (iterables: Iterable<any>, options: ZipOptions | ZipLongestOptions<any> | undefined) => { mode: ZipMode, values: any[], padding: any[] }
+ * @type (iterables: Iterable<any>, options: ZipOptions | undefined) => { mode: ZipMode, values: any[], padding: any[] }
  */
 export const zipInputs = (iterables, options) => {
   const { mode, padding } = zipOptions(options);
@@ -41,7 +47,7 @@ export const zipInputs = (iterables, options) => {
  * Same as `zipInputs`, for `zipKeyed`. `values` and `padding` are in the
  * order of `keys`, which are the keys whose value isn't `undefined`.
  *
- * @type (iterables: Record<PropertyKey, any>, options: ZipOptions | ZipLongestOptions<any> | undefined) => { mode: ZipMode, keys: PropertyKey[], values: any[], padding: any[] }
+ * @type (iterables: Record<PropertyKey, any>, options: ZipOptions | undefined) => { mode: ZipMode, keys: PropertyKey[], values: any[], padding: any[] }
  */
 export const zipKeyedInputs = (iterables, options) => {
   const { mode, padding } = zipOptions(options);
@@ -75,7 +81,7 @@ export const toKeyed = (keys) => (values) => {
 /** @type () => IteratorReturnResult<undefined> */
 export const finished = () => ({ value: undefined, done: true });
 
-/** @type (options: ZipOptions | ZipLongestOptions<any> | undefined) => { mode: ZipMode, padding: any } */
+/** @type (options: ZipOptions | undefined) => { mode: ZipMode, padding: any } */
 const zipOptions = (options) => {
   if (options !== undefined && (options === null || typeof options !== "object")) {
     throw TypeError("`options` must be an object");
@@ -86,7 +92,7 @@ const zipOptions = (options) => {
     throw TypeError("`mode` must be \"shortest\", \"longest\", or \"strict\"");
   }
 
-  const padding = mode === "longest" ? /** @type ZipLongestOptions<any> */ (options)?.padding : undefined;
+  const padding = mode === "longest" ? /** @type API.ZipLongestOptions<any> */ (options)?.padding : undefined;
   if (padding !== undefined && (padding === null || typeof padding !== "object")) {
     throw TypeError("`padding` must be an object");
   }

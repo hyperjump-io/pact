@@ -8,7 +8,7 @@ import { finished, toCount, toKeyed, zipInputs, zipKeyedInputs } from "./helpers
 /**
  * @import { IterableItem } from "./type-utils.d.ts"
  * @import * as API from "./index.d.ts"
- * @import { ZipMode } from "./helpers.js"
+ * @import { ZipMode, ZipOptions } from "./helpers.js"
  */
 
 /** @type API.map */
@@ -18,16 +18,16 @@ export const map = (fn) => (iter) => new MapIterator(iter, fn);
 export const tap = (fn) => (iter) => new TapIterator(iter, fn);
 
 /** @type API.filter */
-export const filter = (fn) => (iter) => new FilterIterator(iter, fn);
+export const filter = (/** @type API.Predicate<any> */ fn) => (/** @type Iterable<any> */ iter) => new FilterIterator(iter, fn);
 
 /** @type API.scan */
 export const scan = (fn, initial) => (iter) => new ScanIterator(iter, fn, initial);
 
 /** @type API.flatten */
-export const flatten = (depth = 1) => (iter) => new FlattenIterator(getIterator(iter), depth);
+export const flatten = (/** @type number */ depth = 1) => (iter) => new FlattenIterator(getIterator(iter), depth);
 
 /** @type API.flatMap */
-export const flatMap = (fn) => (iter) => new FlatMapIterator(iter, fn);
+export const flatMap = (/** @type API.FlatMapper<any, any> */ fn) => (iter) => new FlatMapIterator(iter, fn);
 
 /** @type API.drop */
 export const drop = (count) => {
@@ -60,19 +60,19 @@ export const head = (iter) => {
 export const empty = () => new ConcatIterator([]);
 
 /** @type API.zip */
-export const zip = (iterables, options) => {
+export const zip = (/** @type Iterable<any> */ iterables, /** @type ZipOptions | undefined */ options) => {
   const { mode, values, padding } = zipInputs(iterables, options);
   return new ZipIterator(openAll(values), mode, padding);
 };
 
 /** @type API.zipKeyed */
-export const zipKeyed = (iterables, options) => {
+export const zipKeyed = (/** @type Record<PropertyKey, any> */ iterables, /** @type ZipOptions | undefined */ options) => {
   const { mode, keys, values, padding } = zipKeyedInputs(iterables, options);
   return map(toKeyed(keys))(new ZipIterator(openAll(values), mode, padding));
 };
 
 /** @type API.concat */
-export const concat = (...iters) => {
+export const concat = (/** @type Iterable<any>[] */ ...iters) => {
   for (const iter of iters) {
     if (iter === null || typeof iter !== "object" || typeof iter[Symbol.iterator] !== "function") {
       throw TypeError("Expected an iterable");
@@ -129,13 +129,15 @@ export const some = (fn) => (iter) => {
 };
 
 /** @type API.find */
-export const find = (fn) => (iter) => {
+export const find = (/** @type API.Predicate<any> */ fn) => (/** @type Iterable<any> */ iter) => {
   let index = 0;
   for (const item of iter) {
     if (fn(item, index++)) {
       return item;
     }
   }
+
+  return undefined;
 };
 
 /** @type API.forEach */
@@ -194,7 +196,7 @@ export const toObject = (iter) => {
   /** @type Record<string, V> */
   const result = Object.create(null);
   for (const [key, value] of iter) {
-    result[key] = value;
+    result[/** @type string */ (key)] = value;
   }
 
   return result;
