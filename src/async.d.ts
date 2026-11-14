@@ -52,7 +52,7 @@ type FlatMapResult<B> = Iterable<B> | AsyncIterable<B> | Iterator<B> | AsyncIter
  * `count` is truncated to an integer. One that's NaN or negative throws a
  * RangeError.
  */
-export const drop: <A>(count: number) => (iterator: Iterable<A> | AsyncIterable<A>) => AsyncIteratorObject<A, undefined, unknown>;
+export const drop: (count: number) => <A>(iterator: Iterable<A> | AsyncIterable<A>) => AsyncIteratorObject<A, undefined, unknown>;
 
 /**
  * Same as `drop` but instead of dropping a specific number of values, it drops
@@ -65,7 +65,7 @@ export const dropWhile: <A>(fn: Predicate<A>) => (iterator: Iterable<A> | AsyncI
  * `count` is truncated to an integer. One that's NaN or negative throws a
  * RangeError.
  */
-export const take: <A>(count: number) => (iterator: Iterable<A> | AsyncIterable<A>) => AsyncIteratorObject<A, undefined, unknown>;
+export const take: (count: number) => <A>(iterator: Iterable<A> | AsyncIterable<A>) => AsyncIteratorObject<A, undefined, unknown>;
 
 /**
  * Same as `take` but instead of yielding a specific number of values, it yields
