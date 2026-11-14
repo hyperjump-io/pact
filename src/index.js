@@ -712,7 +712,12 @@ class FlattenIterator extends Iterator {
 
       const value = result.value;
       if (level < this.#depth && value && typeof value === "object" && Symbol.iterator in value) {
-        this.#stack.push(value[Symbol.iterator]());
+        try {
+          this.#stack.push(value[Symbol.iterator]());
+        } catch (error) {
+          this.return();
+          throw error;
+        }
         continue;
       }
 

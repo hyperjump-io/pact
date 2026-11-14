@@ -967,7 +967,12 @@ class FlattenIterator extends AsyncStep {
 
       const value = result.value;
       if (level < this.#depth && value && typeof value === "object" && (Symbol.asyncIterator in value || Symbol.iterator in value)) {
-        this.#stack.push(getAsyncIterator(value));
+        try {
+          this.#stack.push(getAsyncIterator(value));
+        } catch (error) {
+          await this[close]();
+          throw error;
+        }
         continue;
       }
 

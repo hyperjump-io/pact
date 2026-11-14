@@ -140,6 +140,22 @@ describe("closing a step closes its source", () => {
   });
 });
 
+describe("an iterable that can't be opened closes what's open", () => {
+  test("flatten", () => {
+    const source = closable([unopenable, 2]);
+    const result = Pact.flatten()(source);
+    expect(() => result.next()).to.throw("boom");
+    expect(source.closed).to.equal(true);
+  });
+
+  test("Async.flatten", async () => {
+    const source = asyncClosable([unopenable, 2]);
+    const result = Async.flatten()(source);
+    await expect(result.next()).rejects.toThrow("boom");
+    expect(source.closed).to.equal(true);
+  });
+});
+
 // The padding is read before anything is opened, so there's nothing to close
 describe("zip with padding that can't be read doesn't open its iterables", () => {
   /** @type [string, (source: any) => any][] */

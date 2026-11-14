@@ -26,6 +26,8 @@ check for every function:
 - A callback that throws closes the source before the error is passed on.
 - An error from the source is passed on without closing it, as a
   generator's `for...of` does.
+- `flatten` closes the iterators it's in if a nested iterable throws when
+  it's opened, as `for...of` did in v1.
 - `zip` and `zipKeyed` read `padding` before they open anything, so
   padding that throws leaves nothing open. `Iterator.zip` opens the
   iterables first and closes them, which is the same unless reading the
