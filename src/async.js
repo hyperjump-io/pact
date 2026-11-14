@@ -6,9 +6,15 @@ export { pipe, compose, range } from "./common.js";
 import { finished, toCount, toKeyed, zipInputs, zipKeyedInputs } from "./helpers.js";
 
 /**
- * @import { AsyncIterableItem } from "./type-utils.d.ts"
  * @import * as API from "./async.d.ts"
  * @import { ZipMode, ZipOptions } from "./helpers.js"
+ */
+
+/**
+ * The type of the values of an async iterable.
+ *
+ * @template T
+ * @typedef {T extends AsyncIterable<infer U> ? U : never} AsyncIterableItem
  */
 
 /** @type API.map */
@@ -231,10 +237,11 @@ export const join = (separator) => async (iter) => {
   return result;
 };
 
-/** @type (value: unknown) => boolean */
+/** @type (value: unknown) => value is Iterable<unknown> | AsyncIterable<unknown> */
 const isIterable = (value) => {
   return value !== null && typeof value === "object"
-    && (typeof (/** @type any */ (value))[Symbol.asyncIterator] === "function" || typeof (/** @type any */ (value))[Symbol.iterator] === "function");
+    && ((Symbol.asyncIterator in value && typeof value[Symbol.asyncIterator] === "function")
+      || (Symbol.iterator in value && typeof value[Symbol.iterator] === "function"));
 };
 
 /** @type <A>(iter: API.AnyIterable<A>) => AsyncIterator<A> */
@@ -265,14 +272,14 @@ const getFlattenable = (value) => {
  * this throws before anything is read, and an error from closing is dropped,
  * because the error that stopped it is the one to pass on.
  *
- * @type (values: any[]) => AsyncIterator<any>[]
+ * @type (values: unknown[]) => AsyncIterator<unknown>[]
  */
 const openAll = (values) => {
-  /** @type AsyncIterator<any>[] */
+  /** @type AsyncIterator<unknown>[] */
   const iterators = [];
   try {
     for (const value of values) {
-      iterators.push(getAsyncIterator(getFlattenable(value)));
+      iterators.push(getAsyncIterator(getFlattenable(/** @type API.Flattenable<unknown> */ (value))));
     }
   } catch (error) {
     void closeAll(iterators).catch(() => {});

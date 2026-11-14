@@ -18,14 +18,14 @@ export type AnyIterable<A> = Iterable<A | PromiseLike<A>> | AsyncIterable<A>;
  * Apply a function to every value in the iterator. Like the native Iterator
  * helpers, functions that take a callback pass it each value and its index.
  */
-export const map: <A, B>(fn: (item: A, index: number) => B) => (iterator: AnyIterable<A>) => AsyncIteratorObject<Awaited<B>, undefined, unknown>;
+export const map: <A, B>(fn: (item: A, index: number) => B) => (iterable: AnyIterable<A>) => AsyncIteratorObject<Awaited<B>, undefined, unknown>;
 export type Mapper<A, B> = (item: A, index: number) => B | PromiseLike<B>;
 
 /**
  * Apply a function to every value in the iterator, but yield the original
  * value, not the result of the function.
  */
-export const tap: <B extends A, A = B>(fn: Tapper<A>) => (iterator: AnyIterable<B>) => AsyncIteratorObject<B, undefined, unknown>;
+export const tap: <B extends A, A = B>(fn: Tapper<A>) => (iterable: AnyIterable<B>) => AsyncIteratorObject<B, undefined, unknown>;
 export type Tapper<A> = (item: A, index: number) => unknown;
 
 /**
@@ -33,9 +33,9 @@ export type Tapper<A> = (item: A, index: number) => unknown;
  * A predicate that's a type guard narrows the type of the values.
  */
 export const filter: (
-  <A, S extends A>(fn: TypeGuard<A, S>) => (iterator: AnyIterable<A>) => AsyncIteratorObject<S, undefined, unknown>
+  <A, S extends A>(fn: TypeGuard<A, S>) => (iterable: AnyIterable<A>) => AsyncIteratorObject<S, undefined, unknown>
 ) & (
-  <B extends A, A = B>(fn: Predicate<A>) => (iterator: AnyIterable<B>) => AsyncIteratorObject<B, undefined, unknown>
+  <B extends A, A = B>(fn: Predicate<A>) => (iterable: AnyIterable<B>) => AsyncIteratorObject<B, undefined, unknown>
 );
 export type Predicate<A> = (item: A, index: number) => unknown;
 export type TypeGuard<A, S extends A> = (item: A, index: number) => item is S;
@@ -43,13 +43,13 @@ export type TypeGuard<A, S extends A> = (item: A, index: number) => item is S;
 /**
  * Same as `reduce` except it emits the accumulated value after each update
  */
-export const scan: <A, B>(fn: Reducer<A, B>, initial: B) => (iter: AnyIterable<A>) => AsyncIteratorObject<B, undefined, unknown>;
+export const scan: <A, B>(fn: Reducer<A, B>, initial: B) => (iterable: AnyIterable<A>) => AsyncIteratorObject<B, undefined, unknown>;
 
 /**
  * Yields values from the iterator with all sub-iterator elements concatenated
  * into it recursively up to the specified depth. The default depth is 1.
  */
-export const flatten: <Depth extends number = 1>(depth?: Depth) => <A>(iterator: AnyIterable<A>) => AsyncIteratorObject<Flattened<A, number extends Depth ? 20 : Depth>, undefined, unknown>;
+export const flatten: <Depth extends number = 1>(depth?: Depth) => <A>(iterable: AnyIterable<A>) => AsyncIteratorObject<Flattened<A, number extends Depth ? 20 : Depth>, undefined, unknown>;
 export type NestedIterable<A> = Iterable<A | NestedIterable<A>> | AsyncIterable<A | NestedIterable<A>>;
 
 /**
@@ -71,7 +71,7 @@ export type Flattened<A, Depth extends number> = {
  * deep, and `fn` has to return an iterable or an iterator, not a string or
  * other value.
  */
-export const flatMap: <A, R extends Flattenable<unknown>>(fn: Mapper<A, R>) => (iterator: AnyIterable<A>) => AsyncIteratorObject<FlattenableItem<R>, undefined, unknown>;
+export const flatMap: <A, R extends Flattenable<unknown>>(fn: Mapper<A, R>) => (iterable: AnyIterable<A>) => AsyncIteratorObject<FlattenableItem<R>, undefined, unknown>;
 export type FlatMapper<A, B> = Mapper<A, Flattenable<B>>;
 
 /**
@@ -86,36 +86,35 @@ export type FlattenableItem<R> = R extends AsyncIterable<infer A> ? A
       : R extends Iterator<infer A> ? Awaited<A> : never;
 
 /**
- * Yields all the values in the iterator except for the first `n` values.
- * `count` is truncated to an integer. One that's NaN or negative throws a
+ * Yields all the values in the iterator except for the first `count`
+ * values. `count` is truncated to an integer. One that's NaN or negative throws a
  * RangeError.
  */
-export const drop: (count: number) => <A>(iterator: AnyIterable<A>) => AsyncIteratorObject<A, undefined, unknown>;
+export const drop: (count: number) => <A>(iterable: AnyIterable<A>) => AsyncIteratorObject<A, undefined, unknown>;
 
 /**
  * Same as `drop` but instead of dropping a specific number of values, it drops
- * values until the `fn(value)` is `false` and then yields the remaining values.
+ * values while `fn` returns a truthy value and then yields the remaining values.
  */
-export const dropWhile: <B extends A, A = B>(fn: Predicate<A>) => (iterator: AnyIterable<B>) => AsyncIteratorObject<B, undefined, unknown>;
+export const dropWhile: <B extends A, A = B>(fn: Predicate<A>) => (iterable: AnyIterable<B>) => AsyncIteratorObject<B, undefined, unknown>;
 
 /**
- * Yields the first `n` values in the iterator.
- * `count` is truncated to an integer. One that's NaN or negative throws a
+ * Yields the first `count` values in the iterator. `count` is truncated to an integer. One that's NaN or negative throws a
  * RangeError.
  */
-export const take: (count: number) => <A>(iterator: AnyIterable<A>) => AsyncIteratorObject<A, undefined, unknown>;
+export const take: (count: number) => <A>(iterable: AnyIterable<A>) => AsyncIteratorObject<A, undefined, unknown>;
 
 /**
  * Same as `take` but instead of yielding a specific number of values, it yields
- * values as long as the `fn(value)` returns `true` and drops the rest.
+ * values while `fn` returns a truthy value and drops the rest.
  */
-export const takeWhile: <B extends A, A = B>(fn: Predicate<A>) => (iterator: AnyIterable<B>) => AsyncIteratorObject<B, undefined, unknown>;
+export const takeWhile: <B extends A, A = B>(fn: Predicate<A>) => (iterable: AnyIterable<B>) => AsyncIteratorObject<B, undefined, unknown>;
 
 /**
  * Returns the first value in the iterator. The iterator is closed after
  * the first value is read, so the rest can't be read from it.
  */
-export const head: <A>(iterator: AnyIterable<A>) => Promise<A | undefined>;
+export const head: <A>(iterable: AnyIterable<A>) => Promise<A | undefined>;
 
 /**
  * Yields nothing.
@@ -164,7 +163,7 @@ type ZipKeyedItem<R> = FlattenableItem<R> | (undefined extends R ? undefined : n
 /**
  * Yields values from each iterator in order.
  */
-export const concat: <T extends AnyIterable<unknown>[]>(...iters: T) => AsyncIteratorObject<FlattenableItem<T[number]>, undefined, unknown>;
+export const concat: <T extends AnyIterable<unknown>[]>(...iterables: T) => AsyncIteratorObject<FlattenableItem<T[number]>, undefined, unknown>;
 
 /**
  * Reduce an iterator to a single value. Without an initial value, the first
@@ -172,9 +171,9 @@ export const concat: <T extends AnyIterable<unknown>[]>(...iters: T) => AsyncIte
  * TypeError.
  */
 export const reduce: (
-  <A, B>(fn: Reducer<A, B>, initial: B) => (iter: AnyIterable<A>) => Promise<B>
+  <A, B>(fn: Reducer<A, B>, initial: B) => (iterable: AnyIterable<A>) => Promise<B>
 ) & (
-  <A>(fn: Reducer<A, A>) => (iter: AnyIterable<A>) => Promise<A>
+  <A>(fn: Reducer<A, A>) => (iterable: AnyIterable<A>) => Promise<A>
 );
 export type Reducer<A, B> = (acc: B, item: A, index: number) => B | PromiseLike<B>;
 
@@ -182,57 +181,57 @@ export type Reducer<A, B> = (acc: B, item: A, index: number) => B | PromiseLike<
  * Returns a boolean indicating whether or not all values in the iterator passes
  * the predicate function.
  */
-export const every: <A>(fn: Predicate<A>) => (iterator: AnyIterable<A>) => Promise<boolean>;
+export const every: <A>(fn: Predicate<A>) => (iterable: AnyIterable<A>) => Promise<boolean>;
 
 /**
  * Returns a boolean indicating whether or not there exists a value in the
  * iterator that passes the predicate function.
  */
-export const some: <A>(fn: Predicate<A>) => (iterator: AnyIterable<A>) => Promise<boolean>;
+export const some: <A>(fn: Predicate<A>) => (iterable: AnyIterable<A>) => Promise<boolean>;
 
 /**
  * Returns the first value that passes the predicate function. A predicate
  * that's a type guard narrows the type of the value.
  */
 export const find: (
-  <A, S extends A>(fn: TypeGuard<A, S>) => (iterator: AnyIterable<A>) => Promise<S | undefined>
+  <A, S extends A>(fn: TypeGuard<A, S>) => (iterable: AnyIterable<A>) => Promise<S | undefined>
 ) & (
-  <B extends A, A = B>(fn: Predicate<A>) => (iterator: AnyIterable<B>) => Promise<B | undefined>
+  <B extends A, A = B>(fn: Predicate<A>) => (iterable: AnyIterable<B>) => Promise<B | undefined>
 );
 
 /**
  * Call a function with every value in the iterator. Unlike `tap`, it ends a
  * pipeline.
  */
-export const forEach: <A>(fn: Tapper<A>) => (iterator: AnyIterable<A>) => Promise<void>;
+export const forEach: <A>(fn: Tapper<A>) => (iterable: AnyIterable<A>) => Promise<void>;
 
 /**
  * Returns the number of items in the iterator.
  */
-export const count: <A>(iterator: AnyIterable<A>) => Promise<number>;
+export const count: (iterable: AnyIterable<unknown>) => Promise<number>;
 
 /**
  * Collect all the items in the iterator into an array.
  */
-export const toArray: <A>(iterator: AnyIterable<A>) => Promise<A[]>;
+export const toArray: <A>(iterable: AnyIterable<A>) => Promise<A[]>;
 
 /**
  * Collect all the items in the iterator into a Set.
  */
-export const toSet: <A>(iterator: AnyIterable<A>) => Promise<Set<A>>;
+export const toSet: <A>(iterable: AnyIterable<A>) => Promise<Set<A>>;
 
 /**
  * Collect all the key/value tuples in the iterator into a Map.
  */
-export const toMap: <K, V>(iterator: AnyIterable<readonly [K, V]>) => Promise<Map<K, V>>;
+export const toMap: <K, V>(iterable: AnyIterable<readonly [K, V]>) => Promise<Map<K, V>>;
 
 /**
  * Collect all the key/value tuples in the iterator into an Object.
  */
-export const toObject: <V>(iterator: AnyIterable<readonly [PropertyKey, V]>) => Promise<Record<string, V>>;
+export const toObject: <V>(iterable: AnyIterable<readonly [PropertyKey, V]>) => Promise<Record<string, V>>;
 
 /**
  * Collect all the items in the iterator into a string separated by the
  * separator token.
  */
-export const join: (separator: string) => (iterator: AnyIterable<string>) => Promise<string>;
+export const join: (separator: string) => (iterable: AnyIterable<string>) => Promise<string>;

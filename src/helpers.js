@@ -34,20 +34,20 @@ export const toCount = (count) => {
  * position. The padding is read here, before anything is opened, so
  * padding that throws leaves nothing open.
  *
- * @type (iterables: Iterable<any>, options: ZipOptions | undefined) => { mode: ZipMode, values: any[], padding: any[] }
+ * @type (iterables: Iterable<unknown>, options: ZipOptions | undefined) => { mode: ZipMode, values: unknown[], padding: unknown[] }
  */
 export const zipInputs = (iterables, options) => {
   const { mode, padding } = zipOptions(options);
   const values = [...iterables];
 
-  return { mode, values, padding: mode === "longest" ? readPadding(padding, values.length) : [] };
+  return { mode, values, padding: mode === "longest" ? readPadding(/** @type Iterable<unknown> | undefined */ (padding), values.length) : [] };
 };
 
 /**
  * Same as `zipInputs`, for `zipKeyed`. `values` and `padding` are in the
  * order of `keys`, which are the keys whose value isn't `undefined`.
  *
- * @type (iterables: Record<PropertyKey, any>, options: ZipOptions | undefined) => { mode: ZipMode, keys: PropertyKey[], values: any[], padding: any[] }
+ * @type (iterables: Record<PropertyKey, unknown>, options: ZipOptions | undefined) => { mode: ZipMode, keys: PropertyKey[], values: unknown[], padding: unknown[] }
  */
 export const zipKeyedInputs = (iterables, options) => {
   const { mode, padding } = zipOptions(options);
@@ -56,14 +56,14 @@ export const zipKeyedInputs = (iterables, options) => {
   });
   const values = keys.map((key) => iterables[key]);
 
-  return { mode, keys, values, padding: mode === "longest" && padding !== undefined ? keys.map((key) => padding[key]) : [] };
+  return { mode, keys, values, padding: mode === "longest" && padding !== undefined ? keys.map((key) => (/** @type Record<PropertyKey, unknown> */ (padding))[key]) : [] };
 };
 
 /**
  * Makes an object from the values `zip` yields, with a key for each
  * position.
  *
- * @type (keys: PropertyKey[]) => (values: any[]) => any
+ * @type (keys: PropertyKey[]) => (values: unknown[]) => any
  */
 export const toKeyed = (keys) => (values) => {
   const result = Object.create(null);
@@ -81,7 +81,7 @@ export const toKeyed = (keys) => (values) => {
 /** @type () => IteratorReturnResult<undefined> */
 export const finished = () => ({ value: undefined, done: true });
 
-/** @type (options: ZipOptions | undefined) => { mode: ZipMode, padding: any } */
+/** @type (options: ZipOptions | undefined) => { mode: ZipMode, padding: object | undefined } */
 const zipOptions = (options) => {
   if (options !== undefined && (options === null || typeof options !== "object")) {
     throw TypeError("`options` must be an object");
@@ -100,9 +100,9 @@ const zipOptions = (options) => {
   return { mode, padding };
 };
 
-/** @type (padding: Iterable<any> | undefined, length: number) => any[] */
+/** @type (padding: Iterable<unknown> | undefined, length: number) => unknown[] */
 const readPadding = (padding, length) => {
-  /** @type any[] */
+  /** @type unknown[] */
   const values = [];
   if (padding !== undefined && length > 0) {
     for (const value of padding) {

@@ -6,9 +6,15 @@ export { pipe, compose, range } from "./common.js";
 import { finished, toCount, toKeyed, zipInputs, zipKeyedInputs } from "./helpers.js";
 
 /**
- * @import { IterableItem } from "./type-utils.d.ts"
  * @import * as API from "./index.d.ts"
  * @import { ZipMode, ZipOptions } from "./helpers.js"
+ */
+
+/**
+ * The type of the values of an iterable.
+ *
+ * @template T
+ * @typedef {T extends Iterable<infer U> ? U : never} IterableItem
  */
 
 /** @type API.map */
@@ -237,14 +243,14 @@ const getFlattenable = (value) => {
  * Gets an iterator from each value, closing the ones it already got if one
  * of them isn't iterable.
  *
- * @type (values: any[]) => Iterator<any>[]
+ * @type (values: unknown[]) => Iterator<unknown>[]
  */
 const openAll = (values) => {
-  /** @type Iterator<any>[] */
+  /** @type Iterator<unknown>[] */
   const iterators = [];
   try {
     for (const value of values) {
-      iterators.push(getIterator(getFlattenable(value)));
+      iterators.push(getIterator(getFlattenable(/** @type API.Flattenable<unknown> */ (value))));
     }
   } catch (error) {
     try {

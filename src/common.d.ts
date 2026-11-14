@@ -1,5 +1,3 @@
-import type { LastReturnType } from "./type-utils.d.ts";
-
 /**
  * Yields numbers starting from `from` until `to`, counting by `step`, which
  * is 1 by default. A negative `step` counts down, and a `step` of 0 throws a
@@ -464,3 +462,5 @@ export type ZipPadding<P extends Iterable<unknown>, K> = P extends readonly unkn
  * `undefined`, which leaves the key out.
  */
 export type ZipKey<T, K extends keyof T> = [T[K]] extends [undefined] ? never : K;
+
+type LastReturnType<T extends ((...args: any) => any)[]> = T extends [...any, (...args: any) => infer R] ? R : never;

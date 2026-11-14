@@ -12,14 +12,14 @@ export type { ZipOptions, ZipLongestOptions, ZipPadding } from "./common.d.ts";
  * Apply a function to every value in the iterator. Like the native Iterator
  * helpers, functions that take a callback pass it each value and its index.
  */
-export const map: <A, B>(fn: Mapper<A, B>) => (iterator: Iterable<A>) => IteratorObject<B, undefined, unknown>;
+export const map: <A, B>(fn: Mapper<A, B>) => (iterable: Iterable<A>) => IteratorObject<B, undefined, unknown>;
 export type Mapper<A, B> = (item: A, index: number) => B;
 
 /**
  * Apply a function to every value in the iterator, but yield the original
  * value, not the result of the function.
  */
-export const tap: <B extends A, A = B>(fn: Tapper<A>) => (iterator: Iterable<B>) => IteratorObject<B, undefined, unknown>;
+export const tap: <B extends A, A = B>(fn: Tapper<A>) => (iterable: Iterable<B>) => IteratorObject<B, undefined, unknown>;
 export type Tapper<A> = (item: A, index: number) => void;
 
 /**
@@ -27,9 +27,9 @@ export type Tapper<A> = (item: A, index: number) => void;
  * A predicate that's a type guard narrows the type of the values.
  */
 export const filter: (
-  <A, S extends A>(fn: TypeGuard<A, S>) => (iterator: Iterable<A>) => IteratorObject<S, undefined, unknown>
+  <A, S extends A>(fn: TypeGuard<A, S>) => (iterable: Iterable<A>) => IteratorObject<S, undefined, unknown>
 ) & (
-  <B extends A, A = B>(fn: Predicate<A>) => (iterator: Iterable<B>) => IteratorObject<B, undefined, unknown>
+  <B extends A, A = B>(fn: Predicate<A>) => (iterable: Iterable<B>) => IteratorObject<B, undefined, unknown>
 );
 export type Predicate<A> = (item: A, index: number) => unknown;
 export type TypeGuard<A, S extends A> = (item: A, index: number) => item is S;
@@ -37,13 +37,13 @@ export type TypeGuard<A, S extends A> = (item: A, index: number) => item is S;
 /**
  * Same as `reduce` except it emits the accumulated value after each update
  */
-export const scan: <A, B>(fn: Reducer<A, B>, initial: B) => (iter: Iterable<A>) => IteratorObject<B, undefined, unknown>;
+export const scan: <A, B>(fn: Reducer<A, B>, initial: B) => (iterable: Iterable<A>) => IteratorObject<B, undefined, unknown>;
 
 /**
  * Yields values from the iterator with all sub-iterator elements concatenated
  * into it recursively up to the specified depth. The default depth is 1.
  */
-export const flatten: <Depth extends number = 1>(depth?: Depth) => <A>(iterator: Iterable<A>) => IteratorObject<Flattened<A, number extends Depth ? 20 : Depth>, undefined, unknown>;
+export const flatten: <Depth extends number = 1>(depth?: Depth) => <A>(iterable: Iterable<A>) => IteratorObject<Flattened<A, number extends Depth ? 20 : Depth>, undefined, unknown>;
 export type NestedIterable<A> = Iterable<A | NestedIterable<A>>;
 
 /**
@@ -64,7 +64,7 @@ export type Flattened<A, Depth extends number> = {
  * deep, and `fn` has to return an iterable or an iterator, not a string or
  * other value.
  */
-export const flatMap: <A, R extends Flattenable<unknown>>(fn: Mapper<A, R>) => (iterator: Iterable<A>) => IteratorObject<FlattenableItem<R>, undefined, unknown>;
+export const flatMap: <A, R extends Flattenable<unknown>>(fn: Mapper<A, R>) => (iterable: Iterable<A>) => IteratorObject<FlattenableItem<R>, undefined, unknown>;
 export type FlatMapper<A, B> = Mapper<A, Flattenable<B>>;
 
 /**
@@ -75,36 +75,35 @@ export type Flattenable<A> = (Iterable<A> | Iterator<A>) & object;
 export type FlattenableItem<R> = R extends Iterable<infer A> ? A : R extends Iterator<infer A> ? A : never;
 
 /**
- * Yields all the values in the iterator except for the first `n` values.
- * `count` is truncated to an integer. One that's NaN or negative throws a
+ * Yields all the values in the iterator except for the first `count`
+ * values. `count` is truncated to an integer. One that's NaN or negative throws a
  * RangeError.
  */
-export const drop: (count: number) => <A>(iterator: Iterable<A>) => IteratorObject<A, undefined, unknown>;
+export const drop: (count: number) => <A>(iterable: Iterable<A>) => IteratorObject<A, undefined, unknown>;
 
 /**
  * Same as `drop` but instead of dropping a specific number of values, it drops
- * values until the `fn(value)` is `false` and then yields the remaining values.
+ * values while `fn` returns a truthy value and then yields the remaining values.
  */
-export const dropWhile: <B extends A, A = B>(fn: Predicate<A>) => (iterator: Iterable<B>) => IteratorObject<B, undefined, unknown>;
+export const dropWhile: <B extends A, A = B>(fn: Predicate<A>) => (iterable: Iterable<B>) => IteratorObject<B, undefined, unknown>;
 
 /**
- * Yields the first `n` values in the iterator.
- * `count` is truncated to an integer. One that's NaN or negative throws a
+ * Yields the first `count` values in the iterator. `count` is truncated to an integer. One that's NaN or negative throws a
  * RangeError.
  */
-export const take: (count: number) => <A>(iterator: Iterable<A>) => IteratorObject<A, undefined, unknown>;
+export const take: (count: number) => <A>(iterable: Iterable<A>) => IteratorObject<A, undefined, unknown>;
 
 /**
  * Same as `take` but instead of yielding a specific number of values, it yields
- * values as long as the `fn(value)` returns `true` and drops the rest.
+ * values while `fn` returns a truthy value and drops the rest.
  */
-export const takeWhile: <B extends A, A = B>(fn: Predicate<A>) => (iterator: Iterable<B>) => IteratorObject<B, undefined, unknown>;
+export const takeWhile: <B extends A, A = B>(fn: Predicate<A>) => (iterable: Iterable<B>) => IteratorObject<B, undefined, unknown>;
 
 /**
  * Returns the first value in the iterator. The iterator is closed after
  * the first value is read, so the rest can't be read from it.
  */
-export const head: <A>(iterator: Iterable<A>) => A | undefined;
+export const head: <A>(iterable: Iterable<A>) => A | undefined;
 
 /**
  * Yields nothing.
@@ -151,7 +150,7 @@ type ZipKeyedItem<R> = FlattenableItem<R> | (undefined extends R ? undefined : n
 /**
  * Yields values from each iterator in order.
  */
-export const concat: <T extends Iterable<unknown>[]>(...iters: T) => IteratorObject<FlattenableItem<T[number]>, undefined, unknown>;
+export const concat: <T extends Iterable<unknown>[]>(...iterables: T) => IteratorObject<FlattenableItem<T[number]>, undefined, unknown>;
 
 /**
  * Reduce an iterator to a single value. Without an initial value, the first
@@ -159,9 +158,9 @@ export const concat: <T extends Iterable<unknown>[]>(...iters: T) => IteratorObj
  * TypeError.
  */
 export const reduce: (
-  <A, B>(fn: Reducer<A, B>, initial: B) => (iter: Iterable<A>) => B
+  <A, B>(fn: Reducer<A, B>, initial: B) => (iterable: Iterable<A>) => B
 ) & (
-  <A>(fn: Reducer<A, A>) => (iter: Iterable<A>) => A
+  <A>(fn: Reducer<A, A>) => (iterable: Iterable<A>) => A
 );
 export type Reducer<A, B> = (acc: B, item: A, index: number) => B;
 
@@ -169,57 +168,57 @@ export type Reducer<A, B> = (acc: B, item: A, index: number) => B;
  * Returns a boolean indicating whether or not all values in the iterator passes
  * the predicate function.
  */
-export const every: <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => boolean;
+export const every: <A>(fn: Predicate<A>) => (iterable: Iterable<A>) => boolean;
 
 /**
  * Returns a boolean indicating whether or not there exists a value in the
  * iterator that passes the predicate function.
  */
-export const some: <A>(fn: Predicate<A>) => (iterator: Iterable<A>) => boolean;
+export const some: <A>(fn: Predicate<A>) => (iterable: Iterable<A>) => boolean;
 
 /**
  * Returns the first value that passes the predicate function. A predicate
  * that's a type guard narrows the type of the value.
  */
 export const find: (
-  <A, S extends A>(fn: TypeGuard<A, S>) => (iterator: Iterable<A>) => S | undefined
+  <A, S extends A>(fn: TypeGuard<A, S>) => (iterable: Iterable<A>) => S | undefined
 ) & (
-  <B extends A, A = B>(fn: Predicate<A>) => (iterator: Iterable<B>) => B | undefined
+  <B extends A, A = B>(fn: Predicate<A>) => (iterable: Iterable<B>) => B | undefined
 );
 
 /**
  * Call a function with every value in the iterator. Unlike `tap`, it ends a
  * pipeline.
  */
-export const forEach: <A>(fn: Tapper<A>) => (iterator: Iterable<A>) => void;
+export const forEach: <A>(fn: Tapper<A>) => (iterable: Iterable<A>) => void;
 
 /**
  * Returns the number of items in the iterator.
  */
-export const count: <A>(iterator: Iterable<A>) => number;
+export const count: (iterable: Iterable<unknown>) => number;
 
 /**
  * Collect all the items in the iterator into an array.
  */
-export const toArray: <A>(iterator: Iterable<A>) => A[];
+export const toArray: <A>(iterable: Iterable<A>) => A[];
 
 /**
  * Collect all the items in the iterator into a Set.
  */
-export const toSet: <A>(iterator: Iterable<A>) => Set<A>;
+export const toSet: <A>(iterable: Iterable<A>) => Set<A>;
 
 /**
  * Collect all the key/value tuples in the iterator into a Map.
  */
-export const toMap: <K, V>(iterator: Iterable<readonly [K, V]>) => Map<K, V>;
+export const toMap: <K, V>(iterable: Iterable<readonly [K, V]>) => Map<K, V>;
 
 /**
  * Collect all the key/value tuples in the iterator into an Object.
  */
-export const toObject: <V>(iterator: Iterable<readonly [PropertyKey, V]>) => Record<string, V>;
+export const toObject: <V>(iterable: Iterable<readonly [PropertyKey, V]>) => Record<string, V>;
 
 /**
  * Collect all the items in the iterator into a string separated by the
  * separator token.
  */
-export const join: (separator: string) => (iterator: Iterable<string>) => string;
+export const join: (separator: string) => (iterable: Iterable<string>) => string;
