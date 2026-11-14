@@ -15,6 +15,7 @@
   "author": "Jason Desrosiers <jdesrosi@gmail.com>",
   "license": "MIT",
   "repository": "github:hyperjump-io/pact",
+  "homepage": "https://hyperjump.io/pact/",
   "funding": {
     "type": "github",
     "url": "https://github.com/sponsors/hyperjump-io"
