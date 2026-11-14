@@ -30,14 +30,7 @@ export const pipe = (/** @type any */ value, /** @type ((a: any) => any)[] */ ..
 };
 
 /** @type API.compose */
-export const compose = (/** @type ((a: any) => any)[] */ ...fns) => (/** @type any */ value) => {
-  let result = value;
-  for (const fn of fns) {
-    result = fn(result);
-  }
-
-  return result;
-};
+export const compose = (/** @type ((a: any) => any)[] */ ...fns) => (/** @type any */ value) => /** @type any */ (pipe)(value, ...fns);
 
 /** @extends {Iterator<number, undefined, unknown>} */
 class RangeIterator extends Iterator {
