@@ -4,10 +4,6 @@ Higher order functions for iterators and async iterators. Each function is
 a step you put in a `pipe`, and a pipeline does its work one value at a
 time, only as values are asked for.
 
-**Status:** v2 is in progress and unpublished. See
-[the design docs](design/README.md) for the decisions made so far, and
-[Migrating from v1](website/migrating.md) for what changed.
-
 ## Install
 
 ```bash
