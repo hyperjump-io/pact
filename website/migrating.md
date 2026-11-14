@@ -55,7 +55,7 @@ The sources are called the same way as before. Those are `range`,
 `empty`, `concat`, and `zip`. So are collectors that don't need
 configuration, like `head` and `count`.
 
-## The async functions are in @hyperjump/pact/async
+## The async functions are in `@hyperjump/pact/async`
 
 The root module now only has the sync functions. The async ones are in
 `@hyperjump/pact/async` and no longer have the `async` prefix. v1 also
@@ -73,7 +73,7 @@ A module that uses both should import each one as a namespace. See
 [Mixing sync and async](async.md#mixing-sync-and-async). The types lost the
 prefix too. `AsyncMapper` is now `Mapper` from `@hyperjump/pact/async`.
 
-## Collectors are named like toArray
+## Collectors are named like `toArray`
 
 | v1 | v2 |
 | --- | --- |
@@ -82,7 +82,7 @@ prefix too. `AsyncMapper` is now `Mapper` from `@hyperjump/pact/async`.
 | `collectMap` | `toMap` |
 | `collectObject` | `toObject` |
 
-## zip takes an array, and stops at the shortest
+## `zip` takes an array, and stops at the shortest
 
 `zip` takes an array of iterables instead of two arguments. It stops when
 any of them is done. v1 kept going until the first one was done and used
@@ -116,13 +116,13 @@ map(parseInt);
 Pact.map((s) => parseInt(s));
 ```
 
-## reduce without an initial value
+## `reduce` without an initial value
 
 `reduce(fn)` without an initial value starts with the first value. It
 throws a `TypeError` for an empty iterable, just like
 `Array.prototype.reduce`. v1 started with `undefined`.
 
-## head closes the iterator
+## `head` closes the iterator
 
 `head` closes the iterator it reads from, so the rest of the iterator can't
 be read. To read the first value of a generator and then the rest, call its
@@ -138,7 +138,7 @@ const first = lines.next().value;
 const rest = [...lines];
 ```
 
-## concat checks its iterables
+## `concat` checks its iterables
 
 `concat` throws a `TypeError` when it's called with something that isn't an
 iterable object. That includes strings. v1 yielded a string's characters.

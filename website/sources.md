@@ -4,7 +4,7 @@ A source makes an iterator to start a pipeline. Any iterable can start a
 pipeline, so sources are for values that aren't in an iterable yet or are
 spread across several.
 
-## range
+## `range`
 
 Yields numbers from `from` up to but not including `to`. It counts by
 `step`, which is 1 by default. Without `to`, it never ends. A negative
@@ -25,7 +25,7 @@ Pact.pipe(
 ); // [1, 2, 3]
 ```
 
-## empty
+## `empty`
 
 Yields nothing.
 
@@ -35,7 +35,7 @@ import * as Pact from "@hyperjump/pact";
 Pact.toArray(Pact.empty()); // []
 ```
 
-## concat
+## `concat`
 
 Yields the values of each iterable, one after the other. It works like
 `Iterator.concat`. Each argument has to be an iterable object, so a string
@@ -48,7 +48,7 @@ import * as Pact from "@hyperjump/pact";
 Pact.toArray(Pact.concat([1, 2], new Set([3]), [4])); // [1, 2, 3, 4]
 ```
 
-## zip
+## `zip`
 
 Yields arrays that hold the next value of each iterable. It works like
 `Iterator.zip` from the TC39 Joint Iteration proposal. It takes an array of
@@ -88,7 +88,7 @@ Pact.toArray(
 When it stops, it closes the iterables that aren't done. If one of them
 throws, that one isn't closed, but the others are.
 
-## zipKeyed
+## `zipKeyed`
 
 Like `zip`, but it takes an object of iterables and yields objects with the
 same keys. It works like `Iterator.zipKeyed`. A key whose value is

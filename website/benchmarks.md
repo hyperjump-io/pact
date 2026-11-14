@@ -14,7 +14,7 @@ that uses pact in many places. A program that runs only one pipeline will
 see pact run faster than shown here, because the engine can optimize pact's
 code for that one pipeline.
 
-## Stopping early with take
+## Stopping early with `take`
 
 ```typescript
 import * as Pact from "@hyperjump/pact";
@@ -44,7 +44,7 @@ numbers. The array methods read 100,000, make two arrays of 50,000, and
 then copy 10 of them. A pipeline's time depends on how much of the input it
 needs. The array methods' time depends on how big the input is.
 
-## Stopping early with find
+## Stopping early with `find`
 
 ```typescript
 import * as Pact from "@hyperjump/pact";

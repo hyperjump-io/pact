@@ -25,7 +25,7 @@ Pact.pipe(
 ); // [10, 10, 10]
 ```
 
-## map
+## `map`
 
 Calls a function with each value and yields what it returns.
 
@@ -39,7 +39,7 @@ Pact.pipe(
 ); // ["0:a", "1:b"]
 ```
 
-## filter
+## `filter`
 
 Yields the values a function returns `true` for.
 
@@ -53,7 +53,7 @@ Pact.pipe(
 ); // [3, 4]
 ```
 
-## flatMap
+## `flatMap`
 
 Calls a function with each value. The function returns an iterable, and
 `flatMap` yields the values of that iterable, one level deep. The function
@@ -70,7 +70,7 @@ Pact.pipe(
 ); // ["a", "b", "c"]
 ```
 
-## flatten
+## `flatten`
 
 Yields the values of nested iterables, down to a given depth. The depth is
 1 by default. A value that isn't iterable is yielded as is. Strings are
@@ -92,7 +92,7 @@ Pact.pipe(
 ); // [1, 2, 3, 4]
 ```
 
-## scan
+## `scan`
 
 Like `reduce`, but it yields the accumulated value after every value
 instead of only at the end. It needs an initial value.
@@ -107,7 +107,7 @@ Pact.pipe(
 ); // [1, 3, 6]
 ```
 
-## tap
+## `tap`
 
 Calls a function with each value and yields the value itself, not what the
 function returns. Use it to look at values in the middle of a pipeline, for
@@ -130,7 +130,7 @@ before 1
 before 2
 ```
 
-## take and drop
+## `take` and `drop`
 
 `take` yields the first values. `drop` skips the first values and yields
 the rest. `take` closes its source once it has enough, so it can end an
@@ -153,7 +153,7 @@ Pact.pipe(
 ); // [4]
 ```
 
-## takeWhile and dropWhile
+## `takeWhile` and `dropWhile`
 
 `takeWhile` yields values until a function returns `false` for one. Then it
 closes its source. `dropWhile` skips values until a function returns

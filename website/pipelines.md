@@ -62,7 +62,7 @@ Pact.pipe(
 `range(0)` counts forever, but `take(4)` stops after four values. `map`
 only squares those four.
 
-## Building pipelines with compose
+## Building pipelines with `compose`
 
 `compose` combines steps into one step without a source. You can make a
 pipeline once and use it with any number of iterables. Since the result is
