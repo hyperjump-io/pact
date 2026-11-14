@@ -30,6 +30,11 @@
       "default": "./src/async.js"
     }
   },
+  "files": [
+    "src",
+    "!src/**/*.test.js",
+    "!src/test-utils.js"
+  ],
   "scripts": {
     "lint": "oxlint",
     "test": "vitest run",
