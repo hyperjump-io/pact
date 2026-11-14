@@ -52,6 +52,14 @@ helper, because V8 keeps type feedback for each call site in a function's
 code: a shared one would see every kind of source from every step, and
 stop being optimized (see [Array sources](../benchmarks/array-sources.md)).
 
+## Range
+
+`RangeIterator` works out each value from its index, `from + index * step`,
+as `Iterator.range` does. Adding `step` to the last value added up the
+rounding errors, so `range(0, 1, 0.1)` had an eleventh value just under 1,
+and it never ended once a value was too big for adding `step` to change
+it.
+
 ## Result objects
 
 Every result is written `{ value, done }`, in that order. The built-in

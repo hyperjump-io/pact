@@ -40,11 +40,12 @@ export const compose = (/** @type ((a: any) => any)[] */ ...fns) => (/** @type a
 /** @extends {Iterator<number, undefined, unknown>} */
 class RangeIterator extends Iterator {
   /** @type number */
-  #next;
+  #from;
   /** @type number | undefined */
   #to;
   /** @type number */
   #step;
+  #index = 0;
   #done = false;
 
   /**
@@ -54,7 +55,7 @@ class RangeIterator extends Iterator {
    */
   constructor(from, to, step) {
     super();
-    this.#next = from;
+    this.#from = from;
     this.#to = to;
     this.#step = step;
   }
@@ -65,12 +66,14 @@ class RangeIterator extends Iterator {
       return { value: undefined, done: true };
     }
 
-    const value = this.#next;
+    // Each value is worked out from its index, as Iterator.range does.
+    // Adding `step` to the last value would add up its rounding errors.
+    const value = this.#from + this.#index * this.#step;
     if (this.#to !== undefined && (this.#step > 0 ? value >= this.#to : value <= this.#to)) {
       return this.return();
     }
 
-    this.#next += this.#step;
+    this.#index++;
     return { value, done: false };
   }
 

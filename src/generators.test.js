@@ -854,6 +854,16 @@ describe("range", () => {
     expect([...result]).to.eql([0, -1, -2]);
   });
 
+  test("a fractional step doesn't add up its rounding errors", () => {
+    const result = range(0, 1, 0.1);
+    expect([...result]).to.have.length(10);
+  });
+
+  test("ends when the values are too big to be exact", () => {
+    const result = take(5)(range(2 ** 53, 2 ** 53 + 4));
+    expect([...result].at(-1)).to.equal(2 ** 53 + 2);
+  });
+
   test("a step in the wrong direction is empty", () => {
     const result = range(0, 10, -1);
     expect([...result]).to.eql([]);
