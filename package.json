@@ -20,6 +20,9 @@
     "url": "https://github.com/sponsors/hyperjump-io"
   },
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "exports": {
     ".": {
       "types": "./src/index.d.ts",

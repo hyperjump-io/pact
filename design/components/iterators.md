@@ -103,6 +103,15 @@ is given it as its prototype's prototype.
   `AsyncIterator.prototype`, which doesn't have it in every engine yet.
   TypeScript's `AsyncIteratorObject` requires it.
 
+## Minimum version
+
+The classes extend the global `Iterator`, which Node has from 22 and
+browsers have from 2025. pact supports every Node version that's still
+maintained, and 22 is the oldest of those, so `engines` in `package.json`
+says `>=22`, and npm warns when it's installed on an older one. Without
+it, importing pact on Node 20 fails with `Iterator is not defined`. The
+floor goes up as versions reach their end of life.
+
 ## Why
 
 A class that extends `Iterator` is as fast as a plain object for a long
@@ -132,6 +141,8 @@ times faster (see [Pipelines](../benchmarks/pipelines.md#iterator-classes)).
 - **Plain objects that don't extend `Iterator.prototype`.** The native
   helpers wouldn't be available on them, and they were slower for short
   pipelines.
+- **A fallback for engines without a global `Iterator`.** Every Node
+  version that's still maintained has it.
 - **Not queuing async calls**, and documenting that each `next()` has to
   be waited for. Most code does wait, but `filter`, `take`, `scan`, and
   others would give wrong results if it doesn't. The queue with a fast
@@ -145,8 +156,6 @@ times faster (see [Pipelines](../benchmarks/pipelines.md#iterator-classes)).
 
 ## Open questions
 
-- v2 needs a global `Iterator` (Node 22, and browsers from 2025). Is that
-  acceptable as the minimum, or does it need a fallback?
 - Sync classes don't implement `[Symbol.dispose]()`. TypeScript's
   `IteratorObject` type has it from `Iterator.prototype`, which has it in
   engines that support explicit resource management, but not in Node 22.
