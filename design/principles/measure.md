@@ -5,7 +5,7 @@ recorded in [Benchmarks](../benchmarks/README.md) with its date.
 
 Why: what's fast changes between engine versions, and guesses are often
 wrong. Before measuring, the obvious fix for slow generators was the native
-Iterator helpers, but on Node 22 they're no faster than generators.
+Iterator helpers, but they're no faster than generators, on Node 22 or on 26.
 
 Where it shows up:
 

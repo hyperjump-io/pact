@@ -122,8 +122,8 @@ A class that extends `Iterator` is as fast as a plain object for a long
 pipeline, and faster for a short one, because a class's methods are on its
 prototype instead of being created for each object
 (`benchmark/claude/iterator-prototype.js`, 2026-10-27). Compared to v1,
-sync pipelines are 2.2 to 15 times faster and async ones 1.35 to 1.5
-times faster (see [Pipelines](../benchmarks/pipelines.md#iterator-classes)).
+sync pipelines are 2.8 to 15 times faster and async ones 1.6 to 2.8
+times faster (see [Pipelines](../benchmarks/pipelines.md#node-26)).
 
 ## Rejected
 
@@ -131,9 +131,10 @@ times faster (see [Pipelines](../benchmarks/pipelines.md#iterator-classes)).
   pact. Their one advantage is that `for...of` and `yield*` close sources
   for free, and tests cover that instead.
 - **Delegating to the native Iterator helpers.** Warmed up, they're as
-  fast as pact or slower for every pipeline measured, on Node 22 and 24,
-  and they can't read an array by index. There are no native async
-  helpers, `Iterator.concat`, or `Iterator.zip` yet (see
+  fast as pact or slower for every pipeline measured, on Node 22, 24, and
+  26, and they can't read an array by index. There are no native async
+  helpers or `Iterator.zip` yet, and `Iterator.concat` only from Node 26
+  (see
   [Array sources](../benchmarks/array-sources.md#native-iterator-helpers)).
 - **Handing values from step to step without `next()`**, either through a
   function from each step to the one before it, or by fusing the steps

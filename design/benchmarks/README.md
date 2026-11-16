@@ -1,7 +1,8 @@
 # Benchmarks
 
 Measurements behind the performance decisions in [the design docs](../README.md),
-one experiment per file, with the date it was first recorded.
+one experiment per file, with the date it was first recorded. Each was measured again on Node 26,
+the latest LTS, on 2026-11-16, in a section at its end.
 
 The benchmark code is in `benchmark/`, which isn't committed. The
 benchmarks in `benchmark/benchmarks/` are kept up to date. The ones in

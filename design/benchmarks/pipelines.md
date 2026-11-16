@@ -77,3 +77,31 @@ v2 has to beat.
   (`benchmark/claude/async-queue.js`).
 - `additionalProperties` is as fast as array methods. Setting up a short
   pipeline isn't what it costs anymore.
+
+## Node 26
+
+2026-11-16, on Node 26.3.1, the latest LTS. Everything above was measured
+on Node 22, which v2 doesn't support. `next` is v2.0.1 and `branch` is
+`v1`. Mean time per run, the median of three runs of `npm run bench`.
+
+| Benchmark | `next` | `branch` (v1) | Baselines |
+| --- | --- | --- | --- |
+| Sync, 100,000 items: `filter`, `map`, `reduce` | 0.76 ms | 2.12 ms | native helpers 2.59 ms, array methods 1.26 ms, `for` loop 0.23 ms |
+| Sync, 10 items: `map`, `take(5)`, `reduce` | 0.15 µs | 2.3 µs | native helpers 0.28 µs, array methods 0.05 µs |
+| Async, 10,000 items from an array: `filter`, `map`, `reduce` | 0.87 ms | 2.44 ms | `for await` loop 0.75 ms |
+| json-schema v1 `properties`: `map`, `toObject` (10 entries) | 3.2 µs | 5.2 µs | `for` loop 1.1 µs |
+| json-schema v1 `additionalProperties`: `map`, `concat`, `join` (12 items) | 0.42 µs | 1.7 µs | array methods 0.42 µs |
+
+- Sync is 2.8 times faster than v1 for a long pipeline, and 15 times
+  faster for a short one. `additionalProperties` is 4 times faster.
+- Async is 2.8 times faster than v1 from an array, and 1.6 times for
+  `properties`. It was 1.5 times at the iterator classes. Reading arrays
+  by index is what changed since (see
+  [Array sources](array-sources.md#async)). From an array it costs 1.15
+  times a `for await` loop.
+- v1 and the native helpers take what they did on Node 22, so the two
+  sets of numbers can be compared. Array methods are faster on Node 26,
+  1.26 ms from 1.68 ms, and the `for` loop is slower, 0.23 ms from
+  0.12 ms.
+- The native helpers are still the slowest for a long pipeline, slower
+  than v1's generators.

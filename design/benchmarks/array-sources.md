@@ -189,3 +189,40 @@ Async, with `async-array-sources.js` and `ROUNDS=5`:
 
 Promises are most of an async step's cost, so the order matters less
 there. The async generator source is within noise of before.
+
+## Node 26
+
+2026-11-16, on Node 26.3.1. The comparisons between copies of `src/`
+weren't run again. They're about changes that are made, and `src/` has
+them.
+
+`floor.js`, with pact's times from `steps.js`:
+
+| | Fresh | Warmed up |
+| --- | --- | --- |
+| Loop reading the array's iterator | 0.45 ms | 2.01 ms |
+| Loop reading the array by index | 0.47 ms | 1.03 ms |
+| Array methods | 1.24 ms | 1.27 ms |
+| pact | 0.77 ms | 1.57 ms |
+
+- In a fresh process, reading the array's iterator is as fast as reading
+  by index now. It was 2.3 times slower on Node 22.
+- Warmed up, it's still 1.9 times slower, so reading an array by index
+  still pays for itself in an app. pact warmed up, which reads by index,
+  is faster than the loop that reads the iterator.
+
+The native helpers from `array-methods.bench.ts`, warmed up, next to pact
+as it is now:
+
+| Warmed up | pact | Native helpers, Node 26 |
+| --- | --- | --- |
+| `filter`, `map`, `reduce` | 1.69 ms | 2.58 ms |
+| Five steps | 2.46 ms | 3.92 ms |
+| `filter`, `map`, `take(10)` | 0.50 µs | 0.76 µs |
+| `map`, `find` | 12 µs | 23 µs |
+| A `Set` | 1.67 ms | 2.26 ms |
+| 10 items | 0.28 µs | 0.38 µs |
+
+pact is faster in every case, and the native helpers are no faster than
+they were on Node 22 or 24. Node 26 has `Iterator.concat`, but not
+`Iterator.zip`, `Iterator.range`, or async helpers.

@@ -10,8 +10,8 @@ affect most code:
 
 This page lists everything that can break and what to do about it.
 
-v2 is also much faster. Sync pipelines are 2 to 15 times faster than in v1.
-Async pipelines are about 1.5 times faster. That's because pact isn't built
+v2 is also much faster. Sync pipelines are 3 to 15 times faster than in v1.
+Async pipelines are 1.5 to 3 times faster. That's because pact isn't built
 on generators anymore.
 
 ## Requirements

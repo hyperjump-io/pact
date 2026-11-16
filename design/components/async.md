@@ -24,8 +24,8 @@ Async functions accept sync iterables as well as async ones, as in v1.
 Most of the cost of an async pipeline is being async: one promise per item
 per step. On the same data, sync was about 20 times faster than v1's async
 generators (see [Generators](../benchmarks/generators.md)). The iterator
-classes are about 1.5 times faster than v1's async generators (see
-[Pipelines](../benchmarks/pipelines.md#iterator-classes)), but the bigger
+classes are 1.6 to 2.8 times faster than v1's async generators (see
+[Pipelines](../benchmarks/pipelines.md#node-26)), but the bigger
 saving is not using the async functions on data that's sync. The docs say
 so.
 

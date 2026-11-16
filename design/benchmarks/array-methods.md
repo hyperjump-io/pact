@@ -101,3 +101,44 @@ to each benchmark and to `warmUp`. Mean time per run, Node 22.22.2:
   steps, and 1.1 times faster for five.
 - The native helpers are the slowest for every pipeline that reads every
   value, and slower than pact for the others.
+
+## Node 26
+
+2026-11-16, on Node 26.3.1, the latest LTS. The website's page has these
+numbers. Mean time per run, the median of three runs:
+
+| Benchmark | pact | Array methods | Native helpers |
+| --- | --- | --- | --- |
+| `filter`, `map`, `take(10)` | 0.50 µs | 1.10 ms | 0.76 µs |
+| `map`, `find` the 1,000th | 12 µs | 0.65 ms | 23 µs |
+| A `Set`: `filter`, `map`, `reduce` | 1.67 ms | 1.74 ms | 2.26 ms |
+| `filter`, `map`, `reduce` | 1.69 ms | 1.26 ms | 2.58 ms |
+| `map`, `filter`, `map`, `filter`, `reduce` | 2.46 ms | 2.03 ms | 3.92 ms |
+| 10 items: `filter`, `map`, `toArray` | 0.28 µs | 0.04 µs | 0.38 µs |
+
+- Array methods are faster in every benchmark than they were on Node 22,
+  by 13 to 23%. pact is within 7% of what it was, except for a `Set` and
+  the short pipeline, which are 14% and 12% faster.
+- So with every value used, array methods are 1.35 times faster for three
+  steps and 1.2 times for five. On Node 22 pact was about as fast for
+  three and 1.1 times faster for five. The page says array methods are
+  faster for both now.
+- Stopping early, pact is still 2,200 and 55 times faster, and a `Set` is
+  still about the same.
+- The native helpers are still the slowest for every pipeline that reads
+  every value, and slower than pact for the others.
+
+`benchmark/claude/steps.js` again, each case in a fresh process:
+
+| `filter`, `map`, `reduce` | Time |
+| --- | --- |
+| pact, nothing else run first | 0.77 ms |
+| pact, after the five-step pipeline | 1.41 ms |
+| pact, after pipelines with 8 callbacks and 4 kinds of source | 1.57 ms |
+| Array methods, in each of those | 1.3 ms |
+
+Warming up still doubles pact's time and doesn't change the array
+methods'. In a fresh process pact is 1.7 times faster than array methods,
+and warmed up it's 1.2 times slower. From `per-value.js`, between 10 and
+100 items, a value costs about 15 ns warmed up, 8 ns in a fresh process,
+and 2 ns for array methods.

@@ -24,3 +24,20 @@ times for 100,000:
   and a result object for each step. Setting up the pipeline is 0.066 µs.
   Extending `Iterator` instead of `Object` costs about 0.01 µs, making the
   steps' closures each time about 0.02 µs, and `pipe` about 0.02 µs.
+
+## Node 26
+
+2026-11-16, on Node 26.3.1. `benchmark/claude/to-array.js`, written for
+this run, with each case in a fresh process:
+
+| Source | Spread | `Array.from` | Loop |
+| --- | --- | --- | --- |
+| Array iterator, 10 items | 0.271 µs | 0.269 µs | 0.017 µs |
+| `map` step, 10 items | 0.269 µs | 0.269 µs | 0.107 µs |
+| Array iterator, 100,000 items | 2.21 ms | 1.69 ms | 0.86 ms |
+| `map` step, 100,000 items | 2.11 ms | 1.70 ms | 1.10 ms |
+
+The loop is still 1.5 to 2.6 times faster for 100,000 items, and 2.5 to
+16 times faster for 10, so `toArray` stays a loop. `filter`, `map`,
+`toArray` over 10 numbers is 0.12 µs (`short.js`), and array methods take
+0.03 µs.
